@@ -2,109 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Lawa System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
     }
 
-    .login-card {
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      padding: 40px 30px;
+    .login-container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
       width: 100%;
-      max-width: 380px;
-      text-align: center;
+      max-width: 400px;
     }
 
-    .login-card h2 {
-      margin-bottom: 20px;
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
       color: #333;
     }
 
-    .login-card input {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
+    .form-group {
+      margin-bottom: 1rem;
     }
 
-    .login-card button {
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+
+    .form-group input {
       width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #667eea;
       color: white;
-      font-size: 16px;
+      font-size: 1rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 0.5rem;
       cursor: pointer;
       transition: background 0.3s ease;
     }
 
-    .login-card button:hover {
-      background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    .login-btn:hover {
+      background-color: #5563c1;
     }
 
-    .error-message {
-      color: red;
-      font-size: 14px;
-      margin-top: 10px;
-      display: none;
-    }
-
-    @media (max-width: 400px) {
-      .login-card {
-        padding: 30px 20px;
-      }
+    .footer-text {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #888;
     }
   </style>
 </head>
 <body>
+  <div class="login-container">
+    <h2>Login to Lawa</h2>
+    <form action="dashboard.html" method="POST">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required />
+      </div>
 
-  <div class="login-card">
-    <h2>Login</h2>
-    <form id="loginForm">
-      <input type="text" id="username" placeholder="Username" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <div class="error-message" id="errorMsg">Invalid username or password.</div>
-      <button type="submit">Sign In</button>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+
+      <button type="submit" class="login-btn">Login</button>
     </form>
+    <div class="footer-text">
+      © 2025 Lawa System
+    </div>
   </div>
-
-  <script>
-    const form = document.getElementById('loginForm');
-    const errorMsg = document.getElementById('errorMsg');
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-
-      // login logic
-      if (username === 'admin' && password === '1234') {
-        errorMsg.style.display = 'none';
-        window.location.href = "dashboard.html"; // Redirect to dashboard
-      } else {
-        errorMsg.style.display = 'block'; // Show error
-      }
-    });
-  </script>
-
 </body>
 </html>
