@@ -63,7 +63,7 @@
     margin-bottom: 0.3rem;
     font-weight: 600;
   }
-  form input, form textarea {
+  form input, form textarea, form select {
     width: 100%;
     padding: 0.5rem;
     margin-bottom: 1rem;
@@ -149,11 +149,10 @@
       <label for="customerName">ناوی کڕیار</label>
       <input type="text" id="customerName" required placeholder="ناوی کڕیار بنوسە" />
       
-      <label for="productName">ناوی کاڵا</label>
-      <input type="text" id="productName" required placeholder="ناوی کاڵا بنوسە" />
-      
-      <label for="quantity">ژمارە</label>
-      <input type="number" id="quantity" min="1" value="1" required />
+      <label>هەڵبژاردنی کاڵاکان</label>
+      <div id="productList">
+        <!-- ئەمە ئەو لیستی کاڵاکانە کە بتوانرێ هەلبژێردرێن -->
+      </div>
       
       <label for="notes">تێبینی (بەختیار)</label>
       <textarea id="notes" rows="3" placeholder="هەر تێبینیەکت بنوسە"></textarea>
@@ -183,15 +182,46 @@
 </main>
 
 <script>
-  // دابنێ لینکی داواکاری بۆ کڕیار
-  function generateShareLink() {
-    // ئەم پەڕەیەیە (ئەمە کۆدی سادەیە، ئەگەر لە هاوڵاتی وێب بەکارهێنیت ئەم لینکە نوێ دەبێت)
-    const baseUrl = window.location.origin + window.location.pathname;
-    return baseUrl + "?orderForm=1";
-  }
+  // نموونەی لیستی کاڵا (دەتوانیت لێ زیاد بکەیت)
+  const products = [
+    { name: "کاڵا ١", price: 1000 },
+    { name: "کاڵا ٢", price: 2000 },
+    { name: "کاڵا ٣", price: 3000 },
+    { name: "کاڵا ٤", price: 4000 }
+  ];
+
+  // دروستکردنی لیستی چکبۆکس بۆ هەڵبژاردنی کاڵاکان
+  const productListDiv = document.getElementById("productList");
+
+  products.forEach((product, index) => {
+    const div = document.createElement("div");
+    div.style.marginBottom = "0.5rem";
+
+    div.innerHTML = `
+      <input type="checkbox" id="product_${index}" name="products" value="${product.name}" />
+      <label for="product_${index}">${product.name} (نرخ: ${product.price} )</label>
+      <input type="number" min="1" value="1" id="qty_${index}" style="width: 60px; margin-left: 10px;" disabled />
+    `;
+
+    productListDiv.appendChild(div);
+
+    // دەستکاری ژمارەی کاڵا ئەگەر چکبۆکس هەلبژێردرا بێت
+    const checkbox = div.querySelector(`input[type=checkbox]`);
+    const qtyInput = div.querySelector(`input[type=number]`);
+
+    checkbox.addEventListener("change", () => {
+      qtyInput.disabled = !checkbox.checked;
+      if (!checkbox.checked) qtyInput.value = 1;
+    });
+  });
 
   // نیشاندانی لینکی داواکاری
   const shareLinkEl = document.getElementById("shareLink");
+
+  function generateShareLink() {
+    const baseUrl = window.location.origin + window.location.pathname;
+    return baseUrl + "?orderForm=1";
+  }
   shareLinkEl.textContent = generateShareLink();
 
   // وەسڵەکان لە localStorage هەڵگەڕانەوە یان دروستکردن
@@ -204,16 +234,18 @@
   function renderReceipts() {
     receiptsTableBody.innerHTML = "";
     let totalQuantity = 0;
-    receipts.forEach(({ customerName, productName, quantity, notes }, idx) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${customerName}</td>
-        <td>${productName}</td>
-        <td>${quantity}</td>
-        <td>${notes || ""}</td>
-      `;
-      receiptsTableBody.appendChild(tr);
-      totalQuantity += Number(quantity);
+    receipts.forEach(({ customerName, products, notes }, idx) => {
+      products.forEach(({ productName, quantity }) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${customerName}</td>
+          <td>${productName}</td>
+          <td>${quantity}</td>
+          <td>${notes || ""}</td>
+        `;
+        receiptsTableBody.appendChild(tr);
+        totalQuantity += Number(quantity);
+      });
     });
     summaryDiv.textContent = `کۆی گشتی ژمارە: ${totalQuantity}`;
   }
@@ -226,21 +258,46 @@
 
   orderForm.addEventListener("submit", e => {
     e.preventDefault();
+
     const customerName = document.getElementById("customerName").value.trim();
-    const productName = document.getElementById("productName").value.trim();
-    const quantity = document.getElementById("quantity").value.trim();
     const notes = document.getElementById("notes").value.trim();
 
-    if (!customerName || !productName || !quantity) return alert("تکایە خانەکان پڕ بکەوە.");
+    if (!customerName) return alert("تکایە ناوی کڕیار بنوسە");
 
-    // زیادکردنی وەسڵ بە لیست و localStorage
-    receipts.push({ customerName, productName, quantity, notes });
+    // دۆزینەوەی کاڵاکانی هەڵبژێردرا و ژمارەی هەریەک
+    const selectedProducts = [];
+    products.forEach((product, idx) => {
+      const checkbox = document.getElementById(`product_${idx}`);
+      const qtyInput = document.getElementById(`qty_${idx}`);
+      if (checkbox.checked) {
+        const qty = parseInt(qtyInput.value);
+        if (isNaN(qty) || qty < 1) {
+          return alert(`تکایە ژمارەی دروست بۆ ${product.name بنوسە}`);
+        }
+        selectedProducts.push({
+          productName: product.name,
+          quantity: qty
+        });
+      }
+    });
+
+    if (selectedProducts.length === 0) {
+      return alert("تکایە یەک کاڵا هەڵبژێرە");
+    }
+
+    // زیادکردنی وەسڵەکە بە localStorage
+    receipts.push({ customerName, products: selectedProducts, notes });
     localStorage.setItem("receipts", JSON.stringify(receipts));
 
     orderSuccess.style.display = "block";
-
-    // پاککردنی فۆڕم
     orderForm.reset();
+
+    // پاککردنی ژمارەی کاڵا و دیسەبلکردنی input-ەکان
+    products.forEach((_, idx) => {
+      const qtyInput = document.getElementById(`qty_${idx}`);
+      qtyInput.disabled = true;
+      qtyInput.value = 1;
+    });
 
     renderReceipts();
   });
@@ -253,26 +310,4 @@
 
   btnOrderForm.addEventListener("click", () => {
     btnOrderForm.classList.add("active");
-    btnReceipts.classList.remove("active");
-    orderSection.style.display = "block";
-    receiptsSection.style.display = "none";
-  });
-
-  btnReceipts.addEventListener("click", () => {
-    btnReceipts.classList.add("active");
-    btnOrderForm.classList.remove("active");
-    receiptsSection.style.display = "block";
-    orderSection.style.display = "none";
-  });
-
-  // ئەگەر بەتایبەتی لینکی ?orderForm=1 هەبێت بۆ بەکارهێنەر، بەشەکەی فۆڕمە داواکاری نیشان بدرێت بەردەست
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("orderForm") === "1") {
-    btnOrderForm.click();
-  } else {
-    btnReceipts.click();
-  }
-</script>
-
-</body>
-</html>
+    btnReceipts.class
