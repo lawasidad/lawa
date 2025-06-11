@@ -5,8 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
   <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
+
   <style>
-    /* شتێن بە شێوەی پێشووی خۆت ... */
+    body {
+      font-family: 'Rabar_013', sans-serif;
+      background: #f5f7fa;
+      margin: 0; padding: 20px;
+      direction: rtl;
+    }
+    h1 {
+      text-align: center;
+      color: #1a202c;
+      margin-bottom: 10px;
+    }
+    .add-link {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .add-link a {
+      display: inline-block;
+      background: #2b6cb0;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .orders {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+      min-height: 150px;
+    }
+    .order {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 18px 0;
+    }
+    .order:last-child {
+      border-bottom: none;
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #2d3748;
+    }
+    .order-info {
+      font-size: 14px;
+      color: #4a5568;
+      margin-bottom: 12px;
+    }
+    .products {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .product {
+      border: 1.5px solid #cbd5e0;
+      border-radius: 12px;
+      padding: 10px;
+      width: 140px;
+      text-align: center;
+      background: #fefefe;
+    }
+    .product img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+    .product-name {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .product-price {
+      color: #718096;
+      font-size: 14px;
+    }
+    .no-orders {
+      text-align: center;
+      font-size: 18px;
+      color: #a0aec0;
+      padding: 40px 0;
+    }
   </style>
 </head>
 <body>
@@ -21,7 +108,7 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
-<!-- ✅ جۆرەسەکە -->
+<!-- ✅ جەرەس -->
 <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
 
 <script>
@@ -80,15 +167,13 @@
   }
 
   function playAlarm() {
-    alertSound.volume = 1.0;
+    alertSound.volume = 1.0; // بەرزترین
     alertSound.play().catch(err => {
-      console.error("ناتوانرێت دەنگی جەرەس پێبکات:", err);
+      console.warn("ناتوانرێت دەنگ پێبکات:", err);
     });
 
-    if (!document.hasFocus()) {
-      if (Notification.permission === "granted") {
-        new Notification("📦 وەسڵی نوێ زیاد بوو!");
-      }
+    if (!document.hasFocus() && "Notification" in window && Notification.permission === "granted") {
+      new Notification("📦 وەسڵی نوێ زیادکرا!");
     }
   }
 
@@ -108,13 +193,11 @@
     renderOrders();
     lastOrdersLength = getOrders().length;
 
-    // Permission بۆ Notification
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
 
-    // Check every 3 seconds
-    setInterval(checkForNewOrders, 3000);
+    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە
   };
 </script>
 
