@@ -2,26 +2,58 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <title>داشبۆردی کاڵا - تەلەبکردن</title>
+  <title>داشبۆردی وەسڵ و راپۆرت</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 2rem;
+      margin: 0; padding: 0;
+      background: #f0f2f5;
       color: #212529;
     }
-    h1 {
+    header {
+      background: #0d6efd;
+      color: white;
+      padding: 1rem 2rem;
       text-align: center;
-      margin-bottom: 2rem;
-      color: #0d6efd;
+      font-size: 1.5rem;
+      font-weight: bold;
     }
+    nav {
+      display: flex;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+      justify-content: center;
+      gap: 2rem;
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav button {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.5rem 1.2rem;
+      border-radius: 6px;
+      color: #0d6efd;
+      transition: background-color 0.3s ease;
+    }
+    nav button.active, nav button:hover {
+      background-color: #0d6efd;
+      color: white;
+    }
+    main {
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    /* گالەری کاڵاکان */
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
       gap: 1rem;
-      margin-bottom: 2rem;
     }
     .card {
       background: white;
@@ -45,7 +77,6 @@
     }
     .card h3 {
       margin: 0.3rem 0 0.7rem 0;
-      font-size: 1.1rem;
       color: #0d6efd;
     }
     .card p {
@@ -54,24 +85,18 @@
       color: #198754;
       font-size: 1rem;
     }
-
-    /* Form Styles */
+    /* فۆڕم */
     form {
-      max-width: 480px;
-      margin: 0 auto;
       background: white;
-      padding: 1.5rem 2rem;
+      padding: 1.5rem;
       border-radius: 8px;
       box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
-    }
-    form h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #0d6efd;
+      max-width: 480px;
+      margin: 1rem auto;
     }
     form label {
       display: block;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.3rem;
       font-weight: 600;
     }
     form input, form textarea {
@@ -97,102 +122,120 @@
     form button:hover {
       background: #084bcc;
     }
-    .thankyou {
-      margin-top: 1rem;
+    /* وەسڵ و راپۆرت */
+    #receipts {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
+      max-width: 900px;
+      margin: 1rem auto;
+      display: none;
+    }
+    #receipts table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    #receipts th, #receipts td {
+      border: 1px solid #dee2e6;
+      padding: 0.6rem;
       text-align: center;
-      color: #198754;
+    }
+    #receipts th {
+      background: #0d6efd;
+      color: white;
+    }
+    #summary {
       font-weight: bold;
+      font-size: 1.1rem;
+      color: #0d6efd;
+      text-align: right;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <h1>🛒 داشبۆردی کاڵا - بۆ تەلەبکردن</h1>
+<header>داشبۆردی وەسڵ و راپۆرت</header>
 
-  <div class="gallery" id="productGallery">
-    <!-- کاڵاکان ئەمانە نیشان دەدرێن -->
-  </div>
+<nav>
+  <button id="btnOrder" class="active">داواکاری + کاڵا</button>
+  <button id="btnReceipts">وەسڵەکان و راپۆرت</button>
+</nav>
 
-  <form id="orderForm">
-    <h2>فۆڕمی تەلەبکردن</h2>
-    <label for="customerName">ناوی کڕیار</label>
-    <input type="text" id="customerName" name="customerName" placeholder="ناوت بنوسە" required />
+<main>
 
-    <label for="selectedProduct">کاڵای دیاریکراو</label>
-    <input type="text" id="selectedProduct" name="selectedProduct" readonly placeholder="کاڵاکە دیاری بکە لە خوارەوە" required />
+  <!-- بەش کاڵاکان + فۆڕم -->
+  <section id="orderSection">
+    <h2 style="text-align:center; color:#0d6efd; margin-bottom:1rem;">گالەری کاڵا - کلیک بکە بۆ داواکاری</h2>
+    <div class="gallery" id="productGallery"></div>
 
-    <label for="quantity">ژمارە</label>
-    <input type="number" id="quantity" name="quantity" min="1" value="1" required />
+    <form id="orderForm">
+      <h3 style="color:#0d6efd; margin-top:2rem; margin-bottom:1rem;">فۆڕمی داواکاری</h3>
+      <label for="customerName">ناوی کڕیار</label>
+      <input type="text" id="customerName" name="customerName" placeholder="ناوت بنوسە" required />
 
-    <label for="notes">تێبینی زیاتر (بەختیار)</label>
-    <textarea id="notes" name="notes" rows="3" placeholder="هەر شتێک لەبارەی داواکاری..."></textarea>
+      <label for="selectedProduct">کاڵای دیاریکراو</label>
+      <input type="text" id="selectedProduct" name="selectedProduct" readonly placeholder="کاڵاکە دیاری بکە لە خوارەوە" required />
 
-    <button type="submit">ناردن</button>
+      <label for="quantity">ژمارە</label>
+      <input type="number" id="quantity" name="quantity" min="1" value="1" required />
 
-    <div class="thankyou" id="thankyouMessage" style="display:none;">
-      سوپاس بۆ داواکاریەکەت! 🟢
-    </div>
-  </form>
+      <label for="notes">تێبینی زیاتر (بەختیار)</label>
+      <textarea id="notes" name="notes" rows="3" placeholder="هەر شتێک لەبارەی داواکاری..."></textarea>
 
-  <script>
-    // لیستی کاڵاکان (بە شێوەی ئوبجێکت)
-    const products = [
-      { id: 1, name: "پیتزا", price: 15000, img: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png" },
-      { id: 2, name: "کۆکاکۆلا", price: 5000, img: "https://cdn-icons-png.flaticon.com/512/3075/3075979.png" },
-      { id: 3, name: "نانی سنوور", price: 8000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png" },
-      { id: 4, name: "بیرینجی", price: 12000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046795.png" },
-      { id: 5, name: "ماست", price: 6000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046793.png" }
-    ];
+      <button type="submit">ناردن</button>
+      <div id="thankyouMessage" style="display:none; margin-top:1rem; color:#198754; font-weight:bold; text-align:center;">
+        سوپاس بۆ داواکاریەکەت! 🟢
+      </div>
+    </form>
+  </section>
 
-    const gallery = document.getElementById('productGallery');
-    const selectedProductInput = document.getElementById('selectedProduct');
-    const orderForm = document.getElementById('orderForm');
-    const thankyouMessage = document.getElementById('thankyouMessage');
+  <!-- بەش وەسڵ و راپۆرت -->
+  <section id="receipts" >
+    <h2 style="text-align:center; color:#0d6efd; margin-bottom:1rem;">وەسڵەکان و راپۆرت</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ناوی کڕیار</th>
+          <th>کاڵا</th>
+          <th>ژمارە</th>
+          <th>نرخ یەکە</th>
+          <th>نرخی گشتی</th>
+          <th>تێبینی</th>
+        </tr>
+      </thead>
+      <tbody id="receiptTableBody">
+      </tbody>
+    </table>
+    <div id="summary"></div>
+  </section>
 
-    // زیادکردنی کاڵاکان بۆ گالەری
-    function renderProducts() {
-      products.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <img src="${p.img}" alt="${p.name}">
-          <h3>${p.name}</h3>
-          <p>نرخ: ${p.price.toLocaleString()} دینار</p>
-        `;
-        card.addEventListener('click', () => {
-          selectedProductInput.value = p.name + " - " + p.price.toLocaleString() + " دینار";
-          thankyouMessage.style.display = 'none';
-          window.scrollTo({top: orderForm.offsetTop, behavior: 'smooth'});
-        });
-        gallery.appendChild(card);
-      });
-    }
+</main>
 
-    renderProducts();
+<script>
+  // کاڵاکان
+  const products = [
+    { id: 1, name: "پیتزا", price: 15000, img: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png" },
+    { id: 2, name: "کۆکاکۆلا", price: 5000, img: "https://cdn-icons-png.flaticon.com/512/3075/3075979.png" },
+    { id: 3, name: "نانی سنوور", price: 8000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png" },
+    { id: 4, name: "بیرینجی", price: 12000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046795.png" },
+    { id: 5, name: "ماست", price: 6000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046793.png" }
+  ];
 
-    // فۆڕمی ناردن
-    orderForm.addEventListener('submit', e => {
-      e.preventDefault();
-      if (!selectedProductInput.value) {
-        alert("تکایە کاڵاکە دیاری بکە");
-        return;
-      }
-      const name = orderForm.customerName.value.trim();
-      const product = orderForm.selectedProduct.value.trim();
-      const qty = orderForm.quantity.value;
-      const notes = orderForm.notes.value.trim();
+  // لیستی وەسڵەکان (داواکاریەکان)
+  let receipts = [];
 
-      // ئەم جا دەتوانیت داواکارییەکان بخەیتە خۆراک
-      // وەک بەکاربردنی API یان ناردن بە ایمەیل و یان گووگل شیت
+  // نیشاندانی کاڵاکان بۆ گالەری
+  const gallery = document.getElementById('productGallery');
+  const selectedProductInput = document.getElementById('selectedProduct');
+  const orderForm = document.getElementById('orderForm');
+  const thankyouMessage = document.getElementById('thankyouMessage');
 
-      console.log("داواکاری:", { name, product, qty, notes });
-      
-      // پاککردنی فۆڕم و نیشاندانی پەیام سەرکەوتن
-      orderForm.reset();
-      selectedProductInput.value = "";
-      thankyouMessage.style.display = 'block';
-    });
-  </script>
-
-</body>
-</html>
+  function renderProducts() {
+    gallery.innerHTML = "";
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.inner
