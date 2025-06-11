@@ -107,13 +107,14 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
-<!-- جەرەس (ئۆدیۆ) -->
-<audio id="alertSound" preload="auto">
-  <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
+<audio id="alarmSound" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+  Your browser does not support the audio element.
 </audio>
 
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
+  const alarmSound = document.getElementById('alarmSound');
 
   function getOrders() {
     try {
@@ -168,10 +169,10 @@
   }
 
   function playAlarm() {
-    const audio = document.getElementById('alertSound');
-    audio.volume = 1.0;
-    audio.play().catch(e => {
-      console.error("ناتوانرا دەنگ پێبکات:", e);
+    alarmSound.volume = 1.0;
+    alarmSound.currentTime = 0;
+    alarmSound.play().catch((err) => {
+      console.error("هەڵەی دەنگ: ", err);
     });
   }
 
@@ -181,10 +182,8 @@
     const currentOrders = getOrders();
 
     if (currentOrders.length > lastOrdersLength) {
-      if (!document.hasFocus()) {
-        playAlarm();
-        alert("وەسڵی نوێ زیاد بوو!");
-      }
+      playAlarm();
+      alert("📢 وەسڵی نوێ زیاد بوو!");
       lastOrdersLength = currentOrders.length;
       renderOrders();
     }
@@ -193,7 +192,7 @@
   window.onload = () => {
     lastOrdersLength = getOrders().length;
     renderOrders();
-    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە جارێک بپشکنە
+    setInterval(checkForNewOrders, 3000); // check every 3 seconds
   };
 </script>
 
