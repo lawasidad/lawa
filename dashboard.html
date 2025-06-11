@@ -107,8 +107,10 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
-<!-- جەرەس -->
-<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
+<!-- جەرەس (ئۆدیۆ) -->
+<audio id="alertSound" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
+</audio>
 
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
@@ -166,9 +168,11 @@
   }
 
   function playAlarm() {
-    const audio = document.getElementById("alertSound");
+    const audio = document.getElementById('alertSound');
     audio.volume = 1.0;
-    audio.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
+    audio.play().catch(e => {
+      console.error("ناتوانرا دەنگ پێبکات:", e);
+    });
   }
 
   let lastOrdersLength = 0;
@@ -189,7 +193,7 @@
   window.onload = () => {
     lastOrdersLength = getOrders().length;
     renderOrders();
-    setInterval(checkForNewOrders, 3000); // check every 3 seconds
+    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە جارێک بپشکنە
   };
 </script>
 
