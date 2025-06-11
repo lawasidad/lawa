@@ -115,8 +115,7 @@
     <input type="text" id="address" required />
 
     <label for="gps">شوێن (GPS)</label>
-    <input type="text" id="gps" readonly placeholder="کلیک بکە بۆ وەرگرتنی شوێن" />
-    <button type="button" onclick="getLocation()">وەرگرتنی شوێن 📍</button>
+    <input type="text" id="gps" readonly placeholder="چاوەڕوان بە دەست خۆکارانە..." />
 
     <button type="submit">ناردنی داواکاری</button>
     <p id="successMessage">✅ داواکاری نێردرا!</p>
@@ -152,19 +151,20 @@
     productList.appendChild(item);
   });
 
-  function getLocation() {
+  // خۆکارانە وەرگرتنی GPS لە کاتی کرانەوەی فۆرم
+  window.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
         const lat = position.coords.latitude.toFixed(5);
         const lon = position.coords.longitude.toFixed(5);
         document.getElementById("gps").value = `${lat}, ${lon}`;
       }, () => {
-        alert("نەتوانرا شوێن وەرگیرا بۆت.");
+        document.getElementById("gps").value = "نەتوانرا شوێن دابنرێت";
       });
     } else {
-      alert("براوسەر پشتیوانی GPS ناکات.");
+      document.getElementById("gps").value = "براوسەر پشتیوانی ناکات";
     }
-  }
+  });
 
   document.getElementById("orderForm").addEventListener("submit", e => {
     e.preventDefault();
