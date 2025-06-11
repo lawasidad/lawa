@@ -107,8 +107,9 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
+<!-- جەرەس دابنێ -->
 <audio id="alarmSound" preload="auto">
-  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg" />
   Your browser does not support the audio element.
 </audio>
 
@@ -137,7 +138,6 @@
 
   function renderOrders() {
     const orders = getOrders();
-
     if (orders.length === 0) {
       ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
       return;
@@ -147,7 +147,6 @@
 
     orders.forEach(order => {
       const productsHTML = order.products.map(createProductHTML).join('');
-
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
 
@@ -171,16 +170,19 @@
   function playAlarm() {
     alarmSound.volume = 1.0;
     alarmSound.currentTime = 0;
-    alarmSound.play().catch((err) => {
-      console.error("هەڵەی دەنگ: ", err);
-    });
+    const playPromise = alarmSound.play();
+
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.log("🔇 دەنگ نەتوانرا پێبدەدرێت: کلیکێک پێویستە لە پەڕە.");
+      });
+    }
   }
 
   let lastOrdersLength = 0;
 
   function checkForNewOrders() {
     const currentOrders = getOrders();
-
     if (currentOrders.length > lastOrdersLength) {
       playAlarm();
       alert("📢 وەسڵی نوێ زیاد بوو!");
@@ -192,7 +194,13 @@
   window.onload = () => {
     lastOrdersLength = getOrders().length;
     renderOrders();
-    setInterval(checkForNewOrders, 3000); // check every 3 seconds
+
+    // ڕێگەدان بە دەنگ بە کلیکێک بۆ یەکەم جار
+    document.body.addEventListener('click', () => {
+      alarmSound.play().catch(() => {});
+    }, { once: true });
+
+    setInterval(checkForNewOrders, 3000);
   };
 </script>
 
