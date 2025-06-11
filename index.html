@@ -16,6 +16,7 @@
       padding: 20px;
       direction: rtl;
     }
+
     .header {
       text-align: center;
       padding: 20px 0;
@@ -27,6 +28,7 @@
       margin-bottom: 25px;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
     }
+
     .container {
       max-width: 750px;
       background: white;
@@ -35,17 +37,20 @@
       border-radius: 16px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
+
     h2 {
       text-align: center;
       color: #2d3748;
       margin-bottom: 20px;
     }
+
     .product-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 25px;
       margin-top: 20px;
     }
+
     .product {
       border: 2px solid #ddd;
       border-radius: 16px;
@@ -59,15 +64,18 @@
       align-items: center;
       user-select: none;
     }
+
     .product:hover {
       box-shadow: 0 0 15px rgba(0,0,0,0.15);
       transform: translateY(-3px);
     }
+
     .product.selected {
       border-color: #e3342f !important;
       background-color: #ffe5e5 !important;
       color: #b71c1c;
     }
+
     .product img {
       width: 180px;
       height: 180px;
@@ -75,25 +83,30 @@
       border-radius: 16px;
       margin-bottom: 15px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      user-select: none;
     }
+
     .product-name {
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 6px;
       user-select: text;
     }
+
     .product-price {
       font-size: 18px;
       color: #4a5568;
       font-weight: 600;
       user-select: text;
     }
+
     label {
       display: block;
       margin-top: 25px;
       font-weight: bold;
       font-size: 18px;
     }
+
     input, textarea {
       width: 100%;
       padding: 12px;
@@ -105,11 +118,13 @@
       transition: border-color 0.3s;
       box-sizing: border-box;
     }
+
     input:focus, textarea:focus {
       outline: none;
       border-color: #3182ce;
       box-shadow: 0 0 8px rgba(49,130,206,0.3);
     }
+
     button {
       margin-top: 30px;
       padding: 14px;
@@ -123,13 +138,11 @@
       font-weight: bold;
       transition: background 0.3s ease;
     }
-    button:disabled {
-      background: #94d3a2;
-      cursor: not-allowed;
-    }
-    button:hover:not(:disabled) {
+
+    button:hover {
       background: #218838;
     }
+
     #successMessage {
       display: none;
       color: green;
@@ -145,7 +158,7 @@
 <div class="header">کۆمپانیای دۆی قەندیل</div>
 
 <div class="container">
-  <h2>فۆرمی داواکاری دۆی قەندیل</h2>
+  <h2>فۆرمی داواکاری کاڵا</h2>
 
   <div class="product-list" id="productList"></div>
 
@@ -157,12 +170,12 @@
     <input type="tel" id="mobile" pattern="07[0-9]{8}" required placeholder="07XX XXX XXX" title="ژمارەی مۆبایل بە شیوەی 07xxxxxxxx بنووسە" />
 
     <label for="address">ناونیشان</label>
-    <input type="text" id="address" required placeholder="ناونیشانی خۆت بنووسە" />
+    <input type="text" id="address" required />
 
     <label for="gps">شوێن (GPS)</label>
     <input type="text" id="gps" readonly placeholder="چاوەڕوان بە دەست خۆکارانە..." />
 
-    <button type="submit" id="submitBtn" disabled>✅ ناردنی داواکاری</button>
+    <button type="submit">✅ ناردنی داواکاری</button>
     <p id="successMessage">✅ داواکاری نێردرا!</p>
   </form>
 </div>
@@ -186,8 +199,6 @@
       <div class="product-name">${product.name}</div>
       <div class="product-price">${product.price.toLocaleString()} دینار</div>
     `;
-
-    // هەلبژاردنی کاڵا بەکلیک
     item.addEventListener("click", () => {
       item.classList.toggle("selected");
       if (selected.includes(product)) {
@@ -195,28 +206,45 @@
       } else {
         selected.push(product);
       }
-      checkFormValidity();
     });
-
     productList.appendChild(item);
   });
 
-  // وەرگرتنی شوێن (GPS)
+  // GPS ئۆتۆماتیک
   window.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
         const lat = position.coords.latitude.toFixed(5);
         const lon = position.coords.longitude.toFixed(5);
         document.getElementById("gps").value = `${lat}, ${lon}`;
-        checkFormValidity();
       }, () => {
         document.getElementById("gps").value = "نەتوانرا شوێن دابنرێت";
-        checkFormValidity();
       });
     } else {
       document.getElementById("gps").value = "براوسەر پشتیوانی ناکات";
-      checkFormValidity();
     }
   });
 
-  // کارکردن لەسەر فۆرم و چاککردنی هەڵبژاردنەکان و بڵاوکردنە
+  document.getElementById("orderForm").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const name = document.getElementById("customerName").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const gps = document.getElementById("gps").value.trim();
+
+    if (!name || !mobile || !address || selected.length === 0) {
+      alert("تکایە هەموو خانەکان پڕ بکە و کاڵایەک هەلبژێرە.");
+      return;
+    }
+
+    const order = {
+      name, mobile, address, gps,
+      products: selected,
+      time: new Date().toLocaleString()
+    };
+
+    console.log("📦 داواکاری نوێ:", order);
+
+    // نیشاندانی پیغام سەرکەوتووی داواکاری
+    const successMsg = document.getElementBy
