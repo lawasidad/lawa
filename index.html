@@ -1,146 +1,198 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8">
-  <title>داشبۆردی فرۆشتن</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>داشبۆردی کاڵا - تەلەبکردن</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      background: #f1f3f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
       padding: 2rem;
+      color: #212529;
     }
-    .nav-tabs .nav-link.active {
-      background-color: #0d6efd;
-      color: white;
-    }
-    .tab-content {
-      background: white;
-      padding: 1.5rem;
-      border: 1px solid #dee2e6;
-      border-top: none;
-      border-radius: 0 0 0.375rem 0.375rem;
-    }
-    .form-section {
-      margin-bottom: 1rem;
-    }
-    .summary {
-      font-weight: bold;
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
       color: #0d6efd;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 15px rgb(0 0 0 / 0.15);
+    }
+    .card img {
+      max-width: 100%;
+      height: 140px;
+      object-fit: contain;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+    }
+    .card h3 {
+      margin: 0.3rem 0 0.7rem 0;
+      font-size: 1.1rem;
+      color: #0d6efd;
+    }
+    .card p {
+      margin: 0;
+      font-weight: bold;
+      color: #198754;
+      font-size: 1rem;
+    }
+
+    /* Form Styles */
+    form {
+      max-width: 480px;
+      margin: 0 auto;
+      background: white;
+      padding: 1.5rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
+    }
+    form h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #0d6efd;
+    }
+    form label {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-weight: 600;
+    }
+    form input, form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+      font-size: 1rem;
+      resize: vertical;
+    }
+    form button {
+      background: #0d6efd;
+      border: none;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      font-size: 1.1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+    form button:hover {
+      background: #084bcc;
+    }
+    .thankyou {
+      margin-top: 1rem;
+      text-align: center;
+      color: #198754;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2 class="text-center mb-4">📊 داشبۆردی فرۆشتن و راپۆرت</h2>
+  <h1>🛒 داشبۆردی کاڵا - بۆ تەلەبکردن</h1>
 
-    <!-- Tabs Navigation -->
-    <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales" type="button" role="tab">🧾 وەسل</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab">📈 راپۆرت</button>
-      </li>
-    </ul>
-
-    <!-- Tabs Content -->
-    <div class="tab-content" id="dashboardContent">
-      <!-- Sales Tab -->
-      <div class="tab-pane fade show active" id="sales" role="tabpanel">
-        <form id="saleForm">
-          <div class="row form-section">
-            <div class="col-md-3">
-              <input type="text" class="form-control" placeholder="👤 ناوی کڕیار" id="customer" required>
-            </div>
-            <div class="col-md-3">
-              <input type="text" class="form-control" placeholder="📦 ناوی کاڵا" id="product" required>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control" placeholder="🔢 ژمارە" id="qty" min="1" value="1" required>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control" placeholder="💰 نرخی یەکە" id="unitPrice" min="0" required>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control" placeholder="🎯 داشکان %" id="discount" min="0" value="0">
-            </div>
-          </div>
-          <button type="submit" class="btn btn-success">💾 پاشەکەوتکردن</button>
-        </form>
-
-        <hr>
-
-        <h5>📋 وەسلەکان</h5>
-        <table class="table table-bordered table-striped mt-3" id="receiptTable">
-          <thead>
-            <tr>
-              <th>کڕیار</th>
-              <th>کاڵا</th>
-              <th>ژمارە</th>
-              <th>نرخی یەکە</th>
-              <th>داشکان</th>
-              <th>کۆی گشتی</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <!-- Report Tab -->
-      <div class="tab-pane fade" id="report" role="tabpanel">
-        <h5>📊 راپۆرتی گشتی</h5>
-        <p class="summary">🔢 ژمارەی کاڵا فرۆشراو: <span id="totalItems">0</span></p>
-        <p class="summary">💰 کۆی گشتی پارە: <span id="totalRevenue">0</span> دینار</p>
-      </div>
-    </div>
+  <div class="gallery" id="productGallery">
+    <!-- کاڵاکان ئەمانە نیشان دەدرێن -->
   </div>
 
-  <!-- Bootstrap & Script -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <form id="orderForm">
+    <h2>فۆڕمی تەلەبکردن</h2>
+    <label for="customerName">ناوی کڕیار</label>
+    <input type="text" id="customerName" name="customerName" placeholder="ناوت بنوسە" required />
+
+    <label for="selectedProduct">کاڵای دیاریکراو</label>
+    <input type="text" id="selectedProduct" name="selectedProduct" readonly placeholder="کاڵاکە دیاری بکە لە خوارەوە" required />
+
+    <label for="quantity">ژمارە</label>
+    <input type="number" id="quantity" name="quantity" min="1" value="1" required />
+
+    <label for="notes">تێبینی زیاتر (بەختیار)</label>
+    <textarea id="notes" name="notes" rows="3" placeholder="هەر شتێک لەبارەی داواکاری..."></textarea>
+
+    <button type="submit">ناردن</button>
+
+    <div class="thankyou" id="thankyouMessage" style="display:none;">
+      سوپاس بۆ داواکاریەکەت! 🟢
+    </div>
+  </form>
+
   <script>
-    const saleForm = document.getElementById('saleForm');
-    const receiptTable = document.querySelector('#receiptTable tbody');
-    const totalItemsEl = document.getElementById('totalItems');
-    const totalRevenueEl = document.getElementById('totalRevenue');
+    // لیستی کاڵاکان (بە شێوەی ئوبجێکت)
+    const products = [
+      { id: 1, name: "پیتزا", price: 15000, img: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png" },
+      { id: 2, name: "کۆکاکۆلا", price: 5000, img: "https://cdn-icons-png.flaticon.com/512/3075/3075979.png" },
+      { id: 3, name: "نانی سنوور", price: 8000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png" },
+      { id: 4, name: "بیرینجی", price: 12000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046795.png" },
+      { id: 5, name: "ماست", price: 6000, img: "https://cdn-icons-png.flaticon.com/512/1046/1046793.png" }
+    ];
 
-    let totalItems = 0;
-    let totalRevenue = 0;
+    const gallery = document.getElementById('productGallery');
+    const selectedProductInput = document.getElementById('selectedProduct');
+    const orderForm = document.getElementById('orderForm');
+    const thankyouMessage = document.getElementById('thankyouMessage');
 
-    saleForm.addEventListener('submit', function (e) {
+    // زیادکردنی کاڵاکان بۆ گالەری
+    function renderProducts() {
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${p.img}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p>نرخ: ${p.price.toLocaleString()} دینار</p>
+        `;
+        card.addEventListener('click', () => {
+          selectedProductInput.value = p.name + " - " + p.price.toLocaleString() + " دینار";
+          thankyouMessage.style.display = 'none';
+          window.scrollTo({top: orderForm.offsetTop, behavior: 'smooth'});
+        });
+        gallery.appendChild(card);
+      });
+    }
+
+    renderProducts();
+
+    // فۆڕمی ناردن
+    orderForm.addEventListener('submit', e => {
       e.preventDefault();
+      if (!selectedProductInput.value) {
+        alert("تکایە کاڵاکە دیاری بکە");
+        return;
+      }
+      const name = orderForm.customerName.value.trim();
+      const product = orderForm.selectedProduct.value.trim();
+      const qty = orderForm.quantity.value;
+      const notes = orderForm.notes.value.trim();
 
-      const customer = document.getElementById('customer').value;
-      const product = document.getElementById('product').value;
-      const qty = parseFloat(document.getElementById('qty').value);
-      const unitPrice = parseFloat(document.getElementById('unitPrice').value);
-      const discount = parseFloat(document.getElementById('discount').value || 0);
+      // ئەم جا دەتوانیت داواکارییەکان بخەیتە خۆراک
+      // وەک بەکاربردنی API یان ناردن بە ایمەیل و یان گووگل شیت
 
-      const total = qty * unitPrice * (1 - discount / 100);
-      totalItems += qty;
-      totalRevenue += total;
-
-      // Update report
-      totalItemsEl.textContent = totalItems;
-      totalRevenueEl.textContent = totalRevenue.toFixed(2);
-
-      // Add to table
-      const row = `
-        <tr>
-          <td>${customer}</td>
-          <td>${product}</td>
-          <td>${qty}</td>
-          <td>${unitPrice.toFixed(2)}</td>
-          <td>${discount}%</td>
-          <td>${total.toFixed(2)}</td>
-        </tr>
-      `;
-      receiptTable.innerHTML += row;
-
-      saleForm.reset();
-      document.getElementById('qty').value = 1;
-      document.getElementById('discount').value = 0;
+      console.log("داواکاری:", { name, product, qty, notes });
+      
+      // پاککردنی فۆڕم و نیشاندانی پەیام سەرکەوتن
+      orderForm.reset();
+      selectedProductInput.value = "";
+      thankyouMessage.style.display = 'block';
     });
   </script>
+
 </body>
 </html>
