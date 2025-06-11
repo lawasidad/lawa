@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>زیادکردنی کاڵا</title>
   <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
   <style>
@@ -12,27 +12,20 @@
       padding: 30px;
       direction: rtl;
     }
-    h1 {
-      text-align: center;
-      color: #1a202c;
-      margin-bottom: 30px;
-    }
     form {
       max-width: 500px;
       margin: auto;
       background: white;
       padding: 25px;
       border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
     label {
       display: block;
       margin-bottom: 8px;
       font-weight: bold;
     }
-    input[type="text"],
-    input[type="number"],
-    input[type="url"] {
+    input[type="text"], input[type="number"], input[type="url"] {
       width: 100%;
       padding: 10px;
       margin-bottom: 20px;
@@ -68,7 +61,7 @@
     <label for="price">نرخی کاڵا (دینار)</label>
     <input type="number" id="price" required>
 
-    <label for="image">بەستەری وێنە (Image URL)</label>
+    <label for="image">بەستەری وێنە (URL)</label>
     <input type="url" id="image" required>
 
     <button type="submit">زیادکردن</button>
@@ -86,29 +79,21 @@
       const price = parseInt(document.getElementById('price').value);
       const image = document.getElementById('image').value.trim();
 
-      const newProduct = { name, price, image };
+      const newProduct = { id: Date.now(), name, price, image };
 
-      let orders = JSON.parse(localStorage.getItem('orders')) || [];
+      // وەرگرتنی لیستی کاڵا لە localStorage یان دروستکردنی نوێ
+      let products = JSON.parse(localStorage.getItem('products')) || [];
 
-      let guestOrder = orders.find(order => order.name === 'کریاری نادیار');
-      if (!guestOrder) {
-        guestOrder = {
-          name: 'کریاری نادیار',
-          mobile: '',
-          address: '',
-          gps: '',
-          time: new Date().toLocaleString(),
-          products: []
-        };
-        orders.push(guestOrder);
-      }
+      // زیادکردنی کاڵا نوێ بۆ لیستەکە
+      products.push(newProduct);
 
-      guestOrder.products.push(newProduct);
-      localStorage.setItem('orders', JSON.stringify(orders));
+      // ناردنی لیستە نوێ بۆ localStorage
+      localStorage.setItem('products', JSON.stringify(products));
 
       form.reset();
       successMsg.style.display = 'block';
 
+      // دوای 2 چرکە بگوازە بۆ index.html
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 2000);
