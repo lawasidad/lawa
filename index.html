@@ -62,7 +62,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      user-select: none;
     }
 
     .product:hover {
@@ -83,21 +82,18 @@
       border-radius: 16px;
       margin-bottom: 15px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      user-select: none;
     }
 
     .product-name {
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 6px;
-      user-select: text;
     }
 
     .product-price {
       font-size: 18px;
       color: #4a5568;
       font-weight: 600;
-      user-select: text;
     }
 
     label {
@@ -116,7 +112,6 @@
       font-family: inherit;
       font-size: 17px;
       transition: border-color 0.3s;
-      box-sizing: border-box;
     }
 
     input:focus, textarea:focus {
@@ -167,7 +162,7 @@
     <input type="text" id="customerName" required placeholder="ناوی خۆت بنووسە" />
 
     <label for="mobile">ژمارەی مۆبایل</label>
-    <input type="tel" id="mobile" pattern="07[0-9]{8}" required placeholder="07XX XXX XXX" title="ژمارەی مۆبایل بە شیوەی 07xxxxxxxx بنووسە" />
+    <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
 
     <label for="address">ناونیشان</label>
     <input type="text" id="address" required />
@@ -190,7 +185,6 @@
   const productList = document.getElementById("productList");
   const selected = [];
 
-  // دروستکردنی لیستی کاڵاکان
   products.forEach(product => {
     const item = document.createElement("div");
     item.classList.add("product");
@@ -245,6 +239,12 @@
     };
 
     console.log("📦 داواکاری نوێ:", order);
+    document.getElementById("successMessage").style.display = "block";
+    document.getElementById("orderForm").reset();
+    selected.length = 0;
+    document.querySelectorAll(".product").forEach(p => p.classList.remove("selected"));
+  });
+</script>
 
-    // نیشاندانی پیغام سەرکەوتووی داواکاری
-    const successMsg = document.getElementBy
+</body>
+</html>
