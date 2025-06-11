@@ -7,199 +7,191 @@
   <style>
     body {
       font-family: sans-serif;
-      background: #f2f4f7;
+      background: #f4f6f9;
       margin: 0;
       padding: 20px;
     }
 
-    .form-container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 600px;
+    .container {
+      max-width: 700px;
+      background: white;
       margin: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
       color: #333;
+    }
+
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .product {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .product:hover {
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      transform: scale(1.02);
+    }
+
+    .product.selected {
+      border-color: green;
+      background-color: #e6ffe6;
+    }
+
+    .product img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
     }
 
     label {
       display: block;
       margin-top: 15px;
       font-weight: bold;
-      color: #444;
     }
 
     input, textarea {
       width: 100%;
       padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
       margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
     button {
       margin-top: 20px;
       padding: 12px;
-      width: 100%;
-      background: #28a745;
+      background: green;
       color: white;
       font-size: 16px;
       border: none;
       border-radius: 8px;
+      width: 100%;
       cursor: pointer;
     }
 
     button:hover {
-      background: #218838;
+      background: darkgreen;
     }
 
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .product-card {
-      background: #fafafa;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: 0.3s;
-    }
-
-    .product-card:hover {
-      border-color: #28a745;
-    }
-
-    .product-card.selected {
-      border-color: #28a745;
-      background: #e9fbe9;
-    }
-
-    .product-card img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 6px;
-    }
-
-    #successMsg {
-      color: green;
+    #successMessage {
       display: none;
-      margin-top: 15px;
+      color: green;
       text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>فۆڕمی داواکردنی کاڵا</h2>
-    <form id="orderForm">
-      <label for="customerName">ناوی کڕیار</label>
-      <input type="text" id="customerName" required placeholder="ناوی کڕیار بنوسە" />
 
-      <label for="mobile">ژمارەی مۆبایل</label>
-      <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
+<div class="container">
+  <h2>داواکاری کاڵا</h2>
 
-      <label for="address">ناونیشان</label>
-      <input type="text" id="address" required placeholder="ناونیشانت بنوسە" />
+  <div class="product-list" id="productList"></div>
 
-      <label for="gps">شوێنەکە (GPS Location)</label>
-      <input type="text" id="gps" placeholder="Location auto-fill..." readonly />
-      <button type="button" onclick="getLocation()">وەرگرتنی شوێن 📍</button>
+  <form id="orderForm">
+    <label for="customerName">ناوی کریار</label>
+    <input type="text" id="customerName" required placeholder="ناوی خۆت بنووسە" />
 
-      <label>هەڵبژاردنی کاڵاکان</label>
-      <div class="products-grid" id="productsGrid"></div>
+    <label for="mobile">ژمارەی مۆبایل</label>
+    <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
 
-      <label for="notes">تێبینی (بەختیار)</label>
-      <textarea id="notes" rows="3" placeholder="تێبینی بنوسە"></textarea>
+    <label for="address">ناونیشان</label>
+    <input type="text" id="address" required />
 
-      <button type="submit">ناردنی داواکاری</button>
-      <p id="successMsg">✅ داواکاری بە سەرکەوتوویی نێردرا!</p>
-    </form>
-  </div>
+    <label for="gps">شوێن (GPS)</label>
+    <input type="text" id="gps" readonly placeholder="کلیک بکە بۆ وەرگرتنی شوێن" />
+    <button type="button" onclick="getLocation()">وەرگرتنی شوێن 📍</button>
 
-  <script>
-    const products = [
-      { id: 1, name: "قاوە", price: 5000, image: "https://via.placeholder.com/100?text=قاوە" },
-      { id: 2, name: "شەکر", price: 2000, image: "https://via.placeholder.com/100?text=شەکر" },
-      { id: 3, name: "چای", price: 3000, image: "https://via.placeholder.com/100?text=چای" }
-    ];
+    <button type="submit">ناردنی داواکاری</button>
+    <p id="successMessage">✅ داواکاری نێردرا!</p>
+  </form>
+</div>
 
-    const productsGrid = document.getElementById("productsGrid");
-    const selectedProducts = [];
+<script>
+  const products = [
+    { id: 1, name: "قاوە", price: 5000, image: "https://via.placeholder.com/100?text=قاوە" },
+    { id: 2, name: "چای", price: 3000, image: "https://via.placeholder.com/100?text=چای" },
+    { id: 3, name: "شەکر", price: 2500, image: "https://via.placeholder.com/100?text=شەکر" }
+  ];
 
-    products.forEach(p => {
-      const card = document.createElement("div");
-      card.className = "product-card";
-      card.innerHTML = `
-        <img src="${p.image}" alt="${p.name}">
-        <div>${p.name}</div>
-        <small>${p.price} دینار</small>
-      `;
-      card.addEventListener("click", () => {
-        card.classList.toggle("selected");
-        if (selectedProducts.includes(p)) {
-          selectedProducts.splice(selectedProducts.indexOf(p), 1);
-        } else {
-          selectedProducts.push(p);
-        }
-      });
-      productsGrid.appendChild(card);
-    });
+  const productList = document.getElementById("productList");
+  const selected = [];
 
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          const lat = position.coords.latitude.toFixed(5);
-          const lon = position.coords.longitude.toFixed(5);
-          document.getElementById("gps").value = `${lat}, ${lon}`;
-        }, () => {
-          alert("نەتوانرا شوێنەکە بدۆزرێتەوە.");
-        });
+  products.forEach(product => {
+    const item = document.createElement("div");
+    item.classList.add("product");
+    item.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" />
+      <div>${product.name}</div>
+      <small>${product.price} دینار</small>
+    `;
+    item.addEventListener("click", () => {
+      item.classList.toggle("selected");
+      if (selected.includes(product)) {
+        selected.splice(selected.indexOf(product), 1);
       } else {
-        alert("براوسەری تۆ پشتیوانی GPS ناکات.");
+        selected.push(product);
       }
+    });
+    productList.appendChild(item);
+  });
+
+  function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude.toFixed(5);
+        const lon = position.coords.longitude.toFixed(5);
+        document.getElementById("gps").value = `${lat}, ${lon}`;
+      }, () => {
+        alert("نەتوانرا شوێن وەرگیرا بۆت.");
+      });
+    } else {
+      alert("براوسەر پشتیوانی GPS ناکات.");
+    }
+  }
+
+  document.getElementById("orderForm").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const name = document.getElementById("customerName").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const gps = document.getElementById("gps").value.trim();
+
+    if (!name || !mobile || !address || selected.length === 0) {
+      alert("تکایە هەموو خانەکان پڕ بکە و کاڵایەک هەلبژێرە.");
+      return;
     }
 
-    document.getElementById("orderForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const name = document.getElementById("customerName").value.trim();
-      const mobile = document.getElementById("mobile").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const gps = document.getElementById("gps").value.trim();
-      const notes = document.getElementById("notes").value.trim();
+    const order = {
+      name, mobile, address, gps,
+      products: selected,
+      time: new Date().toLocaleString()
+    };
 
-      if (!name || !mobile || !address || selectedProducts.length === 0) {
-        alert("تکایە هەموو خانەکان پڕبکە و کاڵایەک هەلبژێرە.");
-        return;
-      }
+    console.log("📦 داواکاری نوێ:", order);
+    document.getElementById("successMessage").style.display = "block";
+    document.getElementById("orderForm").reset();
+    selected.length = 0;
+    document.querySelectorAll(".product").forEach(p => p.classList.remove("selected"));
+  });
+</script>
 
-      const order = {
-        customerName: name,
-        mobile,
-        address,
-        gps,
-        products: selectedProducts,
-        notes,
-        date: new Date().toLocaleString()
-      };
-
-      console.log("داواکاری: ", order);
-
-      document.getElementById("orderForm").reset();
-      selectedProducts.length = 0;
-      document.querySelectorAll(".product-card").forEach(c => c.classList.remove("selected"));
-      document.getElementById("successMsg").style.display = "block";
-    });
-  </script>
 </body>
 </html>
