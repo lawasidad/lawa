@@ -6,7 +6,6 @@
   <title>کۆمپانیای دۆی قەندیل</title>
   <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
   <style>
-    /* ستایلەکان وەکو کۆدەکەت */
     body {
       font-family: 'Rabar_013', sans-serif;
       background: #f7f9fc;
@@ -186,7 +185,6 @@
     productList.appendChild(item);
   });
 
-  // GPS ئۆتۆماتیک
   window.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
@@ -201,7 +199,6 @@
     }
   });
 
-  // ناردنی داواکاری و زیادکردن بۆ localStorage
   document.getElementById("orderForm").addEventListener("submit", e => {
     e.preventDefault();
 
@@ -216,7 +213,7 @@
     }
 
     const order = {
-      id: Date.now(),  // یەک ID بۆ هەر داواکاری
+      id: Date.now(),
       name,
       mobile,
       address,
@@ -225,20 +222,17 @@
       time: new Date().toLocaleString()
     };
 
-    // وەسڵەکان لە localStorage بخەینە ناو و زیاد بکەین
     let orders = JSON.parse(localStorage.getItem("orders") || "[]");
     orders.push(order);
     localStorage.setItem("orders", JSON.stringify(orders));
 
     console.log("📦 داواکاری نوێ:", order);
 
-    // فۆرم ڕیسێت و پەیام نیشان بدە
     document.getElementById("successMessage").style.display = "block";
     document.getElementById("orderForm").reset();
     selected.length = 0;
     document.querySelectorAll(".product").forEach(p => p.classList.remove("selected"));
 
-    // پەیامەکە دوور بکە 3 چرکە دواتر
     setTimeout(() => {
       document.getElementById("successMessage").style.display = "none";
     }, 3000);
