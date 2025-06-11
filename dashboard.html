@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
   <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
-
   <style>
     body {
       font-family: 'Rabar_013', sans-serif;
@@ -108,12 +107,8 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
-<!-- ✅ جەرەس -->
-<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
-
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
-  const alertSound = document.getElementById("alertSound");
 
   function getOrders() {
     try {
@@ -146,6 +141,7 @@
 
     orders.forEach(order => {
       const productsHTML = order.products.map(createProductHTML).join('');
+
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
 
@@ -167,14 +163,8 @@
   }
 
   function playAlarm() {
-    alertSound.volume = 1.0; // بەرزترین
-    alertSound.play().catch(err => {
-      console.warn("ناتوانرێت دەنگ پێبکات:", err);
-    });
-
-    if (!document.hasFocus() && "Notification" in window && Notification.permission === "granted") {
-      new Notification("📦 وەسڵی نوێ زیادکرا!");
-    }
+    const audio = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+    audio.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
   }
 
   let lastOrdersLength = 0;
@@ -183,21 +173,19 @@
     const currentOrders = getOrders();
 
     if (currentOrders.length > lastOrdersLength) {
-      playAlarm();
+      if (!document.hasFocus()) {
+        playAlarm();
+        alert("وەسڵی نوێ زیاد بوو!");
+      }
       lastOrdersLength = currentOrders.length;
       renderOrders();
     }
   }
 
   window.onload = () => {
-    renderOrders();
     lastOrdersLength = getOrders().length;
-
-    if ("Notification" in window && Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
-    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە
+    renderOrders();
+    setInterval(checkForNewOrders, 3000); // check every 3 seconds
   };
 </script>
 
