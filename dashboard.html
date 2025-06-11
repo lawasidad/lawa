@@ -107,15 +107,8 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
-<!-- جەرەس دابنێ -->
-<audio id="alarmSound" preload="auto">
-  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg" />
-  Your browser does not support the audio element.
-</audio>
-
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
-  const alarmSound = document.getElementById('alarmSound');
 
   function getOrders() {
     try {
@@ -138,6 +131,7 @@
 
   function renderOrders() {
     const orders = getOrders();
+
     if (orders.length === 0) {
       ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
       return;
@@ -147,6 +141,7 @@
 
     orders.forEach(order => {
       const productsHTML = order.products.map(createProductHTML).join('');
+
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
 
@@ -167,25 +162,19 @@
     });
   }
 
-  function playAlarm() {
-    alarmSound.volume = 1.0;
-    alarmSound.currentTime = 0;
-    const playPromise = alarmSound.play();
-
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.log("🔇 دەنگ نەتوانرا پێبدەدرێت: کلیکێک پێویستە لە پەڕە.");
-      });
-    }
-  }
+  // دەنگەکە بۆ جەرەس
+  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
 
   let lastOrdersLength = 0;
 
   function checkForNewOrders() {
     const currentOrders = getOrders();
+
     if (currentOrders.length > lastOrdersLength) {
-      playAlarm();
-      alert("📢 وەسڵی نوێ زیاد بوو!");
+      if (!document.hasFocus()) {
+        alarmSound.play().catch(e => console.log("ناتوانێت دەنگ پێبکات:", e));
+        alert("وەسڵی نوێ زیاد بوو!");
+      }
       lastOrdersLength = currentOrders.length;
       renderOrders();
     }
@@ -195,12 +184,12 @@
     lastOrdersLength = getOrders().length;
     renderOrders();
 
-    // ڕێگەدان بە دەنگ بە کلیکێک بۆ یەکەم جار
+    // بۆ چالاککردنی دەنگ بە یەک کلیک (دەنگەکە پێویستە لەگەڵ یەک کلیکەوە چالاک بکرێت بڕاوزەری نوێ)
     document.body.addEventListener('click', () => {
       alarmSound.play().catch(() => {});
     }, { once: true });
 
-    setInterval(checkForNewOrders, 3000);
+    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە جارەوە سەیرکردن
   };
 </script>
 
