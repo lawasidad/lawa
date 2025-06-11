@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>داواکاری کاڵا</title>
+  <title>کۆمپانیای دۆی قەندیل</title>
 
   <!-- ✅ فۆنتی کوردی Rabar -->
   <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
@@ -11,14 +11,214 @@
   <style>
     body {
       font-family: 'Rabar_013', sans-serif;
-      background: #f5f7fa;
+      background: #f7f9fc;
       margin: 0;
       padding: 20px;
       direction: rtl;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      font-size: 30px;
+      color: #2a4365;
+      font-weight: bold;
+      background: linear-gradient(to right, #e0f7fa, #fff);
+      border-radius: 16px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
     }
 
     .container {
       max-width: 750px;
       background: white;
       margin: auto;
-      padding:
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2d3748;
+      margin-bottom: 20px;
+    }
+
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .product {
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      background-color: #fff;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .product:hover {
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .product.selected {
+      border-color: #e3342f !important;
+      background-color: #ffe5e5 !important;
+      color: #b71c1c;
+    }
+
+    .product img {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-family: inherit;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    #successMessage {
+      display: none;
+      color: green;
+      text-align: center;
+      margin-top: 15px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">کۆمپانیای دۆی قەندیل</div>
+
+<div class="container">
+  <h2>فۆرمی داواکاری کاڵا</h2>
+
+  <div class="product-list" id="productList"></div>
+
+  <form id="orderForm">
+    <label for="customerName">ناوی کریار</label>
+    <input type="text" id="customerName" required placeholder="ناوی خۆت بنووسە" />
+
+    <label for="mobile">ژمارەی مۆبایل</label>
+    <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
+
+    <label for="address">ناونیشان</label>
+    <input type="text" id="address" required />
+
+    <label for="gps">شوێن (GPS)</label>
+    <input type="text" id="gps" readonly placeholder="چاوەڕوان بە دەست خۆکارانە..." />
+
+    <button type="submit">✅ ناردنی داواکاری</button>
+    <p id="successMessage">✅ داواکاری نێردرا!</p>
+  </form>
+</div>
+
+<script>
+  const products = [
+    { id: 1, name: "قاوە", price: 5000, image: "https://via.placeholder.com/140x140?text=قاوە" },
+    { id: 2, name: "چای", price: 3000, image: "https://via.placeholder.com/140x140?text=چای" },
+    { id: 3, name: "شەکر", price: 2500, image: "https://via.placeholder.com/140x140?text=شەکر" }
+  ];
+
+  const productList = document.getElementById("productList");
+  const selected = [];
+
+  products.forEach(product => {
+    const item = document.createElement("div");
+    item.classList.add("product");
+    item.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" />
+      <div style="font-weight:bold">${product.name}</div>
+      <small>${product.price} دینار</small>
+    `;
+    item.addEventListener("click", () => {
+      item.classList.toggle("selected");
+      if (selected.includes(product)) {
+        selected.splice(selected.indexOf(product), 1);
+      } else {
+        selected.push(product);
+      }
+    });
+    productList.appendChild(item);
+  });
+
+  // GPS ئۆتۆماتیک
+  window.addEventListener("DOMContentLoaded", () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude.toFixed(5);
+        const lon = position.coords.longitude.toFixed(5);
+        document.getElementById("gps").value = `${lat}, ${lon}`;
+      }, () => {
+        document.getElementById("gps").value = "نەتوانرا شوێن دابنرێت";
+      });
+    } else {
+      document.getElementById("gps").value = "براوسەر پشتیوانی ناکات";
+    }
+  });
+
+  document.getElementById("orderForm").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const name = document.getElementById("customerName").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const gps = document.getElementById("gps").value.trim();
+
+    if (!name || !mobile || !address || selected.length === 0) {
+      alert("تکایە هەموو خانەکان پڕ بکە و کاڵایەک هەلبژێرە.");
+      return;
+    }
+
+    const order = {
+      name, mobile, address, gps,
+      products: selected,
+      time: new Date().toLocaleString()
+    };
+
+    console.log("📦 داواکاری نوێ:", order);
+    document.getElementById("successMessage").style.display = "block";
+    document.getElementById("orderForm").reset();
+    selected.length = 0;
+    document.querySelectorAll(".product").forEach(p => p.classList.remove("selected"));
+  });
+</script>
+
+</body>
+</html>
