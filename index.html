@@ -2,24 +2,54 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8">
-  <title>داشبۆردی وەسل و راپۆرت</title>
+  <title>داشبۆردی فرۆشتن</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background: #f8f9fa; padding: 2rem; }
-    .card { box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    body {
+      background: #f1f3f5;
+      padding: 2rem;
+    }
+    .nav-tabs .nav-link.active {
+      background-color: #0d6efd;
+      color: white;
+    }
+    .tab-content {
+      background: white;
+      padding: 1.5rem;
+      border: 1px solid #dee2e6;
+      border-top: none;
+      border-radius: 0 0 0.375rem 0.375rem;
+    }
+    .form-section {
+      margin-bottom: 1rem;
+    }
+    .summary {
+      font-weight: bold;
+      color: #0d6efd;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2 class="mb-4 text-center">📋 داشبۆردی وەسل و راپۆرت</h2>
+    <h2 class="text-center mb-4">📊 داشبۆردی فرۆشتن و راپۆرت</h2>
 
-    <!-- وەسل -->
-    <div class="card mb-4">
-      <div class="card-header bg-success text-white">➕ زیادکردنی وەسل</div>
-      <div class="card-body">
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales" type="button" role="tab">🧾 وەسل</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab">📈 راپۆرت</button>
+      </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="dashboardContent">
+      <!-- Sales Tab -->
+      <div class="tab-pane fade show active" id="sales" role="tabpanel">
         <form id="saleForm">
-          <div class="row g-3">
+          <div class="row form-section">
             <div class="col-md-3">
               <input type="text" class="form-control" placeholder="👤 ناوی کڕیار" id="customer" required>
             </div>
@@ -36,19 +66,16 @@
               <input type="number" class="form-control" placeholder="🎯 داشکان %" id="discount" min="0" value="0">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary mt-3">💾 پاشەکەوتکردن</button>
+          <button type="submit" class="btn btn-success">💾 پاشەکەوتکردن</button>
         </form>
-      </div>
-    </div>
 
-    <!-- راپۆرت -->
-    <div class="card">
-      <div class="card-header bg-primary text-white">📊 راپۆرتی فرۆشتن</div>
-      <div class="card-body">
-        <table class="table table-bordered table-striped" id="reportTable">
-          <thead class="table-light">
+        <hr>
+
+        <h5>📋 وەسلەکان</h5>
+        <table class="table table-bordered table-striped mt-3" id="receiptTable">
+          <thead>
             <tr>
-              <th>ناوی کڕیار</th>
+              <th>کڕیار</th>
               <th>کاڵا</th>
               <th>ژمارە</th>
               <th>نرخی یەکە</th>
@@ -57,22 +84,28 @@
             </tr>
           </thead>
           <tbody></tbody>
-          <tfoot>
-            <tr>
-              <th colspan="5" class="text-end">کۆی گشتیی فرۆشتن:</th>
-              <th id="grandTotal">0</th>
-            </tr>
-          </tfoot>
         </table>
+      </div>
+
+      <!-- Report Tab -->
+      <div class="tab-pane fade" id="report" role="tabpanel">
+        <h5>📊 راپۆرتی گشتی</h5>
+        <p class="summary">🔢 ژمارەی کاڵا فرۆشراو: <span id="totalItems">0</span></p>
+        <p class="summary">💰 کۆی گشتی پارە: <span id="totalRevenue">0</span> دینار</p>
       </div>
     </div>
   </div>
 
+  <!-- Bootstrap & Script -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const saleForm = document.getElementById('saleForm');
-    const reportTable = document.querySelector('#reportTable tbody');
-    const grandTotalEl = document.getElementById('grandTotal');
-    let grandTotal = 0;
+    const receiptTable = document.querySelector('#receiptTable tbody');
+    const totalItemsEl = document.getElementById('totalItems');
+    const totalRevenueEl = document.getElementById('totalRevenue');
+
+    let totalItems = 0;
+    let totalRevenue = 0;
 
     saleForm.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -84,8 +117,14 @@
       const discount = parseFloat(document.getElementById('discount').value || 0);
 
       const total = qty * unitPrice * (1 - discount / 100);
-      grandTotal += total;
+      totalItems += qty;
+      totalRevenue += total;
 
+      // Update report
+      totalItemsEl.textContent = totalItems;
+      totalRevenueEl.textContent = totalRevenue.toFixed(2);
+
+      // Add to table
       const row = `
         <tr>
           <td>${customer}</td>
@@ -96,14 +135,12 @@
           <td>${total.toFixed(2)}</td>
         </tr>
       `;
-      reportTable.innerHTML += row;
-      grandTotalEl.textContent = grandTotal.toFixed(2);
+      receiptTable.innerHTML += row;
 
       saleForm.reset();
       document.getElementById('qty').value = 1;
       document.getElementById('discount').value = 0;
     });
   </script>
-
 </body>
 </html>
