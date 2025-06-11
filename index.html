@@ -4,11 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>کۆمپانیای دۆی قەندیل</title>
-
-  <!-- فۆنتی کوردی Rabar -->
   <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
-
   <style>
+    /* ستایلەکان وەکو کۆدەکەت */
     body {
       font-family: 'Rabar_013', sans-serif;
       background: #f7f9fc;
@@ -16,7 +14,6 @@
       padding: 20px;
       direction: rtl;
     }
-
     .header {
       text-align: center;
       padding: 20px 0;
@@ -28,7 +25,6 @@
       margin-bottom: 25px;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
     }
-
     .container {
       max-width: 750px;
       background: white;
@@ -37,20 +33,17 @@
       border-radius: 16px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
-
     h2 {
       text-align: center;
       color: #2d3748;
       margin-bottom: 20px;
     }
-
     .product-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 25px;
       margin-top: 20px;
     }
-
     .product {
       border: 2px solid #ddd;
       border-radius: 16px;
@@ -63,18 +56,15 @@
       flex-direction: column;
       align-items: center;
     }
-
     .product:hover {
       box-shadow: 0 0 15px rgba(0,0,0,0.15);
       transform: translateY(-3px);
     }
-
     .product.selected {
       border-color: #e3342f !important;
       background-color: #ffe5e5 !important;
       color: #b71c1c;
     }
-
     .product img {
       width: 180px;
       height: 180px;
@@ -83,26 +73,22 @@
       margin-bottom: 15px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
-
     .product-name {
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 6px;
     }
-
     .product-price {
       font-size: 18px;
       color: #4a5568;
       font-weight: 600;
     }
-
     label {
       display: block;
       margin-top: 25px;
       font-weight: bold;
       font-size: 18px;
     }
-
     input, textarea {
       width: 100%;
       padding: 12px;
@@ -113,13 +99,11 @@
       font-size: 17px;
       transition: border-color 0.3s;
     }
-
     input:focus, textarea:focus {
       outline: none;
       border-color: #3182ce;
       box-shadow: 0 0 8px rgba(49,130,206,0.3);
     }
-
     button {
       margin-top: 30px;
       padding: 14px;
@@ -133,11 +117,9 @@
       font-weight: bold;
       transition: background 0.3s ease;
     }
-
     button:hover {
       background: #218838;
     }
-
     #successMessage {
       display: none;
       color: green;
@@ -219,6 +201,7 @@
     }
   });
 
+  // ناردنی داواکاری و زیادکردن بۆ localStorage
   document.getElementById("orderForm").addEventListener("submit", e => {
     e.preventDefault();
 
@@ -233,16 +216,32 @@
     }
 
     const order = {
-      name, mobile, address, gps,
-      products: selected,
+      id: Date.now(),  // یەک ID بۆ هەر داواکاری
+      name,
+      mobile,
+      address,
+      gps,
+      products: selected.map(p => ({ id: p.id, name: p.name, price: p.price })),
       time: new Date().toLocaleString()
     };
 
+    // وەسڵەکان لە localStorage بخەینە ناو و زیاد بکەین
+    let orders = JSON.parse(localStorage.getItem("orders") || "[]");
+    orders.push(order);
+    localStorage.setItem("orders", JSON.stringify(orders));
+
     console.log("📦 داواکاری نوێ:", order);
+
+    // فۆرم ڕیسێت و پەیام نیشان بدە
     document.getElementById("successMessage").style.display = "block";
     document.getElementById("orderForm").reset();
     selected.length = 0;
     document.querySelectorAll(".product").forEach(p => p.classList.remove("selected"));
+
+    // پەیامەکە دوور بکە 3 چرکە دواتر
+    setTimeout(() => {
+      document.getElementById("successMessage").style.display = "none";
+    }, 3000);
   });
 </script>
 
