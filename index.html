@@ -3,311 +3,220 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>داشبۆردی داواکاری و وەسڵ</title>
+<title>داواکاری بە وێنە و نرخ</title>
 <style>
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f9fafd;
-    margin: 0; padding: 0;
-    color: #222;
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    margin: 0; padding: 20px;
   }
-  header {
-    background: #0d6efd;
-    color: white;
-    padding: 1rem 0;
+  h2 {
     text-align: center;
-    font-size: 1.8rem;
-    font-weight: bold;
+    color: #333;
   }
-  nav {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    background: #fff;
-    padding: 1rem 0;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  nav button {
-    border: none;
-    background: none;
-    font-size: 1.1rem;
-    color: #0d6efd;
-    cursor: pointer;
-    padding: 0.5rem 1.5rem;
-    border-radius: 6px;
-    transition: background-color 0.3s;
-  }
-  nav button.active, nav button:hover {
-    background: #0d6efd;
-    color: white;
-  }
-  main {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-  }
-  /* فۆڕم */
   form {
+    max-width: 700px;
+    margin: 0 auto;
     background: white;
-    padding: 1.5rem;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+  }
+  .product-card {
+    width: 150px;
+    background: #fff;
+    border: 2px solid #ccc;
     border-radius: 8px;
-    box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
-    max-width: 480px;
-    margin: 1rem auto;
+    cursor: pointer;
+    padding: 10px;
+    text-align: center;
+    transition: border-color 0.3s ease;
+    user-select: none;
   }
-  form label {
-    display: block;
-    margin-bottom: 0.3rem;
-    font-weight: 600;
+  .product-card.selected {
+    border-color: #0d6efd;
+    box-shadow: 0 0 10px #0d6efd;
   }
-  form input, form textarea, form select {
-    width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
+  .product-card img {
+    max-width: 100%;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 8px;
+  }
+  .product-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  .product-price {
+    color: #555;
+    margin-bottom: 8px;
+  }
+  .quantity-input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ccc;
     border-radius: 5px;
-    border: 1px solid #ced4da;
+    font-size: 1rem;
+    text-align: center;
+  }
+  label {
+    display: block;
+    margin-top: 20px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
     font-size: 1rem;
     resize: vertical;
   }
-  form button {
+  button {
+    margin-top: 20px;
     background: #0d6efd;
-    border: none;
     color: white;
-    padding: 0.7rem 1.2rem;
+    border: none;
+    padding: 12px 20px;
     font-size: 1.1rem;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
     width: 100%;
     transition: background-color 0.3s ease;
   }
-  form button:hover {
+  button:hover {
     background: #084bcc;
   }
-  /* جەنجالێکی سادە بۆ نیشاندانی لینک */
-  #shareLinkBox {
-    background: #e9ecef;
-    padding: 1rem;
-    border-radius: 8px;
+  #successMsg {
+    color: green;
     text-align: center;
-    font-size: 1.1rem;
-    user-select: all;
-    margin-bottom: 2rem;
-  }
-  /* جدول وەسڵەکان */
-  #receiptsSection {
+    margin-top: 15px;
     display: none;
-    background: white;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-  }
-  th, td {
-    border: 1px solid #dee2e6;
-    padding: 0.5rem;
-    text-align: center;
-  }
-  th {
-    background: #0d6efd;
-    color: white;
-  }
-  #summary {
-    font-weight: bold;
-    font-size: 1.1rem;
-    text-align: right;
-    color: #0d6efd;
   }
 </style>
 </head>
 <body>
 
-<header>داشبۆردی داواکاری و وەسڵ</header>
+<h2>فۆڕمی داواکاری</h2>
 
-<nav>
-  <button id="btnOrderForm" class="active">فۆڕمی داواکاری و لینک</button>
-  <button id="btnReceipts">وەسڵەکان</button>
-</nav>
+<form id="orderForm">
+  <label for="customerName">ناوی کڕیار</label>
+  <input type="text" id="customerName" required placeholder="ناوی کڕیار بنوسە" />
 
-<main>
+  <label>هەڵبژاردنی کاڵاکان</label>
+  <div class="products-grid" id="productsGrid">
+    <!-- کاڵاکان بەم شوێنە زیاد دەکرێن -->
+  </div>
 
-  <!-- بەش لینک و فۆڕم داواکاری -->
-  <section id="orderSection">
-    <div id="shareLinkBox">
-      <strong>لینکی داواکاری (بە کڕیارەکان بنێرە):</strong><br />
-      <code id="shareLink"></code>
-    </div>
+  <label for="notes">تێبینی (بەختیار)</label>
+  <textarea id="notes" rows="3" placeholder="تێبینی بنوسە"></textarea>
 
-    <form id="orderForm">
-      <h3>فۆڕمی داواکاری</h3>
-      <label for="customerName">ناوی کڕیار</label>
-      <input type="text" id="customerName" required placeholder="ناوی کڕیار بنوسە" />
-      
-      <label>هەڵبژاردنی کاڵاکان</label>
-      <div id="productList">
-        <!-- ئەمە ئەو لیستی کاڵاکانە کە بتوانرێ هەلبژێردرێن -->
-      </div>
-      
-      <label for="notes">تێبینی (بەختیار)</label>
-      <textarea id="notes" rows="3" placeholder="هەر تێبینیەکت بنوسە"></textarea>
-      
-      <button type="submit">داواکردن</button>
-      <p id="orderSuccess" style="color:green; display:none; margin-top: 10px;">داواکاری بە سەرکەوتوویی نێردرا!</p>
-    </form>
-  </section>
-
-  <!-- بەش وەسڵەکان -->
-  <section id="receiptsSection">
-    <h3>وەسڵەکان</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>ناوی کڕیار</th>
-          <th>کاڵا</th>
-          <th>ژمارە</th>
-          <th>تێبینی</th>
-        </tr>
-      </thead>
-      <tbody id="receiptsTableBody"></tbody>
-    </table>
-    <div id="summary"></div>
-  </section>
-
-</main>
+  <button type="submit">داواکردن</button>
+  <p id="successMsg">داواکاری بە سەرکەوتوویی نێردرا!</p>
+</form>
 
 <script>
-  // نموونەی لیستی کاڵا (دەتوانیت لێ زیاد بکەیت)
   const products = [
-    { name: "کاڵا ١", price: 1000 },
-    { name: "کاڵا ٢", price: 2000 },
-    { name: "کاڵا ٣", price: 3000 },
-    { name: "کاڵا ٤", price: 4000 }
+    { id: 1, name: "کاڵا ١", price: 1500, img: "https://via.placeholder.com/150?text=کاڵا+١" },
+    { id: 2, name: "کاڵا ٢", price: 3000, img: "https://via.placeholder.com/150?text=کاڵا+٢" },
+    { id: 3, name: "کاڵا ٣", price: 2500, img: "https://via.placeholder.com/150?text=کاڵا+٣" },
+    { id: 4, name: "کاڵا ٤", price: 4500, img: "https://via.placeholder.com/150?text=کاڵا+٤" }
   ];
 
-  // دروستکردنی لیستی چکبۆکس بۆ هەڵبژاردنی کاڵاکان
-  const productListDiv = document.getElementById("productList");
+  const productsGrid = document.getElementById("productsGrid");
 
-  products.forEach((product, index) => {
-    const div = document.createElement("div");
-    div.style.marginBottom = "0.5rem";
+  // دروستکردنی کارت کاڵاکان
+  products.forEach(p => {
+    const card = document.createElement("div");
+    card.classList.add("product-card");
+    card.dataset.id = p.id;
 
-    div.innerHTML = `
-      <input type="checkbox" id="product_${index}" name="products" value="${product.name}" />
-      <label for="product_${index}">${product.name} (نرخ: ${product.price} )</label>
-      <input type="number" min="1" value="1" id="qty_${index}" style="width: 60px; margin-left: 10px;" disabled />
+    card.innerHTML = `
+      <img src="${p.img}" alt="${p.name}" />
+      <div class="product-name">${p.name}</div>
+      <div class="product-price">${p.price.toLocaleString()} کەسە</div>
+      <input type="number" class="quantity-input" min="1" value="1" disabled />
     `;
 
-    productListDiv.appendChild(div);
-
-    // دەستکاری ژمارەی کاڵا ئەگەر چکبۆکس هەلبژێردرا بێت
-    const checkbox = div.querySelector(`input[type=checkbox]`);
-    const qtyInput = div.querySelector(`input[type=number]`);
-
-    checkbox.addEventListener("change", () => {
-      qtyInput.disabled = !checkbox.checked;
-      if (!checkbox.checked) qtyInput.value = 1;
+    // کلیک کردنی کارت بۆ هەڵبژاردن و نا-هەڵبژاردن
+    card.addEventListener("click", () => {
+      const isSelected = card.classList.toggle("selected");
+      const qtyInput = card.querySelector(".quantity-input");
+      qtyInput.disabled = !isSelected;
+      if (!isSelected) qtyInput.value = 1;
     });
+
+    productsGrid.appendChild(card);
   });
 
-  // نیشاندانی لینکی داواکاری
-  const shareLinkEl = document.getElementById("shareLink");
-
-  function generateShareLink() {
-    const baseUrl = window.location.origin + window.location.pathname;
-    return baseUrl + "?orderForm=1";
-  }
-  shareLinkEl.textContent = generateShareLink();
-
-  // وەسڵەکان لە localStorage هەڵگەڕانەوە یان دروستکردن
-  let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
-
-  // نیشاندانی وەسڵەکان
-  const receiptsTableBody = document.getElementById("receiptsTableBody");
-  const summaryDiv = document.getElementById("summary");
-
-  function renderReceipts() {
-    receiptsTableBody.innerHTML = "";
-    let totalQuantity = 0;
-    receipts.forEach(({ customerName, products, notes }, idx) => {
-      products.forEach(({ productName, quantity }) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${customerName}</td>
-          <td>${productName}</td>
-          <td>${quantity}</td>
-          <td>${notes || ""}</td>
-        `;
-        receiptsTableBody.appendChild(tr);
-        totalQuantity += Number(quantity);
-      });
-    });
-    summaryDiv.textContent = `کۆی گشتی ژمارە: ${totalQuantity}`;
-  }
-
-  renderReceipts();
-
-  // فۆڕم و داواکاری ناردن
   const orderForm = document.getElementById("orderForm");
-  const orderSuccess = document.getElementById("orderSuccess");
+  const successMsg = document.getElementById("successMsg");
 
   orderForm.addEventListener("submit", e => {
     e.preventDefault();
 
     const customerName = document.getElementById("customerName").value.trim();
-    const notes = document.getElementById("notes").value.trim();
+    if (!customerName) {
+      alert("تکایە ناوی کڕیار بنوسە");
+      return;
+    }
 
-    if (!customerName) return alert("تکایە ناوی کڕیار بنوسە");
-
-    // دۆزینەوەی کاڵاکانی هەڵبژێردرا و ژمارەی هەریەک
+    // هەڵبژاردنی کاڵاکان و ژمارەی هەریەک
     const selectedProducts = [];
-    products.forEach((product, idx) => {
-      const checkbox = document.getElementById(`product_${idx}`);
-      const qtyInput = document.getElementById(`qty_${idx}`);
-      if (checkbox.checked) {
-        const qty = parseInt(qtyInput.value);
-        if (isNaN(qty) || qty < 1) {
-          return alert(`تکایە ژمارەی دروست بۆ ${product.name بنوسە}`);
-        }
-        selectedProducts.push({
-          productName: product.name,
-          quantity: qty
-        });
+    document.querySelectorAll(".product-card.selected").forEach(card => {
+      const productId = Number(card.dataset.id);
+      const qtyInput = card.querySelector(".quantity-input");
+      const qty = parseInt(qtyInput.value);
+      if (isNaN(qty) || qty < 1) {
+        alert("تکایە ژمارەی دروست بۆ هەر کاڵایەک بنوسە");
+        throw new Error("Invalid quantity");
       }
+      const product = products.find(p => p.id === productId);
+      selectedProducts.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: qty
+      });
     });
 
     if (selectedProducts.length === 0) {
-      return alert("تکایە یەک کاڵا هەڵبژێرە");
+      alert("تکایە یەک کاڵا هەڵبژێرە");
+      return;
     }
 
-    // زیادکردنی وەسڵەکە بە localStorage
-    receipts.push({ customerName, products: selectedProducts, notes });
+    const notes = document.getElementById("notes").value.trim();
+
+    // ئەم زانیارییەکان دەتوانرێن بۆ server یان localStorage بنێردرێن
+    // نموونەی localStorage بۆ وەسڵەکان:
+    let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+    receipts.push({
+      customerName,
+      products: selectedProducts,
+      notes,
+      date: new Date().toISOString()
+    });
     localStorage.setItem("receipts", JSON.stringify(receipts));
 
-    orderSuccess.style.display = "block";
+    successMsg.style.display = "block";
+    setTimeout(() => successMsg.style.display = "none", 3000);
+
     orderForm.reset();
-
-    // پاککردنی ژمارەی کاڵا و دیسەبلکردنی input-ەکان
-    products.forEach((_, idx) => {
-      const qtyInput = document.getElementById(`qty_${idx}`);
-      qtyInput.disabled = true;
-      qtyInput.value = 1;
+    // نیشاندانی ژمارە و دیسەبلکردنی ئەنجامەکان لە کارتاکان
+    document.querySelectorAll(".product-card.selected").forEach(card => {
+      card.classList.remove("selected");
+      card.querySelector(".quantity-input").disabled = true;
+      card.querySelector(".quantity-input").value = 1;
     });
-
-    renderReceipts();
   });
+</script>
 
-  // بەرزکردنی بەشەکان بە کلیک لە ناو ناڤ
-  const btnOrderForm = document.getElementById("btnOrderForm");
-  const btnReceipts = document.getElementById("btnReceipts");
-  const orderSection = document.getElementById("orderSection");
-  const receiptsSection = document.getElementById("receiptsSection");
-
-  btnOrderForm.addEventListener("click", () => {
-    btnOrderForm.classList.add("active");
-    btnReceipts.class
+</body>
+</html>
