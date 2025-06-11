@@ -25,6 +25,7 @@
     border-radius: 16px;
     padding: 30px;
     box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+    min-height: 150px;
   }
   .order {
     border-bottom: 1px solid #e2e8f0;
@@ -90,59 +91,62 @@
 </div>
 
 <script>
-  // هەموو داواکاریەکان لە localStorage بەناوی 'orders' هەڵگرێنەوە
-  const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-
   const ordersContainer = document.getElementById('ordersContainer');
-  const noOrdersMsg = ordersContainer.querySelector('.no-orders');
+
+  function getOrders() {
+    try {
+      const data = localStorage.getItem('orders');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function createProductHTML(product) {
+    return `
+      <div class="product">
+        <img src="${product.image}" alt="${product.name}" />
+        <div class="product-name">${product.name}</div>
+        <div class="product-price">${product.price.toLocaleString()} دینار</div>
+      </div>
+    `;
+  }
 
   function renderOrders() {
+    const orders = getOrders();
+
     if (orders.length === 0) {
-      noOrdersMsg.style.display = 'block';
+      ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
       return;
     }
-    noOrdersMsg.style.display = 'none';
-    ordersContainer.innerHTML = ''; // سڕینەوەی پێشووتر
 
-    orders.forEach((order, index) => {
-      const div = document.createElement('div');
-      div.className = 'order';
+    ordersContainer.innerHTML = '';
 
-      // ناوی کریار + مۆبایل + GPS
-      const headerHTML = `
+    orders.forEach(order => {
+      const productsHTML = order.products.map(createProductHTML).join('');
+
+      const orderHTML = document.createElement('div');
+      orderHTML.className = 'order';
+
+      orderHTML.innerHTML = `
         <div class="order-header">
           <span>ناوی کریار: ${order.name}</span>
           <span>ژمارە مۆبایل: ${order.mobile}</span>
         </div>
-      `;
-
-      const infoHTML = `
         <div class="order-info">
           ناونیشان: ${order.address}<br/>
           GPS: ${order.gps}<br/>
           کاتی داواکاری: ${order.time}
         </div>
+        <div class="products">${productsHTML}</div>
       `;
 
-      const productsHTML = order.products.map(p => `
-        <div class="product">
-          <img src="${p.image}" alt="${p.name}" />
-          <div class="product-name">${p.name}</div>
-          <div class="product-price">${p.price.toLocaleString()} دینار</div>
-        </div>
-      `).join('');
-
-      div.innerHTML = headerHTML + infoHTML + `<div class="products">${productsHTML}</div>`;
-
-      ordersContainer.appendChild(div);
+      ordersContainer.appendChild(orderHTML);
     });
   }
 
   renderOrders();
-
-  // فەرمی داواکاریەکەت لە لینکی کە دروست کردووە لە کۆدی پێشوو بە localStorage زیاد دەکات:
-  // تو دەتوانیت بەو فۆرما داتاکان بۆ localStorage زیاد بکەیت و ئەمش دەتوانێت کۆتایی بێت بە گەیشتن بە داشبۆرد.
-
 </script>
+
 </body>
 </html>
