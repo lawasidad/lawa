@@ -1,119 +1,20 @@
-<!DOCTYPE html>
-<html lang="ku">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>داواکاری بە وێنە و نرخ</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f0f2f5;
-    margin: 0; padding: 20px;
-  }
-  h2 {
-    text-align: center;
-    color: #333;
-  }
-  form {
-    max-width: 700px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-  .products-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-  }
-  .product-card {
-    width: 150px;
-    background: #fff;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    cursor: pointer;
-    padding: 10px;
-    text-align: center;
-    transition: border-color 0.3s ease;
-    user-select: none;
-  }
-  .product-card.selected {
-    border-color: #0d6efd;
-    box-shadow: 0 0 10px #0d6efd;
-  }
-  .product-card img {
-    max-width: 100%;
-    height: 100px;
-    object-fit: contain;
-    margin-bottom: 8px;
-  }
-  .product-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  .product-price {
-    color: #555;
-    margin-bottom: 8px;
-  }
-  .quantity-input {
-    width: 60px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    text-align: center;
-  }
-  label {
-    display: block;
-    margin-top: 20px;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  input[type="text"], textarea {
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    resize: vertical;
-  }
-  button {
-    margin-top: 20px;
-    background: #0d6efd;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 1.1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background: #084bcc;
-  }
-  #successMsg {
-    color: green;
-    text-align: center;
-    margin-top: 15px;
-    display: none;
-  }
-</style>
-</head>
-<body>
-
-<h2>فۆڕمی داواکاری</h2>
-
 <form id="orderForm">
   <label for="customerName">ناوی کڕیار</label>
   <input type="text" id="customerName" required placeholder="ناوی کڕیار بنوسە" />
 
+  <label for="mobile">ژمارەی مۆبایل</label>
+  <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
+
+  <label for="address">ناونیشان</label>
+  <input type="text" id="address" required placeholder="ناونیشان بنوسە" />
+
+  <label for="gps">شوێنەکە (GPS Location)</label>
+  <input type="text" id="gps" placeholder="Location auto-fill..." readonly />
+
+  <button type="button" onclick="getLocation()">وەرگرتنی شوێن</button>
+
   <label>هەڵبژاردنی کاڵاکان</label>
-  <div class="products-grid" id="productsGrid">
-    <!-- کاڵاکان بەم شوێنە زیاد دەکرێن -->
-  </div>
+  <div class="products-grid" id="productsGrid"></div>
 
   <label for="notes">تێبینی (بەختیار)</label>
   <textarea id="notes" rows="3" placeholder="تێبینی بنوسە"></textarea>
@@ -121,102 +22,3 @@
   <button type="submit">داواکردن</button>
   <p id="successMsg">داواکاری بە سەرکەوتوویی نێردرا!</p>
 </form>
-
-<script>
-  const products = [
-    { id: 1, name: "کاڵا ١", price: 1500, img: "https://via.placeholder.com/150?text=کاڵا+١" },
-    { id: 2, name: "کاڵا ٢", price: 3000, img: "https://via.placeholder.com/150?text=کاڵا+٢" },
-    { id: 3, name: "کاڵا ٣", price: 2500, img: "https://via.placeholder.com/150?text=کاڵا+٣" },
-    { id: 4, name: "کاڵا ٤", price: 4500, img: "https://via.placeholder.com/150?text=کاڵا+٤" }
-  ];
-
-  const productsGrid = document.getElementById("productsGrid");
-
-  // دروستکردنی کارت کاڵاکان
-  products.forEach(p => {
-    const card = document.createElement("div");
-    card.classList.add("product-card");
-    card.dataset.id = p.id;
-
-    card.innerHTML = `
-      <img src="${p.img}" alt="${p.name}" />
-      <div class="product-name">${p.name}</div>
-      <div class="product-price">${p.price.toLocaleString()} کەسە</div>
-      <input type="number" class="quantity-input" min="1" value="1" disabled />
-    `;
-
-    // کلیک کردنی کارت بۆ هەڵبژاردن و نا-هەڵبژاردن
-    card.addEventListener("click", () => {
-      const isSelected = card.classList.toggle("selected");
-      const qtyInput = card.querySelector(".quantity-input");
-      qtyInput.disabled = !isSelected;
-      if (!isSelected) qtyInput.value = 1;
-    });
-
-    productsGrid.appendChild(card);
-  });
-
-  const orderForm = document.getElementById("orderForm");
-  const successMsg = document.getElementById("successMsg");
-
-  orderForm.addEventListener("submit", e => {
-    e.preventDefault();
-
-    const customerName = document.getElementById("customerName").value.trim();
-    if (!customerName) {
-      alert("تکایە ناوی کڕیار بنوسە");
-      return;
-    }
-
-    // هەڵبژاردنی کاڵاکان و ژمارەی هەریەک
-    const selectedProducts = [];
-    document.querySelectorAll(".product-card.selected").forEach(card => {
-      const productId = Number(card.dataset.id);
-      const qtyInput = card.querySelector(".quantity-input");
-      const qty = parseInt(qtyInput.value);
-      if (isNaN(qty) || qty < 1) {
-        alert("تکایە ژمارەی دروست بۆ هەر کاڵایەک بنوسە");
-        throw new Error("Invalid quantity");
-      }
-      const product = products.find(p => p.id === productId);
-      selectedProducts.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: qty
-      });
-    });
-
-    if (selectedProducts.length === 0) {
-      alert("تکایە یەک کاڵا هەڵبژێرە");
-      return;
-    }
-
-    const notes = document.getElementById("notes").value.trim();
-
-    // ئەم زانیارییەکان دەتوانرێن بۆ server یان localStorage بنێردرێن
-    // نموونەی localStorage بۆ وەسڵەکان:
-    let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
-    receipts.push({
-      customerName,
-      products: selectedProducts,
-      notes,
-      date: new Date().toISOString()
-    });
-    localStorage.setItem("receipts", JSON.stringify(receipts));
-
-    successMsg.style.display = "block";
-    setTimeout(() => successMsg.style.display = "none", 3000);
-
-    orderForm.reset();
-    // نیشاندانی ژمارە و دیسەبلکردنی ئەنجامەکان لە کارتاکان
-    document.querySelectorAll(".product-card.selected").forEach(card => {
-      card.classList.remove("selected");
-      card.querySelector(".quantity-input").disabled = true;
-      card.querySelector(".quantity-input").value = 1;
-    });
-  });
-</script>
-
-</body>
-</html>
