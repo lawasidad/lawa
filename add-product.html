@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ku">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>زیادکردنی کاڵا</title>
+  <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Rabar_013', sans-serif;
+      background: #f5f7fa;
+      padding: 30px;
+      direction: rtl;
+    }
+    h1 {
+      text-align: center;
+      color: #1a202c;
+      margin-bottom: 30px;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="url"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+    }
+    button {
+      background: #2b6cb0;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .success {
+      text-align: center;
+      color: green;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>➕ زیادکردنی کاڵا</h1>
+
+  <form id="productForm">
+    <label for="name">ناوی کاڵا</label>
+    <input type="text" id="name" required>
+
+    <label for="price">نرخی کاڵا (دینار)</label>
+    <input type="number" id="price" required>
+
+    <label for="image">بەستەری وێنە (Image URL)</label>
+    <input type="url" id="image" required>
+
+    <button type="submit">زیادکردن</button>
+    <div class="success" id="successMsg" style="display:none;">✅ کاڵا بەسەرکەوتوویی زیادکرا!</div>
+  </form>
+
+  <script>
+    const form = document.getElementById('productForm');
+    const successMsg = document.getElementById('successMsg');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const price = parseInt(document.getElementById('price').value);
+      const image = document.getElementById('image').value.trim();
+
+      const newProduct = { name, price, image };
+
+      let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+      // داتای کاڵای نوێ زیادبکە بۆ داواکارییەکی تایبەتی تایبەتی "کریار نادیار" (ناونیشانەی دەق)
+      let guestOrder = orders.find(order => order.name === 'کریاری نادیار');
+      if (!guestOrder) {
+        guestOrder = {
+          name: 'کریاری نادیار',
+          mobile: '',
+          address: '',
+          gps: '',
+          time: new Date().toLocaleString(),
+          products: []
+        };
+        orders.push(guestOrder);
+      }
+
+      guestOrder.products.push(newProduct);
+      localStorage.setItem('orders', JSON.stringify(orders));
+
+      form.reset();
+      successMsg.style.display = 'block';
+
+      // ڕەوانەکردن بۆ dashboard پاش 2 چرکە
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+    });
+  </script>
+
+</body>
+</html>
