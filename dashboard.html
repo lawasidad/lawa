@@ -165,21 +165,6 @@
 
   let lastOrders = [];
 
-  function checkForNewOrders() {
-    const currentOrders = getOrders();
-
-    if (currentOrders.length > lastOrders.length) {
-      // ئەگەر فۆکەس نیە (داشبۆرد داخراوە یان بە پس‌زمێنە)
-      if (!document.hasFocus()) {
-        alert("وەسڵی نوێ زیاد بوو!");
-        playAlarm();
-      }
-
-      renderOrders();
-      lastOrders = currentOrders;
-    }
-  }
-
   function playAlarm() {
     const context = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = context.createOscillator();
@@ -194,11 +179,25 @@
     };
   }
 
+  function checkForNewOrders() {
+    const currentOrders = getOrders();
+
+    if (currentOrders.length > lastOrders.length) {
+      // ئەگەر پەنجەرە ناو فۆکەس نیە (داشبۆرد داخراوە یان بە پس‌زمێنە)
+      if (!document.hasFocus()) {
+        playAlarm();
+        alert('وەسڵی نوێ زیاد بوو!');
+      }
+
+      lastOrders = currentOrders;
+      renderOrders();
+    }
+  }
+
   window.onload = () => {
     lastOrders = getOrders();
     renderOrders();
-
-    setInterval(checkForNewOrders, 5000);
+    setInterval(checkForNewOrders, 3000); // هەر 3 چرکە چەک دەکات
   };
 </script>
 
