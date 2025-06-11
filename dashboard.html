@@ -111,6 +111,7 @@
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
 
+  // فەرمی وەسڵەکان لە localStorage
   function getOrders() {
     try {
       const data = localStorage.getItem('orders');
@@ -152,8 +153,8 @@
           <span>ژمارە مۆبایل: ${order.mobile}</span>
         </div>
         <div class="order-info">
-          ناونیشان: ${order.address}<br/>
-          GPS: ${order.gps}<br/>
+          ناونیشان: ${order.address || '-'}<br/>
+          GPS: ${order.gps || '-'}<br/>
           کاتی داواکاری: ${order.time}
         </div>
         <div class="products">${productsHTML}</div>
@@ -163,7 +164,49 @@
     });
   }
 
-  renderOrders();
+  // دۆخی ڕاستەقینەی وەسڵەکان بۆ چەککردنی گۆڕانکاری
+  let lastOrders = [];
+
+  function checkForNewOrders() {
+    const currentOrders = getOrders();
+
+    // ئەگەر ژمارەی وەسڵەکان گۆڕیوە یان وەسڵی نوێ زیاد بوو
+    if (currentOrders.length > lastOrders.length) {
+      // نیشاندانی ئاڵەرت و جەرس
+      alert("وەسڵی نوێ زیاد بوو!");
+      playAlarm();
+
+      // ڕەندەرکردنی وەسڵەکان نوێ
+      renderOrders();
+
+      // گۆڕینی دۆخ
+      lastOrders = currentOrders;
+    }
+  }
+
+  // جەرس بەکارهێنە
+  function playAlarm() {
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = context.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(1000, context.currentTime); // فریکوێنس
+    oscillator.connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + 1); // 1 چرکە جەرس
+
+    oscillator.onended = () => {
+      context.close();
+    };
+  }
+
+  // بارکردنی سەرەتا
+  window.onload = () => {
+    lastOrders = getOrders();
+    renderOrders();
+
+    // پۆلینگ هر 5 چرکە چەک بکە
+    setInterval(checkForNewOrders, 5000);
+  };
 </script>
 
 </body>
