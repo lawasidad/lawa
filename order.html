@@ -62,6 +62,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      user-select: none;
     }
 
     .product:hover {
@@ -88,12 +89,14 @@
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 6px;
+      user-select: text;
     }
 
     .product-price {
       font-size: 18px;
       color: #4a5568;
       font-weight: 600;
+      user-select: text;
     }
 
     label {
@@ -112,6 +115,7 @@
       font-family: inherit;
       font-size: 17px;
       transition: border-color 0.3s;
+      box-sizing: border-box;
     }
 
     input:focus, textarea:focus {
@@ -134,7 +138,12 @@
       transition: background 0.3s ease;
     }
 
-    button:hover {
+    button:disabled {
+      background: #94d3a2;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
       background: #218838;
     }
 
@@ -162,15 +171,15 @@
     <input type="text" id="customerName" required placeholder="ناوی خۆت بنووسە" />
 
     <label for="mobile">ژمارەی مۆبایل</label>
-    <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
+    <input type="tel" id="mobile" pattern="07[0-9]{8}" required placeholder="07XX XXX XXX" title="ژمارەی مۆبایل بە شیوەی 07xxxxxxxx بنووسە" />
 
     <label for="address">ناونیشان</label>
-    <input type="text" id="address" required />
+    <input type="text" id="address" required placeholder="ناونیشانی خۆت بنووسە" />
 
     <label for="gps">شوێن (GPS)</label>
     <input type="text" id="gps" readonly placeholder="چاوەڕوان بە دەست خۆکارانە..." />
 
-    <button type="submit">✅ ناردنی داواکاری</button>
+    <button type="submit" id="submitBtn" disabled>✅ ناردنی داواکاری</button>
     <p id="successMessage">✅ داواکاری نێردرا!</p>
   </form>
 </div>
@@ -185,6 +194,7 @@
   const productList = document.getElementById("productList");
   const selected = [];
 
+  // دروستکردنی لیستی کاڵاکان
   products.forEach(product => {
     const item = document.createElement("div");
     item.classList.add("product");
@@ -193,6 +203,8 @@
       <div class="product-name">${product.name}</div>
       <div class="product-price">${product.price.toLocaleString()} دینار</div>
     `;
+
+    // کلیلەکە بەکارھێنان بۆ هەلبژاردنی کاڵا
     item.addEventListener("click", () => {
       item.classList.toggle("selected");
       if (selected.includes(product)) {
@@ -200,51 +212,29 @@
       } else {
         selected.push(product);
       }
+      checkFormValidity();
     });
+
     productList.appendChild(item);
   });
 
-  // GPS ئۆتۆماتیک
+  // بەردەوامکردنی دکۆمەنت لە کاتی بارکردن بۆ وەرگرتنی شوێن (GPS)
   window.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
         const lat = position.coords.latitude.toFixed(5);
         const lon = position.coords.longitude.toFixed(5);
         document.getElementById("gps").value = `${lat}, ${lon}`;
+        checkFormValidity();
       }, () => {
         document.getElementById("gps").value = "نەتوانرا شوێن دابنرێت";
+        checkFormValidity();
       });
     } else {
       document.getElementById("gps").value = "براوسەر پشتیوانی ناکات";
+      checkFormValidity();
     }
   });
 
-  document.getElementById("orderForm").addEventListener("submit", e => {
-    e.preventDefault();
-
-    const name = document.getElementById("customerName").value.trim();
-    const mobile = document.getElementById("mobile").value.trim();
-    const address = document.getElementById("address").value.trim();
-    const gps = document.getElementById("gps").value.trim();
-
-    if (!name || !mobile || !address || selected.length === 0) {
-      alert("تکایە هەموو خانەکان پڕ بکە و کاڵایەک هەلبژێرە.");
-      return;
-    }
-
-    const order = {
-      name, mobile, address, gps,
-      products: selected,
-      time: new Date().toLocaleString()
-    };
-
-    console.log("📦 داواکاری نوێ:", order);
-    document.getElementById("successMessage").style.display = "block";
-    document.getElementById("orderForm").reset();
-    selected.length = 0;
-    document.querySelectorAll(".product").forEach(p => p.classList.remove("selected"));
-  });
-</script>
-
-</body>
-</html>
+  // فەرمی داواکاری
+  const orderForm
