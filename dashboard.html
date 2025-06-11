@@ -162,8 +162,10 @@
     });
   }
 
-  // دەنگەکە بۆ جەرەس
-  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+  function playAlarm() {
+    const audio = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+    audio.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
+  }
 
   let lastOrdersLength = 0;
 
@@ -172,7 +174,7 @@
 
     if (currentOrders.length > lastOrdersLength) {
       if (!document.hasFocus()) {
-        alarmSound.play().catch(e => console.log("ناتوانێت دەنگ پێبکات:", e));
+        playAlarm();
         alert("وەسڵی نوێ زیاد بوو!");
       }
       lastOrdersLength = currentOrders.length;
@@ -183,13 +185,7 @@
   window.onload = () => {
     lastOrdersLength = getOrders().length;
     renderOrders();
-
-    // بۆ چالاککردنی دەنگ بە یەک کلیک (دەنگەکە پێویستە لەگەڵ یەک کلیکەوە چالاک بکرێت بڕاوزەری نوێ)
-    document.body.addEventListener('click', () => {
-      alarmSound.play().catch(() => {});
-    }, { once: true });
-
-    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە جارەوە سەیرکردن
+    setInterval(checkForNewOrders, 3000); // check every 3 seconds
   };
 </script>
 
