@@ -111,7 +111,6 @@
   <label for="address">ناونیشان</label>
   <input type="text" id="address" required />
 
-  <!-- خانەی GPS زیادکراو -->
   <label for="gps">GPS</label>
   <input type="text" id="gps" readonly />
 
@@ -123,7 +122,10 @@
 
 <script>
   let autoGps = null;
+  const productList = document.getElementById('productList');
+  let selected = [];
 
+  // گرتنی GPS
   async function autoFetchGPS() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(pos => {
@@ -132,14 +134,14 @@
         longitude: pos.coords.longitude
       };
       document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
+    }, err => {
+      console.warn('GPS ناوەڕاست نییە:', err.message);
+      autoGps = null;
+      document.getElementById("gps").value = '';
     });
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    autoFetchGPS();
-    loadProducts();
-  });
-
+  // بوونی محصولات بۆ localStorage
   if (!localStorage.getItem('products')) {
     const sampleProducts = [
       { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر', quantity: 1 },
@@ -149,11 +151,9 @@
     localStorage.setItem('products', JSON.stringify(sampleProducts));
   }
 
-  let selected = [];
-  const productList = document.getElementById('productList');
-
+  // بارکردنی محصولات و نیشاندانی هەلبژاردن و کۆی گشتی
   function loadProducts() {
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
     productList.innerHTML = '';
 
     let total = 0;
@@ -161,9 +161,7 @@
     products.forEach(product => {
       const div = document.createElement('div');
       div.className = 'product';
-
-      let isSelected = selected.includes(product.id);
-      if (isSelected) div.classList.add('selected');
+      if (selected.includes(product.id)) div.classList.add('selected');
 
       div.innerHTML = `
         <img src="${product.image}" alt="${product.name}" />
@@ -171,7 +169,7 @@
         <div>${product.price.toLocaleString()} دینار</div>
       `;
 
-      if (isSelected) {
+      if (selected.includes(product.id)) {
         const controls = document.createElement('div');
         controls.className = 'quantity-controls';
 
@@ -198,23 +196,21 @@
         controls.appendChild(btnMinus);
         controls.appendChild(qtySpan);
         controls.appendChild(btnPlus);
-
         div.appendChild(controls);
 
         total += product.quantity * product.price;
       }
 
-      div.addEventListener('click', () => {
+      div.onclick = () => {
         if (selected.includes(product.id)) {
           selected = selected.filter(id => id !== product.id);
           updateProductQuantity(product.id, 1);
         } else {
           selected.push(product.id);
-          product.quantity = 1;
           updateProductQuantity(product.id, 1);
         }
         loadProducts();
-      });
+      };
 
       productList.appendChild(div);
     });
@@ -223,13 +219,12 @@
   }
 
   function updateProductQuantity(productId, qty) {
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    let product = products.find(p => p.id === productId);
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === productId);
     if (product) {
       product.quantity = qty;
       localStorage.setItem('products', JSON.stringify(products));
     }
-    loadProducts();
   }
 
   document.getElementById('orderForm').addEventListener('submit', e => {
@@ -246,11 +241,8 @@
 
     const gps = autoGps;
 
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    let selectedProducts = products.filter(p => selected.includes(p.id));
-
-    // **گۆڕینی ئەم بڕگەی کۆدی بۆ نابردنی وێنە لە داتاکە**
-    selectedProducts = selectedProducts.map(p => ({
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const selectedProducts = products.filter(p => selected.includes(p.id)).map(p => ({
       id: p.id,
       name: p.name,
       price: p.price,
@@ -275,10 +267,19 @@
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    alert("✅ داواکاریەکەت نێردرا!");
+    // ڕاستەوخۆ بڵاوکردنەوەی ئەنجامی داواکاری بەشێوەی کەمەل
+    const successMessage = document.getElementById('successMessage');
+    successMessage.style.display = 'block';
+    setTimeout(() => successMessage.style.display = 'none', 3000);
+
     selected = [];
     document.getElementById('orderForm').reset();
     document.getElementById('gps').value = '';
+    autoFetchGPS();
+    loadProducts();
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
     autoFetchGPS();
     loadProducts();
   });
