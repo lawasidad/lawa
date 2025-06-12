@@ -195,6 +195,10 @@
           کاتی داواکاری: ${order.time}
         </div>
         <div class="products">${productsHTML}</div>
+        <div style="margin-top: 10px; text-align: center;">
+          <button onclick="editOrder(${index})" style="margin-right: 10px; padding:5px 10px; border-radius:8px; border:none; background:#3182ce; color:#fff; cursor:pointer;">Edit</button>
+          <button onclick="deleteOrder(${index})" style="padding:5px 10px; border-radius:8px; border:none; background:#e53e3e; color:#fff; cursor:pointer;">Delete</button>
+        </div>
       `;
 
       ordersContainer.appendChild(orderHTML);
@@ -293,6 +297,23 @@
     newWindow.document.close();
     newWindow.focus();
     newWindow.print();
+  }
+
+  function editOrder(index) {
+    const orders = getOrders();
+    const order = orders[index];
+    if (!order) return alert("وەسڵ نەدۆزرایەوە.");
+
+    alert(`Editing order for: ${order.name}\n(کۆدی دەستکاری زیاد بکە لێرە)`);
+  }
+
+  function deleteOrder(index) {
+    if (!confirm("دڵنیایت لە سڕینەوەی ئەم وەسڵە؟")) return;
+
+    const orders = getOrders();
+    orders.splice(index, 1);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrders();
   }
 
   let lastOrdersLength = 0;
