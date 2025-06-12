@@ -30,16 +30,28 @@
       border-radius: 10px;
       margin-bottom: 10px;
     }
-    .total-price-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: #28a745;
+    .quantity-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .quantity-controls button {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
       color: white;
-      padding: 5px 8px;
-      border-radius: 12px;
       font-weight: bold;
-      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .quantity-controls span {
+      min-width: 25px;
+      display: inline-block;
+      text-align: center;
+      font-weight: bold;
       user-select: none;
     }
     label, input, button {
@@ -87,7 +99,6 @@
 </form>
 
 <script>
-  // نمونه کاڵا بۆ پیشاندانی
   if (!localStorage.getItem('products')) {
     const sampleProducts = [
       { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر', quantity: 1 },
@@ -107,33 +118,76 @@
     products.forEach(product => {
       const div = document.createElement('div');
       div.className = 'product';
+
+      let isSelected = selected.includes(product.id);
+      if (isSelected) div.classList.add('selected');
+
       div.innerHTML = `
         <img src="${product.image}" alt="${product.name}" />
         <div><strong>${product.name}</strong></div>
         <div>${product.price.toLocaleString()} دینار</div>
       `;
 
-      if (selected.includes(product.id)) {
-        div.classList.add('selected');
-        const totalPrice = (product.price * (product.quantity || 1)).toLocaleString();
-        const badge = document.createElement('div');
-        badge.className = 'total-price-badge';
-        badge.textContent = totalPrice + ' دینار';
-        div.appendChild(badge);
+      if (isSelected) {
+        const controls = document.createElement('div');
+        controls.className = 'quantity-controls';
+
+        const btnMinus = document.createElement('button');
+        btnMinus.textContent = '-';
+        btnMinus.title = 'کەمکردن';
+
+        const qtySpan = document.createElement('span');
+        qtySpan.textContent = product.quantity || 1;
+
+        const btnPlus = document.createElement('button');
+        btnPlus.textContent = '+';
+        btnPlus.title = 'زیادکردن';
+
+        btnMinus.onclick = e => {
+          e.stopPropagation();
+          if ((product.quantity || 1) > 1) {
+            product.quantity = (product.quantity || 1) - 1;
+            updateProductQuantity(product.id, product.quantity);
+          }
+        };
+        btnPlus.onclick = e => {
+          e.stopPropagation();
+          product.quantity = (product.quantity || 1) + 1;
+          updateProductQuantity(product.id, product.quantity);
+        };
+
+        controls.appendChild(btnMinus);
+        controls.appendChild(qtySpan);
+        controls.appendChild(btnPlus);
+
+        div.appendChild(controls);
       }
 
       div.addEventListener('click', () => {
-        div.classList.toggle('selected');
         if (selected.includes(product.id)) {
           selected = selected.filter(id => id !== product.id);
+          // reset quantity to 1 when deselected
+          updateProductQuantity(product.id, 1);
         } else {
           selected.push(product.id);
+          if (!product.quantity) product.quantity = 1;
+          updateProductQuantity(product.id, product.quantity);
         }
         loadProducts();
       });
 
       productList.appendChild(div);
     });
+  }
+
+  function updateProductQuantity(productId, qty) {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    let product = products.find(p => p.id === productId);
+    if (product) {
+      product.quantity = qty;
+      localStorage.setItem('products', JSON.stringify(products));
+    }
+    loadProducts();
   }
 
   loadProducts();
