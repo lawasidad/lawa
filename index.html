@@ -79,7 +79,7 @@
     form {
       max-width: 400px;
       margin-top: 20px;
-      position: sticky;
+      position: sticky; /* فۆرم جێگیر بمێنێت */
       top: 20px;
       background: white;
       padding: 15px;
@@ -103,7 +103,7 @@
   <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
 
   <label for="address">ناونیشان</label>
-  <input type="text" id="address" required placeholder="ئێرە ناونیشانی GPS دابنێ" />
+  <input type="text" id="address" required />
 
   <button type="submit">✅ ناردنی داواکاری</button>
   <p id="successMessage" style="color:green; display:none; font-weight:bold; margin-top: 15px;">✅ داواکاری نێردرا!</p>
@@ -121,7 +121,6 @@
 
   let selected = [];
   const productList = document.getElementById('productList');
-  const addressInput = document.getElementById('address');
 
   function loadProducts() {
     let products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -201,24 +200,6 @@
     loadProducts();
   }
 
-  // زیادکردنی GPS بە شێوەی ئۆتۆماتیکی لە کاتی بارکردنی فۆرمەکە
-  window.onload = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const lat = position.coords.latitude.toFixed(6);
-          const lon = position.coords.longitude.toFixed(6);
-          addressInput.value = `Lat: ${lat}, Lon: ${lon}`;
-        },
-        error => {
-          console.warn('GPS نەتوانرا دابنرێت:', error.message);
-          // ئەگەر GPS نەبێت هیچ کاری تر نەکە
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    }
-  };
-
   loadProducts();
 
   document.getElementById('orderForm').addEventListener('submit', e => {
@@ -226,7 +207,7 @@
 
     const name = document.getElementById('customerName').value.trim();
     const mobile = document.getElementById('mobile').value.trim();
-    const address = addressInput.value.trim();
+    const address = document.getElementById('address').value.trim();
 
     if (!name || !mobile || !address || selected.length === 0) {
       alert('تکایە هەموو خانەکان پڕ بکە و کاڵایەک هەلبژێرە.');
@@ -242,4 +223,26 @@
       totalPrice: (p.price * (p.quantity || 1))
     }));
 
-    const
+    const order = {
+      id: Date.now(),
+      name,
+      mobile,
+      address,
+      products: selectedProducts,
+      time: new Date().toLocaleString()
+    };
+
+    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    alert("داواکاریەکەت بەسەرکەوتویی نێردرا!");
+
+    selected = [];
+    document.getElementById('orderForm').reset();
+    loadProducts();
+  });
+</script>
+
+</body>
+</html>
