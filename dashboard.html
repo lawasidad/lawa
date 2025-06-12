@@ -52,11 +52,14 @@
       margin-bottom: 10px;
       font-weight: bold;
       color: #2d3748;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .order-info {
       font-size: 14px;
       color: #4a5568;
       margin-bottom: 12px;
+      line-height: 1.5;
     }
     .products {
       display: flex;
@@ -82,6 +85,7 @@
       font-weight: 700;
       font-size: 16px;
       margin-bottom: 4px;
+      word-break: break-word;
     }
     .product-price {
       color: #718096;
@@ -110,64 +114,13 @@
     }
     .order-checkbox {
       margin-left: 8px;
-    }
-
-    /* Modal styles */
-    #editModal {
-      display: none; 
-      position: fixed; 
-      z-index: 1000; 
-      left: 0; top: 0; width: 100%; height: 100%; 
-      overflow: auto; 
-      background-color: rgba(0,0,0,0.5);
-    }
-    #editModalContent {
-      background: white;
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 16px;
-      max-width: 600px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    #editModalContent h2 {
-      margin-top: 0;
-      text-align: center;
-    }
-    #editModalContent label {
-      display: block;
-      margin: 10px 0 4px;
-      font-weight: bold;
-    }
-    #editModalContent input[type="text"],
-    #editModalContent input[type="tel"],
-    #editModalContent textarea {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1.5px solid #cbd5e0;
-      font-size: 16px;
-      box-sizing: border-box;
-      resize: vertical;
-    }
-    #editModalContent textarea {
-      height: 60px;
-    }
-    #editModalContent button {
-      margin-top: 20px;
-      padding: 10px 25px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
       cursor: pointer;
     }
-    #saveEditBtn {
-      background-color: #2b6cb0;
-      color: white;
-      margin-right: 10px;
+    button {
+      transition: background-color 0.3s ease;
     }
-    #cancelEditBtn {
-      background-color: #e53e3e;
-      color: white;
+    button:hover {
+      opacity: 0.85;
     }
   </style>
 </head>
@@ -189,41 +142,10 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal">
-  <div id="editModalContent">
-    <h2>دەسکاریکردنی وەسڵ</h2>
-    <form id="editForm">
-      <label for="editName">ناوی کریار</label>
-      <input type="text" id="editName" name="name" required />
-
-      <label for="editMobile">ژمارە مۆبایل</label>
-      <input type="tel" id="editMobile" name="mobile" pattern="[0-9+()-\s]+" required />
-
-      <label for="editAddress">ناونیشان</label>
-      <textarea id="editAddress" name="address" required></textarea>
-
-      <label for="editGPS">GPS</label>
-      <input type="text" id="editGPS" name="gps" />
-
-      <label for="editTime">کاتی داواکاری</label>
-      <input type="text" id="editTime" name="time" required />
-
-      <div style="margin-top: 10px;">
-        <button type="submit" id="saveEditBtn">پاشەکەوتکردن</button>
-        <button type="button" id="cancelEditBtn">هەڵگرتنەوە</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
   const enableSoundBtn = document.getElementById('enableSoundBtn');
   const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-
-  let orders = [];
-  let editingIndex = null;
 
   enableSoundBtn.addEventListener('click', () => {
     alarmSound.play().then(() => {
@@ -239,28 +161,29 @@
     try {
       const data = localStorage.getItem('orders');
       return data ? JSON.parse(data) : [];
-    } catch {
+    } catch (e) {
+      console.error('Error parsing orders from localStorage', e);
       return [];
     }
   }
 
-  function saveOrders(updatedOrders) {
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-    orders = updatedOrders;
-  }
-
   function createProductHTML(product) {
+    // Handle missing image or name gracefully
+    const imageSrc = product.image || 'https://via.placeholder.com/140x120?text=No+Image';
+    const name = product.name || 'ناوی کاڵا نییە';
+    const price = (typeof product.price === 'number') ? product.price.toLocaleString() : 'نەزانراو';
+
     return `
       <div class="product">
-        <img src="${product.image}" alt="${product.name}" />
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${product.price.toLocaleString()} دینار</div>
+        <img src="${imageSrc}" alt="${name}" />
+        <div class="product-name">${name}</div>
+        <div class="product-price">${price} دینار</div>
       </div>
     `;
   }
 
   function renderOrders() {
-    orders = getOrders();
+    const orders = getOrders();
 
     if (orders.length === 0) {
       ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
@@ -270,23 +193,31 @@
     ordersContainer.innerHTML = '';
 
     orders.forEach((order, index) => {
-      const productsHTML = order.products.map(createProductHTML).join('');
+      const productsHTML = Array.isArray(order.products) ? order.products.map(createProductHTML).join('') : '';
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
       orderHTML.dataset.index = index;
 
+      // Use safe fallback for all text fields
+      const name = order.name || 'ناوی کریار نییە';
+      const mobile = order.mobile || 'ژمارە مۆبایل نییە';
+      const address = order.address || 'ناونیشان نییە';
+      const gps = order.gps || 'GPS نییە';
+      const time = order.time || 'کات نییە';
+
       orderHTML.innerHTML = `
-        <div style="margin-bottom: 10px">
-          <input type="checkbox" class="order-checkbox" data-index="${index}" /> وەسلەکە هەلبژێرە
+        <div style="margin-bottom: 10px; text-align: center;">
+          <input type="checkbox" class="order-checkbox" data-index="${index}" id="checkbox-${index}" />
+          <label for="checkbox-${index}">وەسلەکە هەلبژێرە</label>
         </div>
         <div class="order-header">
-          <span>ناوی کریار: ${order.name}</span>
-          <span>ژمارە مۆبایل: ${order.mobile}</span>
+          <span>ناوی کریار: ${name}</span>
+          <span>ژمارە مۆبایل: ${mobile}</span>
         </div>
         <div class="order-info">
-          ناونیشان: ${order.address}<br/>
-          GPS: ${order.gps}<br/>
-          کاتی داواکاری: ${order.time}
+          ناونیشان: ${address}<br/>
+          GPS: ${gps}<br/>
+          کاتی داواکاری: ${time}
         </div>
         <div class="products">${productsHTML}</div>
         <div style="margin-top: 10px; text-align: center;">
@@ -301,12 +232,12 @@
 
   function checkForNewOrders() {
     const currentOrders = getOrders();
-    if (currentOrders.length > orders.length) {
+    if (currentOrders.length > lastOrdersLength) {
       if (!document.hasFocus()) {
         alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
         alert("وەسڵی نوێ زیاد بوو!");
       }
-      orders = currentOrders;
+      lastOrdersLength = currentOrders.length;
       renderOrders();
     }
   }
@@ -323,7 +254,12 @@
     checkboxes.forEach(cb => {
       const idx = cb.dataset.index;
       const order = document.querySelector(`.order[data-index="${idx}"]`);
-      if (order) printableOrders.push(order.cloneNode(true));
+      if (order) {
+        // Clone order div but remove the buttons and checkbox before printing
+        const clone = order.cloneNode(true);
+        clone.querySelectorAll('button, .order-checkbox, label').forEach(el => el.remove());
+        printableOrders.push(clone);
+      }
     });
 
     const newWindow = window.open('', '_blank', 'width=900,height=700');
@@ -346,10 +282,15 @@
             font-weight: bold;
             font-size: 18px;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
           }
           .order-info {
             font-size: 14px;
             margin-bottom: 10px;
+            line-height: 1.5;
           }
           .products {
             display: flex;
@@ -362,6 +303,7 @@
             border-radius: 10px;
             padding: 10px;
             text-align: center;
+            background: #fff;
           }
           .product img {
             width: 100%;
@@ -377,10 +319,14 @@
             font-size: 13px;
             color: #555;
           }
+          h2 {
+            text-align: center;
+            margin-bottom: 30px;
+          }
         </style>
       </head>
       <body>
-        <h2 style="text-align:center">🧾 وەسلەی کریار</h2>
+        <h2>🧾 وەسلەی کریار</h2>
     `);
 
     printableOrders.forEach(order => {
@@ -393,51 +339,32 @@
     newWindow.print();
   }
 
-  // --- Edit order functions ---
-  const editModal = document.getElementById('editModal');
-  const editForm = document.getElementById('editForm');
-  const cancelEditBtn = document.getElementById('cancelEditBtn');
-
   function editOrder(index) {
-    editingIndex = index;
+    const orders = getOrders();
     const order = orders[index];
     if (!order) return alert("وەسڵ نەدۆزرایەوە.");
 
-    // Fill form inputs
-    editForm.editName.value = order.name || '';
-    editForm.editMobile.value = order.mobile || '';
-    editForm.editAddress.value = order.address || '';
-    editForm.editGPS.value = order.gps || '';
-    editForm.editTime.value = order.time || '';
-
-    editModal.style.display = 'block';
+    // Placeholder for editing logic — لێرە دەسکارییەکانی دابنێ بە پێویست
+    alert(`Editing order for: ${order.name}\n(کۆدی دەستکاری زیاد بکە لێرە)`);
   }
 
-  cancelEditBtn.addEventListener('click', () => {
-    editModal.style.display = 'none';
-    editingIndex = null;
-  });
-
-  editForm.addEventListener('submit', e => {
-    e.preventDefault();
-    if (editingIndex === null) return;
-
-    // Update order data
-    orders[editingIndex] = {
-      ...orders[editingIndex],
-      name: editForm.editName.value.trim(),
-      mobile: editForm.editMobile.value.trim(),
-      address: editForm.editAddress.value.trim(),
-      gps: editForm.editGPS.value.trim(),
-      time: editForm.editTime.value.trim(),
-      products: orders[editingIndex].products || []
-    };
-
-    saveOrders(orders);
-    renderOrders();
-    editModal.style.display = 'none';
-    editingIndex = null;
-  });
-
   function deleteOrder(index) {
-    if (!confirm("دڵنیایت لە سڕینەوەی ئەم وەسڵە؟"))
+    if (!confirm("دڵنیایت لە سڕینەوەی ئەم وەسڵە؟")) return;
+
+    const orders = getOrders();
+    orders.splice(index, 1);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrders();
+  }
+
+  let lastOrdersLength = 0;
+
+  window.onload = () => {
+    lastOrdersLength = getOrders().length;
+    renderOrders();
+    setInterval(checkForNewOrders, 3000);
+  };
+</script>
+
+</body>
+</html>
