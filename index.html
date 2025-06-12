@@ -285,33 +285,5 @@
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    // ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
-    // ناردنی وەسلەکەی وەتسئاپ بۆ ژمارەی +9647502020061 بەشێوەی ئۆتۆماتیک
-    const waNumber = '9647502020061';
-    let message = `✅ داواکاری نوێ\n\nکڕیار: ${name}\nژمارە: ${mobile}\nناونیشان: ${address}\nGPS: ${gps}\nکۆی گشتی: ${totalAmount.toLocaleString()} دینار\n\nکاڵاکان:\n`;
-    selectedProducts.forEach(p => {
-      message += `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار\n`;
-    });
-    message += `\nکات: ${order.time}`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const waUrl = `https://wa.me/${waNumber}?text=${encodedMessage}`;
-    window.open(waUrl, '_blank');
-    // ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
-
-    selected = {};
-    document.getElementById('orderForm').reset();
-    document.getElementById('gps').value = '';
-    autoFetchGPS();
-    updateUI();
-
-    const successMsg = document.getElementById('successMessage');
-    successMsg.style.display = 'block';
-    setTimeout(() => {
-      successMsg.style.display = 'none';
-    }, 3000);
-  });
-</script>
-
-</body>
-</html>
+    // کۆدی واتسئاپ بۆ ناردنی وەسل
+    const waNumber = '9647502020061';  // ژمارەی
