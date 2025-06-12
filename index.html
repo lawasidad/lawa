@@ -131,16 +131,28 @@
 
   async function autoFetchGPS() {
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => {
-      autoGps = {
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude
-      };
-      document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
-    });
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        autoGps = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude
+        };
+        document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
+      },
+      err => {
+        console.warn("GPS نەتوانرا وەرگیراوە:", err.message);
+        autoGps = null;
+        document.getElementById("gps").value = "شوێن نەدۆزرایەوە";
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
   }
 
-  // Initialize sample products if not present
   if (!localStorage.getItem('products')) {
     const sampleProducts = [
       { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر' },
@@ -150,18 +162,16 @@
     localStorage.setItem('products', JSON.stringify(sampleProducts));
   }
 
-  let selected = {}; // key: productId, value: quantity (integer)
+  let selected = {};
   const productList = document.getElementById('productList');
 
   function loadProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     productList.innerHTML = '';
-
     let total = 0;
 
     products.forEach(product => {
       const isSelected = selected[product.id] > 0;
-
       const div = document.createElement('div');
       div.className = 'product';
       if (isSelected) div.classList.add('selected');
@@ -208,7 +218,6 @@
         controls.appendChild(btnPlus);
 
         div.appendChild(controls);
-
         total += product.price * selected[product.id];
       }
 
@@ -283,14 +292,12 @@
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    // Clear form and selections
     selected = {};
     document.getElementById('orderForm').reset();
     document.getElementById('gps').value = '';
     autoFetchGPS();
     updateUI();
 
-    // Show success message
     const successMsg = document.getElementById('successMessage');
     successMsg.style.display = 'block';
     setTimeout(() => {
