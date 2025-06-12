@@ -76,6 +76,17 @@
     button:hover {
       background: #218838;
     }
+    form {
+      max-width: 400px;
+      margin-top: 20px;
+      position: sticky; /* فۆرم جێگیر بمێنێت */
+      top: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
   </style>
 </head>
 <body>
@@ -166,7 +177,6 @@
       div.addEventListener('click', () => {
         if (selected.includes(product.id)) {
           selected = selected.filter(id => id !== product.id);
-          // reset quantity to 1 when deselected
           updateProductQuantity(product.id, 1);
         } else {
           selected.push(product.id);
