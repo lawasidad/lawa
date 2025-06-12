@@ -248,10 +248,14 @@
 
     let products = JSON.parse(localStorage.getItem('products') || '[]');
     let selectedProducts = products.filter(p => selected.includes(p.id));
+
+    // **گۆڕینی ئەم بڕگەی کۆدی بۆ نابردنی وێنە لە داتاکە**
     selectedProducts = selectedProducts.map(p => ({
-      ...p,
+      id: p.id,
+      name: p.name,
+      price: p.price,
       quantity: p.quantity || 1,
-      totalPrice: p.quantity * p.price
+      totalPrice: (p.quantity || 1) * p.price
     }));
 
     const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
