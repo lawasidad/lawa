@@ -93,6 +93,17 @@
       color: #a0aec0;
       padding: 40px 0;
     }
+    .play-alarm-btn {
+      display: block;
+      margin: 20px auto 40px;
+      background: #2f855a;
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -103,15 +114,29 @@
   <a href="add-product.html">➕ زیادکردنی کاڵا</a>
 </div>
 
+<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
+
 <div class="orders" id="ordersContainer">
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
-<!-- جەرەس -->
-<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
-
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
+  const enableSoundBtn = document.getElementById('enableSoundBtn');
+
+  // دەنگەکە بۆ جەرەس
+  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+
+  // بۆ چالاککردنی دەنگ (پێویستە یەک کلیک لە پەڕەدا هەبێت بۆ ئەوەی بەردەوام ببێت)
+  enableSoundBtn.addEventListener('click', () => {
+    alarmSound.play().then(() => {
+      alert('دەنگ چالاککرا!');
+      enableSoundBtn.style.display = 'none'; // لە دواترەوە نەیشان بدرێت
+    }).catch(err => {
+      alert('ناتوانرێت دەنگ چالاک بکرێت، تکایە دڵنیابە لە ئەوەی دەستکاری نەکراوە.');
+      console.error(err);
+    });
+  });
 
   function getOrders() {
     try {
@@ -165,12 +190,6 @@
     });
   }
 
-  function playAlarm() {
-    const audio = document.getElementById("alertSound");
-    audio.volume = 1.0;
-    audio.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
-  }
-
   let lastOrdersLength = 0;
 
   function checkForNewOrders() {
@@ -178,7 +197,7 @@
 
     if (currentOrders.length > lastOrdersLength) {
       if (!document.hasFocus()) {
-        playAlarm();
+        alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
         alert("وەسڵی نوێ زیاد بوو!");
       }
       lastOrdersLength = currentOrders.length;
@@ -189,7 +208,7 @@
   window.onload = () => {
     lastOrdersLength = getOrders().length;
     renderOrders();
-    setInterval(checkForNewOrders, 3000); // check every 3 seconds
+    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە جارەوە سەیرکردن
   };
 </script>
 
