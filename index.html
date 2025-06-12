@@ -51,6 +51,21 @@
     button:hover {
       background: #218838;
     }
+    .qty-btn {
+      width: 30px;
+      height: 30px;
+      font-weight: bold;
+      border: 1.5px solid #28a745;
+      background: white;
+      color: #28a745;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .qty-btn:hover {
+      background: #28a745;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -75,6 +90,7 @@
 
 <script>
   let selected = [];
+  const quantities = {};
   const productList = document.getElementById('productList');
 
   function loadProducts() {
@@ -84,22 +100,52 @@
     products.forEach(product => {
       const div = document.createElement('div');
       div.className = 'product';
+
+      if (!(product.id in quantities)) quantities[product.id] = 1;
+
       div.innerHTML = `
         <img src="${product.image}" alt="${product.name}" />
         <div><strong>${product.name}</strong></div>
         <div>${product.price.toLocaleString()} دینار</div>
+        <div style="margin-top: 8px;">
+          <button type="button" class="qty-btn" data-id="${product.id}" data-action="decrease">-</button>
+          <span id="qty-${product.id}" style="margin: 0 10px;">${quantities[product.id]}</span>
+          <button type="button" class="qty-btn" data-id="${product.id}" data-action="increase">+</button>
+        </div>
       `;
 
-      div.addEventListener('click', () => {
+      div.addEventListener('click', (e) => {
+        if (e.target.classList.contains('qty-btn')) return;
+
         div.classList.toggle('selected');
         if (selected.includes(product.id)) {
           selected = selected.filter(id => id !== product.id);
         } else {
           selected.push(product.id);
+          if (!(product.id in quantities)) quantities[product.id] = 1;
+          document.getElementById(`qty-${product.id}`).textContent = quantities[product.id];
         }
       });
 
       productList.appendChild(div);
+    });
+
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+
+        const id = parseInt(btn.getAttribute('data-id'));
+        const action = btn.getAttribute('data-action');
+
+        if (!(id in quantities)) quantities[id] = 1;
+
+        if (action === 'increase') {
+          quantities[id]++;
+        } else if (action === 'decrease') {
+          if (quantities[id] > 1) quantities[id]--;
+        }
+        document.getElementById(`qty-${id}`).textContent = quantities[id];
+      });
     });
   }
 
@@ -120,6 +166,14 @@
     let products = JSON.parse(localStorage.getItem('products') || '[]');
     let selectedProducts = products.filter(p => selected.includes(p.id));
 
+    selectedProducts = selectedProducts.map(p => {
+      return {
+        ...p,
+        quantity: quantities[p.id] || 1,
+        totalPrice: (quantities[p.id] || 1) * p.price
+      };
+    });
+
     const order = {
       id: Date.now(),
       name,
@@ -135,8 +189,8 @@
 
     alert("داواکاریەکەت بەسەرکەوتویی نێردرا!");
 
-    // ڕێخستنەوە
     selected = [];
+    for(let key in quantities) delete quantities[key];
     document.getElementById('orderForm').reset();
     loadProducts();
   });
