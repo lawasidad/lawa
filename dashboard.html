@@ -111,7 +111,6 @@
     .order-checkbox {
       margin-left: 8px;
     }
-
     @media print {
       body {
         margin: 0;
@@ -231,7 +230,7 @@
         <div class="products">${productsHTML}</div>
       `;
 
-      ordersContainer.appendChild(orderHTML);
+      ordersContainer.prepend(orderHTML);
     });
   }
 
@@ -257,23 +256,10 @@
     const printableOrders = [];
 
     checkboxes.forEach(cb => {
-      const idx = cb.getAttribute('data-index');
-      const orderDivs = document.querySelectorAll('.order');
-      orderDivs.forEach(orderDiv => {
-        if (orderDiv.dataset.index === idx) {
-          const clone = orderDiv.cloneNode(true);
-          // لابردنی چەکبۆکس لە پرینت بۆ پاککاری تر
-          const checkbox = clone.querySelector('.order-checkbox');
-          if (checkbox) checkbox.remove();
-          printableOrders.push(clone);
-        }
-      });
+      const idx = cb.dataset.index;
+      const order = document.querySelector(`.order[data-index="${idx}"]`);
+      if (order) printableOrders.push(order.cloneNode(true));
     });
-
-    if (printableOrders.length === 0) {
-      alert("وەسڵێک نەدۆزرایەوە بۆ پرینت.");
-      return;
-    }
 
     const newWindow = window.open('', '_blank', 'width=900,height=700');
     newWindow.document.write(`
@@ -350,7 +336,6 @@
     setInterval(checkForNewOrders, 3000);
   };
 
-  // ✅ Checkbox for selecting all orders
   document.getElementById('selectAllCheckbox').addEventListener('change', function() {
     const allCheckboxes = document.querySelectorAll('.order-checkbox');
     allCheckboxes.forEach(cb => cb.checked = this.checked);
