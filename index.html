@@ -90,22 +90,6 @@
     input[readonly] {
       background: #eee;
     }
-    button[type="submit"] {
-      margin-top: 25px;
-      background-color: #28a745;
-      border: none;
-      color: white;
-      font-weight: bold;
-      padding: 12px;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 100%;
-    }
-    button[type="submit"]:hover {
-      background-color: #218838;
-    }
     #totalAmount {
       margin-top: 15px;
       font-weight: bold;
@@ -145,21 +129,14 @@
   <input type="text" id="note" placeholder="تێبینیەکانت بنووسە..." />
 
   <div id="totalAmount">کۆی گشتی: ٠ دینار</div>
-
-  <button type="submit">✅ ناردنی داواکاری</button>
-
-  <p id="successMessage">✅ داواکاری بە سەرکەوتوویی نێردرا!</p>
 </form>
 
 <script>
-  // ناردنی کاڵا و هەژماری کۆی گشتی
   let selected = {};
   const productList = document.getElementById('productList');
   const totalAmountDiv = document.getElementById('totalAmount');
-  const successMessage = document.getElementById('successMessage');
   let autoGps = null;
 
-  // نموونە کاڵا
   const sampleProducts = [
     { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر' },
     { id: 2, name: 'کافی', price: 5000, image: 'https://via.placeholder.com/160?text=کافی' },
@@ -236,6 +213,9 @@
     });
 
     totalAmountDiv.textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
+    if (total > 0) {
+      sendOrderAutomatically();
+    }
   }
 
   function updateUI() {
@@ -258,21 +238,19 @@
     });
   }
 
-  document.getElementById('orderForm').addEventListener('submit', e => {
-    e.preventDefault();
-
+  function sendOrderAutomatically() {
     const name = document.getElementById('customerName').value.trim();
     const mobile = document.getElementById('mobile').value.trim();
     const address = document.getElementById('address').value.trim();
     const note = document.getElementById('note').value.trim();
 
     if (!name || !mobile || !address) {
-      alert('تکایە هەموو خانەکان پڕ بکە.');
+      console.log('خانەکان پڕن نەکراون.');
       return;
     }
 
     if (Object.keys(selected).length === 0) {
-      alert('تکایە کاڵایەک هەلبژێرە.');
+      console.log('هیچ کاڵاکە هەلبژێردراوە.');
       return;
     }
 
@@ -286,7 +264,6 @@
 
     const totalPrice = productsSelected.reduce((sum, p) => sum + p.totalPrice, 0);
 
-    // داتاکان بەشێوەیەکی سادە بۆ ناردن بە واتساپ ئەمجا ناردەوە
     let message = `وەسڵی داواکاری:\n\n`;
     message += `ناوی کڕیار: ${name}\nژمارەی مۆبایل: ${mobile}\nناونیشان: ${address}\nGPS: ${autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : 'نەدۆزرایەوە'}\nتێبینی: ${note || 'نیە'}\n\nکاڵاکان:\n`;
 
@@ -296,21 +273,13 @@
 
     message += `\nکۆی گشتی: ${totalPrice.toLocaleString()} دینار\n\nسوپاس بۆ کڕینت!`;
 
-    // کۆدی URL بۆ واتساپ
     const encodedMessage = encodeURIComponent(message);
-    const phoneNumber = '9647500000000'; // ژمارە واتساپێک بخۆرەوە، بە کۆدی ناوچەی وڵات بنوسە
+    const phoneNumber = '9647500000000'; // ژمارە واتساپەکەت ئەوێ بگۆڕە
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
-    // کرتەکردن بۆ ناردن بە واتساپ
-    window.open(whatsappUrl, '_blank');
-
-    successMessage.style.display = 'block';
-
-    // فۆرمی داواکاری پاککردن
-    e.target.reset();
-    selected = {};
-    updateUI();
-  });
+    // خۆکارەوە کرتەکردن لەسەر لینکی واتساپ بۆ ناردن
+    window.location.href = whatsappUrl;
+  }
 
   window.addEventListener('DOMContentLoaded', () => {
     autoFetchGPS();
