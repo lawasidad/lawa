@@ -30,6 +30,19 @@
       text-decoration: none;
       font-weight: bold;
     }
+    .print-btn {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .print-btn button {
+      background: #d69e2e;
+      color: white;
+      padding: 10px 30px;
+      border: none;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
     .orders {
       max-width: 900px;
       margin: auto;
@@ -42,6 +55,7 @@
     .order {
       border-bottom: 1px solid #e2e8f0;
       padding: 18px 0;
+      position: relative;
     }
     .order:last-child {
       border-bottom: none;
@@ -95,7 +109,7 @@
     }
     .play-alarm-btn {
       display: block;
-      margin: 20px auto;
+      margin: 20px auto 40px;
       background: #2f855a;
       color: white;
       border: none;
@@ -104,29 +118,25 @@
       border-radius: 12px;
       cursor: pointer;
     }
-    .select-print-controls {
-      text-align: center;
-      margin: 10px 0 30px;
-    }
-    .select-print-controls input {
-      margin-left: 5px;
-    }
-    .print-btn {
-      background: #d69e2e;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 12px;
+    .order-checkbox {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      transform: scale(1.5);
       cursor: pointer;
-      margin-top: 10px;
     }
+
     @media print {
       body * {
         visibility: hidden;
       }
-      .order.printable {
+      .order.printable, .order.printable * {
         visibility: visible;
+      }
+      .order.printable {
+        position: relative;
+        top: 0;
+        left: 0;
         page-break-after: always;
       }
     }
@@ -140,13 +150,11 @@
   <a href="add-product.html">➕ زیادکردنی کاڵا</a>
 </div>
 
-<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
-
-<div class="select-print-controls">
-  <label><input type="checkbox" id="selectAllCheckbox" /> هەمووی هەڵبژێرە</label>
-  <br />
-  <button class="print-btn" onclick="printSelectedOrders()">🖨️ پرینتکردنی وەسلە هەڵبژێردراوەکان</button>
+<div class="print-btn">
+  <button onclick="printSelectedOrders()">🖨️ پرینت کردنی وەسلە هەڵبژێردراوەکان</button>
 </div>
+
+<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
 
 <div class="orders" id="ordersContainer">
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
@@ -155,7 +163,6 @@
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
   const enableSoundBtn = document.getElementById('enableSoundBtn');
-  const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
   const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
 
@@ -164,7 +171,7 @@
       alert('دەنگ چالاککرا!');
       enableSoundBtn.style.display = 'none';
     }).catch(err => {
-      alert('ناتوانرێت دەنگ چالاک بکرێت، تکایە دڵنیابە.');
+      alert('ناتوانرێت دەنگ چالاک بکرێت، تکایە دڵنیابە لە ئەوەی دەستکاری نەکراوە.');
       console.error(err);
     });
   });
@@ -206,10 +213,7 @@
       orderHTML.dataset.index = index;
 
       orderHTML.innerHTML = `
-        <label>
-          <input type="checkbox" class="order-checkbox" data-index="${index}" />
-          🔘 وەسڵەکەی کریارەکە
-        </label>
+        <input type="checkbox" class="order-checkbox" data-index="${index}" />
         <div class="order-header">
           <span>ناوی کریار: ${order.name}</span>
           <span>ژمارە مۆبایل: ${order.mobile}</span>
@@ -223,12 +227,6 @@
       `;
 
       ordersContainer.appendChild(orderHTML);
-    });
-
-    // بەڕێوەبردنی checkboxی گشتی
-    selectAllCheckbox.addEventListener('change', () => {
-      const allCheckboxes = document.querySelectorAll('.order-checkbox');
-      allCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
     });
   }
 
@@ -250,6 +248,7 @@
 
   function checkForNewOrders() {
     const currentOrders = getOrders();
+
     if (currentOrders.length > lastOrdersLength) {
       if (!document.hasFocus()) {
         alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
