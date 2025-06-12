@@ -168,10 +168,9 @@
   }
 
   function createProductHTML(product) {
-    // Handle missing image or name gracefully
     const imageSrc = product.image || 'https://via.placeholder.com/140x120?text=No+Image';
     const name = product.name || 'ناوی کاڵا نییە';
-    const price = (typeof product.price === 'number') ? product.price.toLocaleString() : 'نەزانراو';
+    const price = typeof product.price === 'number' ? product.price.toLocaleString() : 'نەزانراو';
 
     return `
       <div class="product">
@@ -198,7 +197,6 @@
       orderHTML.className = 'order';
       orderHTML.dataset.index = index;
 
-      // Use safe fallback for all text fields
       const name = order.name || 'ناوی کریار نییە';
       const mobile = order.mobile || 'ژمارە مۆبایل نییە';
       const address = order.address || 'ناونیشان نییە';
@@ -225,7 +223,6 @@
           <button onclick="deleteOrder(${index})" style="padding:5px 10px; border-radius:8px; border:none; background:#e53e3e; color:#fff; cursor:pointer;">Delete</button>
         </div>
       `;
-
       ordersContainer.appendChild(orderHTML);
     });
   }
@@ -255,7 +252,6 @@
       const idx = cb.dataset.index;
       const order = document.querySelector(`.order[data-index="${idx}"]`);
       if (order) {
-        // Clone order div but remove the buttons and checkbox before printing
         const clone = order.cloneNode(true);
         clone.querySelectorAll('button, .order-checkbox, label').forEach(el => el.remove());
         printableOrders.push(clone);
@@ -268,71 +264,24 @@
       <head>
         <title>وەسلەی چاپی</title>
         <style>
-          body {
-            font-family: 'Rabar_013', sans-serif;
-            direction: rtl;
-            padding: 30px;
-          }
-          .order {
-            border-bottom: 1px solid #999;
-            padding: 20px 0;
-            margin-bottom: 20px;
-          }
-          .order-header {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-          }
-          .order-info {
-            font-size: 14px;
-            margin-bottom: 10px;
-            line-height: 1.5;
-          }
-          .products {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-          }
-          .product {
-            width: 140px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-            background: #fff;
-          }
-          .product img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 5px;
-          }
-          .product-name {
-            font-weight: bold;
-          }
-          .product-price {
-            font-size: 13px;
-            color: #555;
-          }
-          h2 {
-            text-align: center;
-            margin-bottom: 30px;
-          }
+          body { font-family: 'Rabar_013', sans-serif; direction: rtl; padding: 30px; }
+          .order { border-bottom: 1px solid #999; padding: 20px 0; margin-bottom: 20px; }
+          .order-header { font-weight: bold; font-size: 18px; margin-bottom: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+          .order-info { font-size: 14px; margin-bottom: 10px; line-height: 1.5; }
+          .products { display: flex; flex-wrap: wrap; gap: 12px; }
+          .product { width: 140px; border: 1px solid #ccc; border-radius: 10px; padding: 10px; text-align: center; background: #fff; }
+          .product img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
+          .product-name { font-weight: bold; }
+          .product-price { font-size: 13px; color: #555; }
+          h2 { text-align: center; margin-bottom: 30px; }
         </style>
       </head>
       <body>
         <h2>🧾 وەسلەی کریار</h2>
     `);
-
     printableOrders.forEach(order => {
       newWindow.document.body.appendChild(order);
     });
-
     newWindow.document.write(`</body></html>`);
     newWindow.document.close();
     newWindow.focus();
@@ -344,7 +293,6 @@
     const order = orders[index];
     if (!order) return alert("وەسڵ نەدۆزرایەوە.");
 
-    // دەسکارییەکانی زیادکراو:
     const newName = prompt("ناوی کریار نوێ بنوسە:", order.name || "");
     if (newName !== null) order.name = newName.trim() || order.name;
 
@@ -360,7 +308,6 @@
     const newTime = prompt("کاتی داواکاری نوێ بنوسە:", order.time || "");
     if (newTime !== null) order.time = newTime.trim() || order.time;
 
-    // وەک هەموو بژارەکان نێردرابێت بە localStorage و نیشاندەدات
     orders[index] = order;
     localStorage.setItem('orders', JSON.stringify(orders));
     renderOrders();
