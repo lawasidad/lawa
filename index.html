@@ -51,6 +51,13 @@
     button:hover {
       background: #218838;
     }
+    #totalPriceDisplay {
+      font-weight: bold;
+      margin-top: 15px;
+      font-size: 18px;
+      color: #2f855a;
+      max-width: 400px;
+    }
   </style>
 </head>
 <body>
@@ -69,6 +76,8 @@
   <label for="address">ناونیشان</label>
   <input type="text" id="address" required />
 
+  <div id="totalPriceDisplay">کۆی گشتی پارە: 0 دینار</div>
+
   <button type="submit">✅ ناردنی داواکاری</button>
   <p id="successMessage" style="color:green; display:none; font-weight:bold; margin-top: 15px;">✅ داواکاری نێردرا!</p>
 </form>
@@ -86,6 +95,14 @@
 
   let selected = [];
   const productList = document.getElementById('productList');
+  const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+
+  function updateTotalPrice() {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    let selectedProducts = products.filter(p => selected.includes(p.id));
+    let total = selectedProducts.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0);
+    totalPriceDisplay.textContent = `کۆی گشتی پارە: ${total.toLocaleString()} دینار`;
+  }
 
   function loadProducts() {
     let products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -100,6 +117,10 @@
         <div>${product.price.toLocaleString()} دینار</div>
       `;
 
+      if (selected.includes(product.id)) {
+        div.classList.add('selected');
+      }
+
       div.addEventListener('click', () => {
         div.classList.toggle('selected');
         if (selected.includes(product.id)) {
@@ -107,10 +128,12 @@
         } else {
           selected.push(product.id);
         }
+        updateTotalPrice();
       });
 
       productList.appendChild(div);
     });
+    updateTotalPrice();
   }
 
   loadProducts();
