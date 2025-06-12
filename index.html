@@ -120,6 +120,9 @@
   <label for="gps">GPS</label>
   <input type="text" id="gps" readonly />
 
+  <label for="note">تێبینی (Note)</label>
+  <input type="text" id="note" placeholder="تێبینیەکانت بنووسە..." />
+
   <div id="totalAmount">کۆی گشتی: ٠ دینار</div>
 
   <button type="submit">✅ ناردنی داواکاری</button>
@@ -244,6 +247,7 @@
     const name = document.getElementById('customerName').value.trim();
     const mobile = document.getElementById('mobile').value.trim();
     const address = document.getElementById('address').value.trim();
+    const note = document.getElementById('note').value.trim();
 
     if (!name || !mobile || !address) {
       alert('تکایە هەموو خانەکان پڕ بکە.');
@@ -275,6 +279,7 @@
       name,
       mobile,
       address,
+      note,
       products: selectedProducts,
       time: new Date().toLocaleString(),
       gps,
