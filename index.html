@@ -87,12 +87,6 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       z-index: 100;
     }
-    #totalAmount {
-      font-weight: bold;
-      font-size: 18px;
-      color: #28a745;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -111,37 +105,12 @@
   <label for="address">ناونیشان</label>
   <input type="text" id="address" required />
 
-  <label for="gps">GPS</label>
-  <input type="text" id="gps" readonly />
-
-  <div id="totalAmount">کۆی گشتی: ٠ دینار</div>
-
   <button type="submit">✅ ناردنی داواکاری</button>
   <p id="successMessage" style="color:green; display:none; font-weight:bold; margin-top: 15px;">✅ داواکاری نێردرا!</p>
+  <p id="totalPriceDisplay" style="font-weight:bold; margin-top: 10px;"></p>
 </form>
 
 <script>
-  let autoGps = null;
-  const productList = document.getElementById('productList');
-  let selected = [];
-
-  // گرتنی GPS
-  async function autoFetchGPS() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => {
-      autoGps = {
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude
-      };
-      document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
-    }, err => {
-      console.warn('GPS ناوەڕاست نییە:', err.message);
-      autoGps = null;
-      document.getElementById("gps").value = '';
-    });
-  }
-
-  // بوونی محصولات بۆ localStorage
   if (!localStorage.getItem('products')) {
     const sampleProducts = [
       { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر', quantity: 1 },
@@ -151,17 +120,32 @@
     localStorage.setItem('products', JSON.stringify(sampleProducts));
   }
 
-  // بارکردنی محصولات و نیشاندانی هەلبژاردن و کۆی گشتی
-  function loadProducts() {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    productList.innerHTML = '';
+  let selected = [];
+  const productList = document.getElementById('productList');
 
-    let total = 0;
+  function updateTotalPrice() {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    let selectedProducts = products.filter(p => selected.includes(p.id));
+    let total = selectedProducts.reduce((sum, p) => {
+      return sum + (p.price * (p.quantity || 1));
+    }, 0);
+
+    const display = document.getElementById('totalPriceDisplay');
+    if (display) {
+      display.textContent = `💰 کۆی گشتی: ${total.toLocaleString()} دینار`;
+    }
+  }
+
+  function loadProducts() {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    productList.innerHTML = '';
 
     products.forEach(product => {
       const div = document.createElement('div');
       div.className = 'product';
-      if (selected.includes(product.id)) div.classList.add('selected');
+
+      let isSelected = selected.includes(product.id);
+      if (isSelected) div.classList.add('selected');
 
       div.innerHTML = `
         <img src="${product.image}" alt="${product.name}" />
@@ -169,65 +153,72 @@
         <div>${product.price.toLocaleString()} دینار</div>
       `;
 
-      if (selected.includes(product.id)) {
+      if (isSelected) {
         const controls = document.createElement('div');
         controls.className = 'quantity-controls';
 
         const btnMinus = document.createElement('button');
         btnMinus.textContent = '-';
+        btnMinus.title = 'کەمکردن';
+
         const qtySpan = document.createElement('span');
         qtySpan.textContent = product.quantity || 1;
+
         const btnPlus = document.createElement('button');
         btnPlus.textContent = '+';
+        btnPlus.title = 'زیادکردن';
 
         btnMinus.onclick = e => {
           e.stopPropagation();
           if ((product.quantity || 1) > 1) {
-            product.quantity--;
+            product.quantity = (product.quantity || 1) - 1;
             updateProductQuantity(product.id, product.quantity);
           }
         };
         btnPlus.onclick = e => {
           e.stopPropagation();
-          product.quantity++;
+          product.quantity = (product.quantity || 1) + 1;
           updateProductQuantity(product.id, product.quantity);
         };
 
         controls.appendChild(btnMinus);
         controls.appendChild(qtySpan);
         controls.appendChild(btnPlus);
-        div.appendChild(controls);
 
-        total += product.quantity * product.price;
+        div.appendChild(controls);
       }
 
-      div.onclick = () => {
+      div.addEventListener('click', () => {
         if (selected.includes(product.id)) {
           selected = selected.filter(id => id !== product.id);
           updateProductQuantity(product.id, 1);
         } else {
           selected.push(product.id);
-          updateProductQuantity(product.id, 1);
+          if (!product.quantity) product.quantity = 1;
+          updateProductQuantity(product.id, product.quantity);
         }
         loadProducts();
-      };
+      });
 
       productList.appendChild(div);
     });
 
-    document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
+    updateTotalPrice();
   }
 
   function updateProductQuantity(productId, qty) {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const product = products.find(p => p.id === productId);
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    let product = products.find(p => p.id === productId);
     if (product) {
       product.quantity = qty;
       localStorage.setItem('products', JSON.stringify(products));
     }
+    loadProducts();
   }
 
-  document.getElementById('orderForm').addEventListener('submit', e => {
+  loadProducts();
+
+  document.getElementById('orderForm').addEventListener('submit', async e => {
     e.preventDefault();
 
     const name = document.getElementById('customerName').value.trim();
@@ -239,18 +230,38 @@
       return;
     }
 
-    const gps = autoGps;
+    function getCurrentPosition() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject('گێڕی GPS پشتیوانی ناکرێت لە ئەم دێڤایسە.');
+        } else {
+          navigator.geolocation.getCurrentPosition(pos => {
+            resolve({
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude
+            });
+          }, err => {
+            reject('ناتوانرێت GPS بگرت.');
+          });
+        }
+      });
+    }
 
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const selectedProducts = products.filter(p => selected.includes(p.id)).map(p => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
+    let gpsCoords = null;
+    try {
+      gpsCoords = await getCurrentPosition();
+    } catch (err) {
+      console.warn(err);
+    }
+
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    let selectedProducts = products.filter(p => selected.includes(p.id));
+
+    selectedProducts = selectedProducts.map(p => ({
+      ...p,
       quantity: p.quantity || 1,
-      totalPrice: (p.quantity || 1) * p.price
+      totalPrice: (p.price * (p.quantity || 1))
     }));
-
-    const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
 
     const order = {
       id: Date.now(),
@@ -259,29 +270,19 @@
       address,
       products: selectedProducts,
       time: new Date().toLocaleString(),
-      gps,
-      total: totalAmount
+      gps: gpsCoords
     };
 
     let orders = JSON.parse(localStorage.getItem('orders') || '[]');
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    // ڕاستەوخۆ بڵاوکردنەوەی ئەنجامی داواکاری بەشێوەی کەمەل
-    const successMessage = document.getElementById('successMessage');
-    successMessage.style.display = 'block';
-    setTimeout(() => successMessage.style.display = 'none', 3000);
+    alert("داواکاریەکەت بەسەرکەوتویی نێردرا!");
 
     selected = [];
     document.getElementById('orderForm').reset();
-    document.getElementById('gps').value = '';
-    autoFetchGPS();
     loadProducts();
-  });
-
-  window.addEventListener('DOMContentLoaded', () => {
-    autoFetchGPS();
-    loadProducts();
+    updateTotalPrice();
   });
 </script>
 
