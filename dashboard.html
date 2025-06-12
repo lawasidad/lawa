@@ -19,7 +19,7 @@
     }
     .add-link {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     .add-link a {
       display: inline-block;
@@ -95,7 +95,7 @@
     }
     .play-alarm-btn {
       display: block;
-      margin: 20px auto 40px;
+      margin: 20px auto;
       background: #2f855a;
       color: white;
       border: none;
@@ -103,6 +103,32 @@
       font-size: 16px;
       border-radius: 12px;
       cursor: pointer;
+    }
+    .select-print-controls {
+      text-align: center;
+      margin: 10px 0 30px;
+    }
+    .select-print-controls input {
+      margin-left: 5px;
+    }
+    .print-btn {
+      background: #d69e2e;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .order.printable {
+        visibility: visible;
+        page-break-after: always;
+      }
     }
   </style>
 </head>
@@ -116,6 +142,12 @@
 
 <button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
 
+<div class="select-print-controls">
+  <label><input type="checkbox" id="selectAllCheckbox" /> هەمووی هەڵبژێرە</label>
+  <br />
+  <button class="print-btn" onclick="printSelectedOrders()">🖨️ پرینتکردنی وەسلە هەڵبژێردراوەکان</button>
+</div>
+
 <div class="orders" id="ordersContainer">
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
@@ -123,17 +155,16 @@
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
   const enableSoundBtn = document.getElementById('enableSoundBtn');
+  const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
-  // دەنگەکە بۆ جەرەس
   const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
 
-  // بۆ چالاککردنی دەنگ (پێویستە یەک کلیک لە پەڕەدا هەبێت بۆ ئەوەی بەردەوام ببێت)
   enableSoundBtn.addEventListener('click', () => {
     alarmSound.play().then(() => {
       alert('دەنگ چالاککرا!');
-      enableSoundBtn.style.display = 'none'; // لە دواترەوە نەیشان بدرێت
+      enableSoundBtn.style.display = 'none';
     }).catch(err => {
-      alert('ناتوانرێت دەنگ چالاک بکرێت، تکایە دڵنیابە لە ئەوەی دەستکاری نەکراوە.');
+      alert('ناتوانرێت دەنگ چالاک بکرێت، تکایە دڵنیابە.');
       console.error(err);
     });
   });
@@ -167,13 +198,18 @@
 
     ordersContainer.innerHTML = '';
 
-    orders.forEach(order => {
+    orders.forEach((order, index) => {
       const productsHTML = order.products.map(createProductHTML).join('');
 
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
+      orderHTML.dataset.index = index;
 
       orderHTML.innerHTML = `
+        <label>
+          <input type="checkbox" class="order-checkbox" data-index="${index}" />
+          🔘 وەسڵەکەی کریارەکە
+        </label>
         <div class="order-header">
           <span>ناوی کریار: ${order.name}</span>
           <span>ژمارە مۆبایل: ${order.mobile}</span>
@@ -188,13 +224,32 @@
 
       ordersContainer.appendChild(orderHTML);
     });
+
+    // بەڕێوەبردنی checkboxی گشتی
+    selectAllCheckbox.addEventListener('change', () => {
+      const allCheckboxes = document.querySelectorAll('.order-checkbox');
+      allCheckboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+    });
+  }
+
+  function printSelectedOrders() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    const allOrders = document.querySelectorAll('.order');
+
+    allOrders.forEach(order => order.classList.remove('printable'));
+    checkboxes.forEach(cb => {
+      const idx = cb.dataset.index;
+      const order = document.querySelector(`.order[data-index="${idx}"]`);
+      order.classList.add('printable');
+    });
+
+    window.print();
   }
 
   let lastOrdersLength = 0;
 
   function checkForNewOrders() {
     const currentOrders = getOrders();
-
     if (currentOrders.length > lastOrdersLength) {
       if (!document.hasFocus()) {
         alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
@@ -208,7 +263,7 @@
   window.onload = () => {
     lastOrdersLength = getOrders().length;
     renderOrders();
-    setInterval(checkForNewOrders, 3000); // هەر ٣ چرکە جارەوە سەیرکردن
+    setInterval(checkForNewOrders, 3000);
   };
 </script>
 
