@@ -290,19 +290,22 @@
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    selected = {};
-    document.getElementById('orderForm').reset();
-    document.getElementById('gps').value = '';
-    autoFetchGPS();
-    updateUI();
+    // دروستکردنی وەسلەی واتساپ
+    let message = `🔔 *وەسڵی داواکاری*\n\n`;
+    message += `*ناوی کریار:* ${name}\n`;
+    message += `*ژمارەی مۆبایل:* ${mobile}\n`;
+    message += `*ناونیشان:* ${address}\n`;
+    message += `*GPS:* ${gps}\n`;
+    if(note) message += `*تێبینی:* ${note}\n`;
+    message += `\n*کاڵاکان:* \n`;
 
-    const successMsg = document.getElementById('successMessage');
-    successMsg.style.display = 'block';
-    setTimeout(() => {
-      successMsg.style.display = 'none';
-    }, 3000);
-  });
-</script>
+    selectedProducts.forEach(p => {
+      message += `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار\n`;
+    });
 
-</body>
-</html>
+    message += `\n*کۆی گشتی:* ${totalAmount.toLocaleString()} دینار\n`;
+    message += `\n*کاتی داواکاری:* ${order.time}`;
+
+    // ژمارەی واتساپ (بێ +)
+    const whatsappNumber = "9647502020061";
+    const whatsappURL = `
