@@ -169,6 +169,10 @@
     `;
   }
 
+  function calculateTotalOrderPrice(order) {
+    return order.products.reduce((sum, product) => sum + product.price, 0);
+  }
+
   function renderOrders() {
     const orders = getOrders();
 
@@ -181,6 +185,7 @@
 
     orders.forEach((order, index) => {
       const productsHTML = order.products.map(createProductHTML).join('');
+      const totalPrice = calculateTotalOrderPrice(order);
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
       orderHTML.dataset.index = index;
@@ -199,6 +204,9 @@
           کاتی داواکاری: ${order.time}
         </div>
         <div class="products">${productsHTML}</div>
+        <div style="margin-top: 12px; font-weight: bold; color: #2f855a;">
+          کۆی گشتی پارە: ${totalPrice.toLocaleString()} دینار
+        </div>
       `;
 
       ordersContainer.prepend(orderHTML);
