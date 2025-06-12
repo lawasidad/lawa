@@ -112,13 +112,12 @@
       margin-left: 8px;
     }
 
-    /* زیادکردنی ستایلی چاپ بۆ A4 */
     @media print {
       body {
         margin: 0;
         padding: 0;
-        width: 210mm;  /* A4 width */
-        height: 297mm; /* A4 height */
+        width: 210mm;
+        height: 297mm;
         overflow: visible;
         font-size: 12pt;
       }
@@ -232,7 +231,7 @@
         <div class="products">${productsHTML}</div>
       `;
 
-      ordersContainer.prepend(orderHTML);
+      ordersContainer.appendChild(orderHTML);
     });
   }
 
@@ -258,10 +257,23 @@
     const printableOrders = [];
 
     checkboxes.forEach(cb => {
-      const idx = cb.dataset.index;
-      const order = document.querySelector(`.order[data-index="${idx}"]`);
-      if (order) printableOrders.push(order.cloneNode(true));
+      const idx = cb.getAttribute('data-index');
+      const orderDivs = document.querySelectorAll('.order');
+      orderDivs.forEach(orderDiv => {
+        if (orderDiv.dataset.index === idx) {
+          const clone = orderDiv.cloneNode(true);
+          // لابردنی چەکبۆکس لە پرینت بۆ پاککاری تر
+          const checkbox = clone.querySelector('.order-checkbox');
+          if (checkbox) checkbox.remove();
+          printableOrders.push(clone);
+        }
+      });
     });
+
+    if (printableOrders.length === 0) {
+      alert("وەسڵێک نەدۆزرایەوە بۆ پرینت.");
+      return;
+    }
 
     const newWindow = window.open('', '_blank', 'width=900,height=700');
     newWindow.document.write(`
