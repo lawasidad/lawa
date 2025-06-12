@@ -93,6 +93,12 @@
       color: #28a745;
       margin-top: 10px;
     }
+    #successMessage {
+      color: green;
+      font-weight: bold;
+      margin-top: 15px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -117,7 +123,7 @@
   <div id="totalAmount">کۆی گشتی: ٠ دینار</div>
 
   <button type="submit">✅ ناردنی داواکاری</button>
-  <p id="successMessage" style="color:green; display:none; font-weight:bold; margin-top: 15px;">✅ داواکاری نێردرا!</p>
+  <p id="successMessage">✅ داواکاری نێردرا!</p>
 </form>
 
 <script>
@@ -134,34 +140,30 @@
     });
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    autoFetchGPS();
-    loadProducts();
-  });
-
+  // Initialize sample products if not present
   if (!localStorage.getItem('products')) {
     const sampleProducts = [
-      { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر', quantity: 1 },
-      { id: 2, name: 'کافی', price: 5000, image: 'https://via.placeholder.com/160?text=کافی', quantity: 1 },
-      { id: 3, name: 'کاکائو', price: 3000, image: 'https://via.placeholder.com/160?text=کاکائو', quantity: 1 }
+      { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر' },
+      { id: 2, name: 'کافی', price: 5000, image: 'https://via.placeholder.com/160?text=کافی' },
+      { id: 3, name: 'کاکائو', price: 3000, image: 'https://via.placeholder.com/160?text=کاکائو' }
     ];
     localStorage.setItem('products', JSON.stringify(sampleProducts));
   }
 
-  let selected = [];
+  let selected = {}; // key: productId, value: quantity (integer)
   const productList = document.getElementById('productList');
 
   function loadProducts() {
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
     productList.innerHTML = '';
 
     let total = 0;
 
     products.forEach(product => {
+      const isSelected = selected[product.id] > 0;
+
       const div = document.createElement('div');
       div.className = 'product';
-
-      let isSelected = selected.includes(product.id);
       if (isSelected) div.classList.add('selected');
 
       div.innerHTML = `
@@ -175,23 +177,30 @@
         controls.className = 'quantity-controls';
 
         const btnMinus = document.createElement('button');
+        btnMinus.type = 'button';
         btnMinus.textContent = '-';
+
         const qtySpan = document.createElement('span');
-        qtySpan.textContent = product.quantity || 1;
+        qtySpan.textContent = selected[product.id];
+
         const btnPlus = document.createElement('button');
+        btnPlus.type = 'button';
         btnPlus.textContent = '+';
 
         btnMinus.onclick = e => {
           e.stopPropagation();
-          if ((product.quantity || 1) > 1) {
-            product.quantity--;
-            updateProductQuantity(product.id, product.quantity);
+          if (selected[product.id] > 1) {
+            selected[product.id]--;
+          } else {
+            delete selected[product.id];
           }
+          updateUI();
         };
+
         btnPlus.onclick = e => {
           e.stopPropagation();
-          product.quantity++;
-          updateProductQuantity(product.id, product.quantity);
+          selected[product.id] = (selected[product.id] || 0) + 1;
+          updateUI();
         };
 
         controls.appendChild(btnMinus);
@@ -200,20 +209,17 @@
 
         div.appendChild(controls);
 
-        total += product.quantity * product.price;
+        total += product.price * selected[product.id];
       }
 
-      div.addEventListener('click', () => {
-        if (selected.includes(product.id)) {
-          selected = selected.filter(id => id !== product.id);
-          updateProductQuantity(product.id, 1);
+      div.onclick = () => {
+        if (isSelected) {
+          delete selected[product.id];
         } else {
-          selected.push(product.id);
-          product.quantity = 1;
-          updateProductQuantity(product.id, 1);
+          selected[product.id] = 1;
         }
-        loadProducts();
-      });
+        updateUI();
+      };
 
       productList.appendChild(div);
     });
@@ -221,15 +227,14 @@
     document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
   }
 
-  function updateProductQuantity(productId, qty) {
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    let product = products.find(p => p.id === productId);
-    if (product) {
-      product.quantity = qty;
-      localStorage.setItem('products', JSON.stringify(products));
-    }
+  function updateUI() {
     loadProducts();
   }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    autoFetchGPS();
+    loadProducts();
+  });
 
   document.getElementById('orderForm').addEventListener('submit', e => {
     e.preventDefault();
@@ -238,20 +243,28 @@
     const mobile = document.getElementById('mobile').value.trim();
     const address = document.getElementById('address').value.trim();
 
-    if (!name || !mobile || !address || selected.length === 0) {
-      alert('تکایە هەموو خانەکان پڕ بکە و کاڵایەک هەلبژێرە.');
+    if (!name || !mobile || !address) {
+      alert('تکایە هەموو خانەکان پڕ بکە.');
+      return;
+    }
+
+    if (Object.keys(selected).length === 0) {
+      alert('تکایە کاڵایەک هەلبژێرە.');
       return;
     }
 
     const gps = autoGps;
 
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    let selectedProducts = products.filter(p => selected.includes(p.id));
-    selectedProducts = selectedProducts.map(p => ({
-      ...p,
-      quantity: p.quantity || 1,
-      totalPrice: p.quantity * p.price
-    }));
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const selectedProducts = products
+      .filter(p => selected[p.id])
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        quantity: selected[p.id],
+        totalPrice: p.price * selected[p.id]
+      }));
 
     const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
 
@@ -270,12 +283,19 @@
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    alert("✅ داواکاریەکەت نێردرا!");
-    selected = [];
+    // Clear form and selections
+    selected = {};
     document.getElementById('orderForm').reset();
     document.getElementById('gps').value = '';
     autoFetchGPS();
-    loadProducts();
+    updateUI();
+
+    // Show success message
+    const successMsg = document.getElementById('successMessage');
+    successMsg.style.display = 'block';
+    setTimeout(() => {
+      successMsg.style.display = 'none';
+    }, 3000);
   });
 </script>
 
