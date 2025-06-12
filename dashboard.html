@@ -128,16 +128,24 @@
 
     @media print {
       body * {
-        visibility: hidden;
+        display: none !important;
       }
       .order.printable, .order.printable * {
-        visibility: visible;
+        display: block !important;
+        visibility: visible !important;
       }
       .order.printable {
         position: relative;
-        top: 0;
-        left: 0;
         page-break-after: always;
+        background: white;
+      }
+      .product {
+        display: inline-block;
+        vertical-align: top;
+        margin: 5px;
+      }
+      .products {
+        display: block;
       }
     }
   </style>
