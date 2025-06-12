@@ -1,105 +1,121 @@
 <!DOCTYPE html>
-<html lang="ku">
+<html lang="ku" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>کۆمپانیای دۆی قەندیل - داواکاری کاڵا</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f7f9fc; }
-    .product-list { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-    .product {
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      width: 180px;
-      text-align: center;
-      cursor: pointer;
-      background: white;
-      transition: 0.3s;
-      user-select: none;
-      position: relative;
-    }
-    .product.selected {
-      border-color: #28a745;
-      background: #e0f7e9;
-    }
-    .product img {
-      width: 160px;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    .quantity-controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .quantity-controls button {
-      width: 30px;
-      height: 30px;
-      border: none;
-      border-radius: 5px;
-      background-color: #28a745;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-    }
-    .quantity-controls span {
-      min-width: 25px;
-      display: inline-block;
-      text-align: center;
-      font-weight: bold;
-      user-select: none;
-    }
-    label, input, button {
-      display: block;
-      margin: 10px 0;
-      width: 100%;
-      max-width: 400px;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: 1.5px solid #ccc;
-    }
-    button {
-      background: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background: #218838;
-    }
-    form {
-      max-width: 400px;
-      margin-top: 20px;
-      position: sticky;
-      top: 20px;
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 100;
-    }
-    #totalAmount {
-      font-weight: bold;
-      font-size: 18px;
-      color: #28a745;
-      margin-top: 10px;
-    }
-    #successMessage {
-      color: green;
-      font-weight: bold;
-      margin-top: 15px;
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>فۆرمی داواکاری - کۆمپانیای قەندیل</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    padding: 15px;
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #0b6623;
+  }
+  .product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+  .product {
+    width: 140px;
+    border: 2px solid #aaa;
+    border-radius: 8px;
+    background: #fff;
+    text-align: center;
+    padding: 10px 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .product.selected {
+    border-color: #28a745;
+    background: #d4edda;
+  }
+  .product img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    margin-bottom: 10px;
+  }
+  .quantity-controls {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .quantity-controls button {
+    width: 28px;
+    height: 28px;
+    background-color: #28a745;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .quantity-controls span {
+    min-width: 22px;
+    font-weight: bold;
+    text-align: center;
+    display: inline-block;
+    user-select: none;
+  }
+  form {
+    max-width: 400px;
+    margin: 0 auto;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  label {
+    font-weight: bold;
+    margin-top: 12px;
+    display: block;
+  }
+  input, button {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    font-size: 16px;
+  }
+  button {
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    margin-top: 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #1e7e34;
+  }
+  #totalAmount {
+    font-weight: bold;
+    font-size: 18px;
+    color: #28a745;
+    margin-top: 15px;
+    text-align: center;
+  }
+  #successMessage {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #155724;
+    text-align: center;
+    display: none;
+  }
+</style>
 </head>
 <body>
 
@@ -109,102 +125,85 @@
 
 <form id="orderForm">
   <label for="customerName">ناوی کریار</label>
-  <input type="text" id="customerName" required placeholder="ناوی خۆت بنووسە" />
+  <input type="text" id="customerName" placeholder="ناوی خۆت بنووسە" required />
 
   <label for="mobile">ژمارەی مۆبایل</label>
-  <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
+  <input type="tel" id="mobile" placeholder="07XX XXX XXX" required pattern="07[0-9]{8,9}" />
 
   <label for="address">ناونیشان</label>
-  <input type="text" id="address" required />
+  <input type="text" id="address" placeholder="ناونیشانت بنووسە" required />
 
-  <label for="gps">GPS</label>
-  <input type="text" id="gps" readonly />
+  <label for="gps">GPS (خودکار دەرکەوتن)</label>
+  <input type="text" id="gps" readonly placeholder="کۆآردیناتەکان ئەنجام بدرێن" />
 
-  <label for="note">تێبینی (Note)</label>
-  <input type="text" id="note" placeholder="تێبینیەکانت بنووسە..." />
+  <label for="note">تێبینی (هەلبژاردن)</label>
+  <input type="text" id="note" placeholder="تێبینیەکان بنووسە" />
 
   <div id="totalAmount">کۆی گشتی: ٠ دینار</div>
 
   <button type="submit">✅ ناردنی داواکاری</button>
-  <p id="successMessage">✅ داواکاری نێردرا!</p>
+
+  <p id="successMessage">✅ داواکاری نێردرا بەسەرکەوتووی!</p>
 </form>
 
 <script>
-  let autoGps = null;
+  // نموونە کاڵاکان بۆ پیشاندانی
+  const products = [
+    { id: 1, name: "شەکر", price: 2000, image: "https://via.placeholder.com/120?text=شەکر" },
+    { id: 2, name: "کافی", price: 5000, image: "https://via.placeholder.com/120?text=کافی" },
+    { id: 3, name: "کاکائو", price: 3000, image: "https://via.placeholder.com/120?text=کاکائو" }
+  ];
 
-  async function autoFetchGPS() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => {
-      autoGps = {
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude
-      };
-      document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
-    }, error => {
-      console.warn('ناتوانرایە GPS بگەڕێنرێت:', error.message);
-      document.getElementById("gps").value = 'GPS نەدۆزرایەوە';
-    });
-  }
-
-  if (!localStorage.getItem('products')) {
-    const sampleProducts = [
-      { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر' },
-      { id: 2, name: 'کافی', price: 5000, image: 'https://via.placeholder.com/160?text=کافی' },
-      { id: 3, name: 'کاکائو', price: 3000, image: 'https://via.placeholder.com/160?text=کاکائو' }
-    ];
-    localStorage.setItem('products', JSON.stringify(sampleProducts));
-  }
-
+  // شیی هەلبژاردنەکان بۆ هەر کاڵا
   let selected = {};
-  const productList = document.getElementById('productList');
 
-  function loadProducts() {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    productList.innerHTML = '';
+  const productList = document.getElementById("productList");
+  const totalAmountEl = document.getElementById("totalAmount");
+  const successMessage = document.getElementById("successMessage");
 
+  function renderProducts() {
+    productList.innerHTML = "";
     let total = 0;
 
-    products.forEach(product => {
-      const isSelected = selected[product.id] > 0;
+    products.forEach(p => {
+      const qty = selected[p.id] || 0;
+      const isSelected = qty > 0;
 
-      const div = document.createElement('div');
-      div.className = 'product';
-      if (isSelected) div.classList.add('selected');
+      const div = document.createElement("div");
+      div.classList.add("product");
+      if (isSelected) div.classList.add("selected");
 
       div.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" />
-        <div><strong>${product.name}</strong></div>
-        <div>${product.price.toLocaleString()} دینار</div>
+        <img src="${p.image}" alt="${p.name}" />
+        <div><strong>${p.name}</strong></div>
+        <div>${p.price.toLocaleString()} دینار</div>
       `;
 
+      // نیشاندانی دکمه‌کانی زیادکردن و کەمکردن
       if (isSelected) {
-        const controls = document.createElement('div');
-        controls.className = 'quantity-controls';
+        const controls = document.createElement("div");
+        controls.classList.add("quantity-controls");
 
-        const btnMinus = document.createElement('button');
-        btnMinus.type = 'button';
-        btnMinus.textContent = '-';
-
-        const qtySpan = document.createElement('span');
-        qtySpan.textContent = selected[product.id];
-
-        const btnPlus = document.createElement('button');
-        btnPlus.type = 'button';
-        btnPlus.textContent = '+';
-
-        btnMinus.onclick = e => {
+        const btnMinus = document.createElement("button");
+        btnMinus.textContent = "-";
+        btnMinus.onclick = (e) => {
           e.stopPropagation();
-          if (selected[product.id] > 1) {
-            selected[product.id]--;
+          if (selected[p.id] > 1) {
+            selected[p.id]--;
           } else {
-            delete selected[product.id];
+            delete selected[p.id];
           }
           updateUI();
         };
 
-        btnPlus.onclick = e => {
+        const qtySpan = document.createElement("span");
+        qtySpan.textContent = qty;
+
+        const btnPlus = document.createElement("button");
+        btnPlus.textContent = "+";
+        btnPlus.onclick = (e) => {
           e.stopPropagation();
-          selected[product.id] = (selected[product.id] || 0) + 1;
+          selected[p.id] = (selected[p.id] || 0) + 1;
           updateUI();
         };
 
@@ -214,14 +213,14 @@
 
         div.appendChild(controls);
 
-        total += product.price * selected[product.id];
+        total += p.price * qty;
       }
 
       div.onclick = () => {
         if (isSelected) {
-          delete selected[product.id];
+          delete selected[p.id];
         } else {
-          selected[product.id] = 1;
+          selected[p.id] = 1;
         }
         updateUI();
       };
@@ -229,83 +228,104 @@
       productList.appendChild(div);
     });
 
-    document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
+    totalAmountEl.textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
   }
 
   function updateUI() {
-    loadProducts();
+    renderProducts();
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    autoFetchGPS();
-    loadProducts();
-  });
+  // بەدەستهێنانی GPS بەشێوەی خودکار
+  function fetchGPS() {
+    const gpsInput = document.getElementById("gps");
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+          gpsInput.value = coords;
+        },
+        (err) => {
+          gpsInput.value = "ناتوانرایە GPS بگەڕێندرێت";
+          console.warn("Error getting GPS:", err.message);
+        }
+      );
+    } else {
+      gpsInput.value = "بەردەست نیە لە کەروێلێشن";
+    }
+  }
 
-  document.getElementById('orderForm').addEventListener('submit', e => {
+  // وەردەگرتنی فۆرمی داواکاری
+  document.getElementById("orderForm").addEventListener("submit", e => {
     e.preventDefault();
+    successMessage.style.display = "none";
 
-    const name = document.getElementById('customerName').value.trim();
-    const mobile = document.getElementById('mobile').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const note = document.getElementById('note').value.trim();
+    const name = document.getElementById("customerName").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const gps = document.getElementById("gps").value.trim();
+    const note = document.getElementById("note").value.trim();
 
     if (!name || !mobile || !address) {
-      alert('تکایە هەموو خانەکان پڕ بکە.');
+      alert("تکایە هەموو خانەکان پر بکەوە");
       return;
     }
 
     if (Object.keys(selected).length === 0) {
-      alert('تکایە کاڵایەک هەلبژێرە.');
+      alert("تکایە کاڵایەک هەلبژێرە");
       return;
     }
 
-    const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
-
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const selectedProducts = products
+    // گرتنی کاڵاکانی هەلبژێردراو
+    const orderedProducts = products
       .filter(p => selected[p.id])
       .map(p => ({
-        id: p.id,
         name: p.name,
-        price: p.price,
         quantity: selected[p.id],
+        price: p.price,
         totalPrice: p.price * selected[p.id]
       }));
 
-    const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
+    const total = orderedProducts.reduce((acc, p) => acc + p.totalPrice, 0);
 
-    const order = {
-      id: Date.now(),
-      name,
-      mobile,
-      address,
-      note,
-      products: selectedProducts,
-      time: new Date().toLocaleString(),
-      gps,
-      total: totalAmount
-    };
+    // دروستکردنی پەیامەکە بۆ واتساپ
+    let whatsappMessage = `🔔 *وەسڵی داواکاری*\n\n`;
+    whatsappMessage += `*ناوی کریار:* ${name}\n`;
+    whatsappMessage += `*ژمارەی مۆبایل:* ${mobile}\n`;
+    whatsappMessage += `*ناونیشان:* ${address}\n`;
+    whatsappMessage += `*GPS:* ${gps}\n`;
+    if(note) whatsappMessage += `*تێبینی:* ${note}\n`;
+    whatsappMessage += `\n*کاڵاکان:* \n`;
 
-    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-
-    // دروستکردنی وەسلەی واتساپ
-    let message = `🔔 *وەسڵی داواکاری*\n\n`;
-    message += `*ناوی کریار:* ${name}\n`;
-    message += `*ژمارەی مۆبایل:* ${mobile}\n`;
-    message += `*ناونیشان:* ${address}\n`;
-    message += `*GPS:* ${gps}\n`;
-    if(note) message += `*تێبینی:* ${note}\n`;
-    message += `\n*کاڵاکان:* \n`;
-
-    selectedProducts.forEach(p => {
-      message += `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار\n`;
+    orderedProducts.forEach(p => {
+      whatsappMessage += `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار\n`;
     });
 
-    message += `\n*کۆی گشتی:* ${totalAmount.toLocaleString()} دینار\n`;
-    message += `\n*کاتی داواکاری:* ${order.time}`;
+    whatsappMessage += `\n*کۆی گشتی:* ${total.toLocaleString()} دینار\n`;
+    whatsappMessage += `\n*کاتی داواکاری:* ${new Date().toLocaleString()}`;
 
-    // ژمارەی واتساپ (بێ +)
+    // بژمارە واتساپ بێ پێشکەش (+964...) بە شێوەی نرمال
     const whatsappNumber = "9647502020061";
-    const whatsappURL = `
+
+    // ئەم لینکی واتساپە بەرەو نووسینی پەیامەکە دەچێت
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+
+    // کرتە کردن بۆ کرتەکردنی واتساپ لە بڕاوزەر
+    window.open(whatsappURL, "_blank");
+
+    // پاککردنی هەلبژاردن و فۆرمەکە بۆ ناردنەوەی داواکارییەکی نوێ
+    selected = {};
+    updateUI();
+    e.target.reset();
+
+    successMessage.style.display = "block";
+  });
+
+  // دانانی هەموو کۆدەکان لە بارکردنی پەڕە
+  window.onload = () => {
+    renderProducts();
+    fetchGPS();
+  };
+</script>
+
+</body>
+</html>
