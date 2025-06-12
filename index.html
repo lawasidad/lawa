@@ -79,7 +79,7 @@
     form {
       max-width: 400px;
       margin-top: 20px;
-      position: sticky; /* فۆرم جێگیر بمێنێت */
+      position: sticky;
       top: 20px;
       background: white;
       padding: 15px;
@@ -107,6 +107,7 @@
 
   <button type="submit">✅ ناردنی داواکاری</button>
   <p id="successMessage" style="color:green; display:none; font-weight:bold; margin-top: 15px;">✅ داواکاری نێردرا!</p>
+  <p id="totalPriceDisplay" style="font-weight:bold; margin-top: 10px;"></p>
 </form>
 
 <script>
@@ -121,6 +122,19 @@
 
   let selected = [];
   const productList = document.getElementById('productList');
+
+  function updateTotalPrice() {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    let selectedProducts = products.filter(p => selected.includes(p.id));
+    let total = selectedProducts.reduce((sum, p) => {
+      return sum + (p.price * (p.quantity || 1));
+    }, 0);
+
+    const display = document.getElementById('totalPriceDisplay');
+    if (display) {
+      display.textContent = `💰 کۆی گشتی: ${total.toLocaleString()} دینار`;
+    }
+  }
 
   function loadProducts() {
     let products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -188,6 +202,8 @@
 
       productList.appendChild(div);
     });
+
+    updateTotalPrice();
   }
 
   function updateProductQuantity(productId, qty) {
@@ -214,7 +230,6 @@
       return;
     }
 
-    // وەرگرتنی GPS بێ دەسکاری تر
     function getCurrentPosition() {
       return new Promise((resolve, reject) => {
         if (!navigator.geolocation) {
@@ -255,7 +270,7 @@
       address,
       products: selectedProducts,
       time: new Date().toLocaleString(),
-      gps: gpsCoords // ناونیشانی GPS زیادکراوە لێرە
+      gps: gpsCoords
     };
 
     let orders = JSON.parse(localStorage.getItem('orders') || '[]');
@@ -267,6 +282,7 @@
     selected = [];
     document.getElementById('orderForm').reset();
     loadProducts();
+    updateTotalPrice();
   });
 </script>
 
