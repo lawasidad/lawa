@@ -285,5 +285,19 @@
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    // کۆدی واتسئاپ بۆ ناردنی وەسل
-    const waNumber = '9647502020061';  // ژمارەی
+    selected = {};
+    document.getElementById('orderForm').reset();
+    document.getElementById('gps').value = '';
+    autoFetchGPS();
+    updateUI();
+
+    const successMsg = document.getElementById('successMessage');
+    successMsg.style.display = 'block';
+    setTimeout(() => {
+      successMsg.style.display = 'none';
+    }, 3000);
+  });
+</script>
+
+</body>
+</html>
