@@ -137,6 +137,9 @@
         longitude: pos.coords.longitude
       };
       document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
+    }, error => {
+      console.warn('ناتوانرایە GPS بگەڕێنرێت:', error.message);
+      document.getElementById("gps").value = 'GPS نەدۆزرایەوە';
     });
   }
 
@@ -155,6 +158,7 @@
   function loadProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     productList.innerHTML = '';
+
     let total = 0;
 
     products.forEach(product => {
@@ -204,7 +208,9 @@
         controls.appendChild(btnMinus);
         controls.appendChild(qtySpan);
         controls.appendChild(btnPlus);
+
         div.appendChild(controls);
+
         total += product.price * selected[product.id];
       }
 
@@ -249,7 +255,7 @@
       return;
     }
 
-    const gps = autoGps;
+    const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
 
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const selectedProducts = products
@@ -271,7 +277,7 @@
       address,
       products: selectedProducts,
       time: new Date().toLocaleString(),
-      gps: gps ? `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}` : "شوێن نەدۆزرایەوە",
+      gps,
       total: totalAmount
     };
 
