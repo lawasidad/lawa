@@ -1,119 +1,197 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>زیادکردنی کاڵا</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
   <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
   <style>
     body {
       font-family: 'Rabar_013', sans-serif;
       background: #f5f7fa;
-      padding: 30px;
+      margin: 0; padding: 20px;
       direction: rtl;
     }
     h1 {
       text-align: center;
       color: #1a202c;
+      margin-bottom: 10px;
+    }
+    .add-link {
+      text-align: center;
       margin-bottom: 30px;
     }
-    form {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 25px;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    input[type="text"],
-    input[type="number"],
-    input[type="url"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #cbd5e0;
-      border-radius: 8px;
-    }
-    button {
+    .add-link a {
+      display: inline-block;
       background: #2b6cb0;
       color: white;
-      padding: 12px 24px;
-      border: none;
+      padding: 10px 20px;
       border-radius: 12px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
-    }
-    .success {
-      text-align: center;
-      color: green;
-      margin-top: 15px;
+      text-decoration: none;
       font-weight: bold;
+    }
+    .orders {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+      min-height: 150px;
+    }
+    .order {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 18px 0;
+    }
+    .order:last-child {
+      border-bottom: none;
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #2d3748;
+    }
+    .order-info {
+      font-size: 14px;
+      color: #4a5568;
+      margin-bottom: 12px;
+    }
+    .products {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .product {
+      border: 1.5px solid #cbd5e0;
+      border-radius: 12px;
+      padding: 10px;
+      width: 140px;
+      text-align: center;
+      background: #fefefe;
+    }
+    .product img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+    .product-name {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .product-price {
+      color: #718096;
+      font-size: 14px;
+    }
+    .no-orders {
+      text-align: center;
+      font-size: 18px;
+      color: #a0aec0;
+      padding: 40px 0;
     }
   </style>
 </head>
 <body>
 
-  <h1>➕ زیادکردنی کاڵا</h1>
+<h1>وەسڵەکانی کریار</h1>
 
-  <form id="productForm">
-    <label for="name">ناوی کاڵا</label>
-    <input type="text" id="name" required>
+<div class="add-link">
+  <a href="add-product.html">➕ زیادکردنی کاڵا</a>
+</div>
 
-    <label for="price">نرخی کاڵا (دینار)</label>
-    <input type="number" id="price" required>
+<div class="orders" id="ordersContainer">
+  <p class="no-orders">هیچ داواکاریەک نییە.</p>
+</div>
 
-    <label for="image">بەستەری وێنە (Image URL)</label>
-    <input type="url" id="image" required>
+<!-- جەرەس -->
+<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
 
-    <button type="submit">زیادکردن</button>
-    <div class="success" id="successMsg" style="display:none;">✅ کاڵا بەسەرکەوتوویی زیادکرا!</div>
-  </form>
+<script>
+  const ordersContainer = document.getElementById('ordersContainer');
 
-  <script>
-    const form = document.getElementById('productForm');
-    const successMsg = document.getElementById('successMsg');
+  function getOrders() {
+    try {
+      const data = localStorage.getItem('orders');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
+  function createProductHTML(product) {
+    return `
+      <div class="product">
+        <img src="${product.image}" alt="${product.name}" />
+        <div class="product-name">${product.name}</div>
+        <div class="product-price">${product.price.toLocaleString()} دینار</div>
+      </div>
+    `;
+  }
 
-      const name = document.getElementById('name').value.trim();
-      const price = parseInt(document.getElementById('price').value);
-      const image = document.getElementById('image').value.trim();
+  function renderOrders() {
+    const orders = getOrders();
 
-      const newProduct = { name, price, image };
+    if (orders.length === 0) {
+      ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
+      return;
+    }
 
-      let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    ordersContainer.innerHTML = '';
 
-      let guestOrder = orders.find(order => order.name === 'کریاری نادیار');
-      if (!guestOrder) {
-        guestOrder = {
-          name: 'کریاری نادیار',
-          mobile: '',
-          address: '',
-          gps: '',
-          time: new Date().toLocaleString(),
-          products: []
-        };
-        orders.push(guestOrder);
-      }
+    orders.forEach(order => {
+      const productsHTML = order.products.map(createProductHTML).join('');
 
-      guestOrder.products.push(newProduct);
-      localStorage.setItem('orders', JSON.stringify(orders));
+      const orderHTML = document.createElement('div');
+      orderHTML.className = 'order';
 
-      form.reset();
-      successMsg.style.display = 'block';
+      orderHTML.innerHTML = `
+        <div class="order-header">
+          <span>ناوی کریار: ${order.name}</span>
+          <span>ژمارە مۆبایل: ${order.mobile}</span>
+        </div>
+        <div class="order-info">
+          ناونیشان: ${order.address}<br/>
+          GPS: ${order.gps}<br/>
+          کاتی داواکاری: ${order.time}
+        </div>
+        <div class="products">${productsHTML}</div>
+      `;
 
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 2000);
+      ordersContainer.appendChild(orderHTML);
     });
-  </script>
+  }
+
+  function playAlarm() {
+    const audio = document.getElementById("alertSound");
+    audio.volume = 1.0;
+    audio.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
+  }
+
+  let lastOrdersLength = 0;
+
+  function checkForNewOrders() {
+    const currentOrders = getOrders();
+
+    if (currentOrders.length > lastOrdersLength) {
+      if (!document.hasFocus()) {
+        playAlarm();
+        alert("وەسڵی نوێ زیاد بوو!");
+      }
+      lastOrdersLength = currentOrders.length;
+      renderOrders();
+    }
+  }
+
+  window.onload = () => {
+    lastOrdersLength = getOrders().length;
+    renderOrders();
+    setInterval(checkForNewOrders, 3000); // check every 3 seconds
+  };
+</script>
 
 </body>
 </html>
