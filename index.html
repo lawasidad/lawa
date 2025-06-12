@@ -141,7 +141,7 @@
         document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
       },
       err => {
-        console.warn("GPS نەتوانرا وەرگیراوە:", err.message);
+        console.warn("هەڵەی GPS:", err.message);
         autoGps = null;
         document.getElementById("gps").value = "شوێن نەدۆزرایەوە";
       },
@@ -168,10 +168,12 @@
   function loadProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     productList.innerHTML = '';
+
     let total = 0;
 
     products.forEach(product => {
       const isSelected = selected[product.id] > 0;
+
       const div = document.createElement('div');
       div.className = 'product';
       if (isSelected) div.classList.add('selected');
@@ -218,6 +220,7 @@
         controls.appendChild(btnPlus);
 
         div.appendChild(controls);
+
         total += product.price * selected[product.id];
       }
 
@@ -263,7 +266,6 @@
     }
 
     const gps = autoGps;
-
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const selectedProducts = products
       .filter(p => selected[p.id])
