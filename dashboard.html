@@ -4,29 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
+  <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Rabar_013', sans-serif;
+      background: #f5f7fa;
+      margin: 0; padding: 20px;
       direction: rtl;
-      padding: 20px;
-      background: #f0f4f8;
     }
     h1 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #333;
+      color: #1a202c;
+      margin-bottom: 10px;
+    }
+    .add-link {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .add-link a {
+      display: inline-block;
+      background: #2b6cb0;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: bold;
     }
     .orders {
       max-width: 900px;
       margin: auto;
       background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+      min-height: 150px;
     }
     .order {
-      border-bottom: 1px solid #ddd;
-      padding: 15px 0;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 18px 0;
     }
     .order:last-child {
       border-bottom: none;
@@ -34,16 +49,17 @@
     .order-header {
       display: flex;
       justify-content: space-between;
+      margin-bottom: 10px;
       font-weight: bold;
-      color: #444;
-      margin-bottom: 8px;
+      color: #2d3748;
       flex-wrap: wrap;
       gap: 10px;
     }
     .order-info {
       font-size: 14px;
-      color: #666;
+      color: #4a5568;
       margin-bottom: 12px;
+      line-height: 1.5;
     }
     .products {
       display: flex;
@@ -51,29 +67,33 @@
       flex-wrap: wrap;
     }
     .product {
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 12px;
       padding: 10px;
-      width: 150px;
-      background: #fafafa;
+      width: 140px;
       text-align: center;
-      user-select: none;
+      background: #fefefe;
+      position: relative;
     }
     .product img {
       width: 100%;
-      height: 100px;
+      height: 120px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 12px;
       margin-bottom: 8px;
     }
     .product-name {
       font-weight: 700;
-      margin-bottom: 5px;
+      font-size: 16px;
+      margin-bottom: 4px;
+      word-break: break-word;
     }
     .product-price {
-      color: #777;
-      margin-bottom: 10px;
+      color: #718096;
+      font-size: 14px;
+      margin-bottom: 8px;
     }
+    /* New quantity controls */
     .quantity-controls {
       display: flex;
       justify-content: center;
@@ -81,149 +101,215 @@
       align-items: center;
     }
     .quantity-controls button {
-      padding: 4px 10px;
-      background: #007bff;
-      color: white;
+      background: #3182ce;
       border: none;
+      color: white;
+      padding: 4px 10px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 14px;
+      user-select: none;
     }
-    .quantity-controls button:hover {
-      background: #0056b3;
-    }
-    .quantity-value {
-      min-width: 20px;
+    .quantity-display {
+      font-weight: bold;
+      font-size: 16px;
+      min-width: 24px;
       text-align: center;
-      font-weight: 600;
     }
+
     .no-orders {
       text-align: center;
-      color: #888;
-      padding: 50px 0;
       font-size: 18px;
+      color: #a0aec0;
+      padding: 40px 0;
     }
-    .btn-delete {
-      margin-top: 10px;
-      background: #dc3545;
+    .play-alarm-btn, .print-btn {
+      display: block;
+      margin: 20px auto;
+      background: #2f855a;
       color: white;
       border: none;
-      padding: 6px 15px;
-      border-radius: 8px;
+      padding: 10px 30px;
+      font-size: 16px;
+      border-radius: 12px;
       cursor: pointer;
     }
-    .btn-delete:hover {
-      background: #a71d2a;
+    .checkbox-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .order-checkbox {
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    button {
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      opacity: 0.85;
     }
   </style>
 </head>
 <body>
 
-<h1>داشبۆردی وەسڵەکان</h1>
+<h1>وەسڵەکانی کریار</h1>
+
+<div class="add-link">
+  <a href="add-product.html">➕ زیادکردنی کاڵا</a>
+</div>
+
+<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
+
+<div class="checkbox-container">
+  <button onclick="printSelectedOrders()" class="print-btn">🖨️ پرینتی وەسڵە هەڵبژێردراوەکان</button>
+</div>
 
 <div class="orders" id="ordersContainer">
-  <p class="no-orders">هیچ وەسڵێک نییە.</p>
+  <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
 <script>
-  // فەرمی پاشەکەوتکردنی وەسڵەکان لە localStorage
+  const ordersContainer = document.getElementById('ordersContainer');
+  const enableSoundBtn = document.getElementById('enableSoundBtn');
+  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+
+  enableSoundBtn.addEventListener('click', () => {
+    alarmSound.play().then(() => {
+      alert('دەنگ چالاککرا!');
+      enableSoundBtn.style.display = 'none';
+    }).catch(err => {
+      alert('ناتوانرێت دەنگ چالاک بکرێت.');
+      console.error(err);
+    });
+  });
+
   function getOrders() {
-    const data = localStorage.getItem('orders');
-    return data ? JSON.parse(data) : [];
+    try {
+      const data = localStorage.getItem('orders');
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('Error parsing orders from localStorage', e);
+      return [];
+    }
   }
 
-  function saveOrders(orders) {
-    localStorage.setItem('orders', JSON.stringify(orders));
+  function createProductHTML(product, orderIndex, productIndex) {
+    const imageSrc = product.image || 'https://via.placeholder.com/140x120?text=No+Image';
+    const name = product.name || 'ناوی کاڵا نییە';
+    const price = typeof product.price === 'number' ? product.price.toLocaleString() : 'نەزانراو';
+    const quantity = typeof product.quantity === 'number' ? product.quantity : 1;
+
+    return `
+      <div class="product" data-order-index="${orderIndex}" data-product-index="${productIndex}">
+        <img src="${imageSrc}" alt="${name}" />
+        <div class="product-name">${name}</div>
+        <div class="product-price">${price} دینار</div>
+        <div class="quantity-controls">
+          <button onclick="changeQuantity(${orderIndex}, ${productIndex}, -1)">-</button>
+          <div class="quantity-display" id="qty-${orderIndex}-${productIndex}">${quantity}</div>
+          <button onclick="changeQuantity(${orderIndex}, ${productIndex}, 1)">+</button>
+        </div>
+      </div>
+    `;
   }
 
-  // گەڕاندنەوە و نیشاندانی وەسڵەکان
   function renderOrders() {
     const orders = getOrders();
-    const container = document.getElementById('ordersContainer');
 
     if (orders.length === 0) {
-      container.innerHTML = '<p class="no-orders">هیچ وەسڵێک نییە.</p>';
+      ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
       return;
     }
 
-    container.innerHTML = '';
+    ordersContainer.innerHTML = '';
 
     orders.forEach((order, orderIndex) => {
-      // دروستکردنی وەسڵ
-      const orderDiv = document.createElement('div');
-      orderDiv.className = 'order';
+      const productsHTML = Array.isArray(order.products) ? order.products.map((product, productIndex) => createProductHTML(product, orderIndex, productIndex)).join('') : '';
+      const orderHTML = document.createElement('div');
+      orderHTML.className = 'order';
+      orderHTML.dataset.index = orderIndex;
 
-      // زانیاری وەسڵ
-      orderDiv.innerHTML = `
+      const name = order.name || 'ناوی کریار نییە';
+      const mobile = order.mobile || 'ژمارە مۆبایل نییە';
+      const address = order.address || 'ناونیشان نییە';
+      const gps = order.gps || 'GPS نییە';
+      const time = order.time || 'کات نییە';
+
+      orderHTML.innerHTML = `
+        <div style="margin-bottom: 10px; text-align: center;">
+          <input type="checkbox" class="order-checkbox" data-index="${orderIndex}" id="checkbox-${orderIndex}" />
+          <label for="checkbox-${orderIndex}">وەسلەکە هەلبژێرە</label>
+        </div>
         <div class="order-header">
-          <span>ناوی کریار: ${order.name || 'بێ ناو'}</span>
-          <span>مۆبایل: ${order.mobile || 'نییە'}</span>
+          <span>ناوی کریار: ${name}</span>
+          <span>ژمارە مۆبایل: ${mobile}</span>
         </div>
         <div class="order-info">
-          ناونیشان: ${order.address || 'نییە'}<br>
-          GPS: ${order.gps || 'نییە'}<br>
-          کات: ${order.time || 'نییە'}
+          ناونیشان: ${address}<br/>
+          GPS: ${gps}<br/>
+          کاتی داواکاری: ${time}
         </div>
-        <div class="products" id="products-${orderIndex}">
-          <!-- کاڵاکان لێرە نیشان دەدرێن -->
+        <div class="products">${productsHTML}</div>
+        <div style="margin-top: 10px; text-align: center;">
+          <button onclick="editOrder(${orderIndex})" style="margin-right: 10px; padding:5px 10px; border-radius:8px; border:none; background:#3182ce; color:#fff; cursor:pointer;">Edit</button>
+          <button onclick="deleteOrder(${orderIndex})" style="padding:5px 10px; border-radius:8px; border:none; background:#e53e3e; color:#fff; cursor:pointer;">Delete</button>
         </div>
-        <button class="btn-delete" onclick="deleteOrder(${orderIndex})">سڕینەوەی وەسڵ</button>
       `;
-
-      container.appendChild(orderDiv);
-
-      // زیادکردنی کاڵاکان بۆ وەسڵەکە
-      const productsDiv = document.getElementById(`products-${orderIndex}`);
-
-      order.products.forEach((product, productIndex) => {
-        const prodDiv = document.createElement('div');
-        prodDiv.className = 'product';
-
-        prodDiv.innerHTML = `
-          <img src="${product.image || 'https://via.placeholder.com/150x100?text=No+Image'}" alt="${product.name}" />
-          <div class="product-name">${product.name}</div>
-          <div class="product-price">${product.price?.toLocaleString() || 0} دینار</div>
-          <div class="quantity-controls">
-            <button onclick="changeQuantity(${orderIndex}, ${productIndex}, -1)">-</button>
-            <div class="quantity-value" id="qty-${orderIndex}-${productIndex}">${product.quantity || 1}</div>
-            <button onclick="changeQuantity(${orderIndex}, ${productIndex}, 1)">+</button>
-          </div>
-        `;
-        productsDiv.appendChild(prodDiv);
-      });
+      ordersContainer.appendChild(orderHTML);
     });
   }
 
-  // گۆڕینی ژمارەی کاڵا لە وەسڵەکەدا
   function changeQuantity(orderIndex, productIndex, delta) {
     const orders = getOrders();
-    const product = orders[orderIndex]?.products[productIndex];
-    if (!product) return;
+    if (!orders[orderIndex]) return;
+    if (!orders[orderIndex].products[productIndex]) return;
 
-    let qty = product.quantity || 1;
-    qty += delta;
-    if (qty < 1) qty = 1;
-
-    product.quantity = qty;
-    saveOrders(orders);
+    let quantity = orders[orderIndex].products[productIndex].quantity || 1;
+    quantity += delta;
+    if (quantity < 1) quantity = 1;
+    orders[orderIndex].products[productIndex].quantity = quantity;
+    localStorage.setItem('orders', JSON.stringify(orders));
     renderOrders();
   }
 
-  // سڕینەوەی وەسڵ
-  function deleteOrder(orderIndex) {
-    const orders = getOrders();
-    if (!orders[orderIndex]) return;
-
-    if(confirm('دڵنیایت دەتەوێت ئەم وەسڵە بسڕیتەوە؟')) {
-      orders.splice(orderIndex, 1);
-      saveOrders(orders);
+  function checkForNewOrders() {
+    const currentOrders = getOrders();
+    if (currentOrders.length > lastOrdersLength) {
+      if (!document.hasFocus()) {
+        alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
+        alert("وەسڵی نوێ زیاد بوو!");
+      }
+      lastOrdersLength = currentOrders.length;
       renderOrders();
     }
   }
 
-  // نیشاندانی وەسڵەکان لە هەموو کاتێک کە لە ماڵپەڕەکە داونلود دەکرێت
-  renderOrders();
-</script>
+  function printSelectedOrders() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    if (checkboxes.length === 0) {
+      alert("تکایە یەک وەسل هەلبژێرە بۆ پرینت.");
+      return;
+    }
 
-</body>
-</html>
+    const printableOrders = [];
+
+    checkboxes.forEach(cb => {
+      const idx = cb.dataset.index;
+      const order = document.querySelector(`.order[data-index="${idx}"]`);
+      if (order) {
+        const clone = order.cloneNode(true);
+        clone.querySelectorAll('button, .order-checkbox, label').forEach(el => el.remove());
+        printableOrders.push(clone);
+      }
+    });
+
+    const newWindow = window.open('', '_blank', 'width=900,height=700');
+    newWindow.document.write(`
+      <html>
+      <head>
+        <title>وەسلەی چاپی</title>
+        <style>
+          body { font-family: 'Rabar_013', sans-serif; direction: rtl; padding: 30px; }
+          .order { border-bottom: 1px solid #999; padding: 20px 0; margin-bottom: 20px; }
+          .order-header { font-weight: bold; font-size: 18px; margin-bottom: 10
