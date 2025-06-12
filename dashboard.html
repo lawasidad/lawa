@@ -344,8 +344,26 @@
     const order = orders[index];
     if (!order) return alert("وەسڵ نەدۆزرایەوە.");
 
-    // Placeholder for editing logic — لێرە دەسکارییەکانی دابنێ بە پێویست
-    alert(`Editing order for: ${order.name}\n(کۆدی دەستکاری زیاد بکە لێرە)`);
+    // دەسکارییەکانی زیادکراو:
+    const newName = prompt("ناوی کریار نوێ بنوسە:", order.name || "");
+    if (newName !== null) order.name = newName.trim() || order.name;
+
+    const newMobile = prompt("ژمارە مۆبایل نوێ بنوسە:", order.mobile || "");
+    if (newMobile !== null) order.mobile = newMobile.trim() || order.mobile;
+
+    const newAddress = prompt("ناونیشان نوێ بنوسە:", order.address || "");
+    if (newAddress !== null) order.address = newAddress.trim() || order.address;
+
+    const newGPS = prompt("GPS نوێ بنوسە:", order.gps || "");
+    if (newGPS !== null) order.gps = newGPS.trim() || order.gps;
+
+    const newTime = prompt("کاتی داواکاری نوێ بنوسە:", order.time || "");
+    if (newTime !== null) order.time = newTime.trim() || order.time;
+
+    // وەک هەموو بژارەکان نێردرابێت بە localStorage و نیشاندەدات
+    orders[index] = order;
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrders();
   }
 
   function deleteOrder(index) {
