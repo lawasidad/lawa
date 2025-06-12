@@ -52,11 +52,14 @@
       margin-bottom: 10px;
       font-weight: bold;
       color: #2d3748;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .order-info {
       font-size: 14px;
       color: #4a5568;
       margin-bottom: 12px;
+      line-height: 1.5;
     }
     .products {
       display: flex;
@@ -82,6 +85,7 @@
       font-weight: 700;
       font-size: 16px;
       margin-bottom: 4px;
+      word-break: break-word;
     }
     .product-price {
       color: #718096;
@@ -93,6 +97,31 @@
       color: #a0aec0;
       padding: 40px 0;
     }
+    .play-alarm-btn, .print-btn {
+      display: block;
+      margin: 20px auto;
+      background: #2f855a;
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .checkbox-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .order-checkbox {
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    button {
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      opacity: 0.85;
+    }
   </style>
 </head>
 <body>
@@ -103,28 +132,51 @@
   <a href="add-product.html">➕ زیادکردنی کاڵا</a>
 </div>
 
+<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
+
+<div class="checkbox-container">
+  <button onclick="printSelectedOrders()" class="print-btn">🖨️ پرینتی وەسڵە هەڵبژێردراوەکان</button>
+</div>
+
 <div class="orders" id="ordersContainer">
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
+  const enableSoundBtn = document.getElementById('enableSoundBtn');
+  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+
+  enableSoundBtn.addEventListener('click', () => {
+    alarmSound.play().then(() => {
+      alert('دەنگ چالاککرا!');
+      enableSoundBtn.style.display = 'none';
+    }).catch(err => {
+      alert('ناتوانرێت دەنگ چالاک بکرێت.');
+      console.error(err);
+    });
+  });
 
   function getOrders() {
     try {
       const data = localStorage.getItem('orders');
       return data ? JSON.parse(data) : [];
-    } catch {
+    } catch (e) {
+      console.error('Error parsing orders from localStorage', e);
       return [];
     }
   }
 
   function createProductHTML(product) {
+    const imageSrc = product.image || 'https://via.placeholder.com/140x120?text=No+Image';
+    const name = product.name || 'ناوی کاڵا نییە';
+    const price = typeof product.price === 'number' ? product.price.toLocaleString() : 'نەزانراو';
+
     return `
       <div class="product">
-        <img src="${product.image}" alt="${product.name}" />
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${product.price.toLocaleString()} دینار</div>
+        <img src="${imageSrc}" alt="${name}" />
+        <div class="product-name">${name}</div>
+        <div class="product-price">${price} دینار</div>
       </div>
     `;
   }
@@ -139,42 +191,47 @@
 
     ordersContainer.innerHTML = '';
 
-    orders.forEach(order => {
-      const productsHTML = order.products.map(createProductHTML).join('');
-
+    orders.forEach((order, index) => {
+      const productsHTML = Array.isArray(order.products) ? order.products.map(createProductHTML).join('') : '';
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
+      orderHTML.dataset.index = index;
+
+      const name = order.name || 'ناوی کریار نییە';
+      const mobile = order.mobile || 'ژمارە مۆبایل نییە';
+      const address = order.address || 'ناونیشان نییە';
+      const gps = order.gps || 'GPS نییە';
+      const time = order.time || 'کات نییە';
 
       orderHTML.innerHTML = `
+        <div style="margin-bottom: 10px; text-align: center;">
+          <input type="checkbox" class="order-checkbox" data-index="${index}" id="checkbox-${index}" />
+          <label for="checkbox-${index}">وەسلەکە هەلبژێرە</label>
+        </div>
         <div class="order-header">
-          <span>ناوی کریار: ${order.name}</span>
-          <span>ژمارە مۆبایل: ${order.mobile}</span>
+          <span>ناوی کریار: ${name}</span>
+          <span>ژمارە مۆبایل: ${mobile}</span>
         </div>
         <div class="order-info">
-          ناونیشان: ${order.address}<br/>
-          GPS: ${order.gps}<br/>
-          کاتی داواکاری: ${order.time}
+          ناونیشان: ${address}<br/>
+          GPS: ${gps}<br/>
+          کاتی داواکاری: ${time}
         </div>
         <div class="products">${productsHTML}</div>
+        <div style="margin-top: 10px; text-align: center;">
+          <button onclick="editOrder(${index})" style="margin-right: 10px; padding:5px 10px; border-radius:8px; border:none; background:#3182ce; color:#fff; cursor:pointer;">Edit</button>
+          <button onclick="deleteOrder(${index})" style="padding:5px 10px; border-radius:8px; border:none; background:#e53e3e; color:#fff; cursor:pointer;">Delete</button>
+        </div>
       `;
-
       ordersContainer.appendChild(orderHTML);
     });
   }
 
-  function playAlarm() {
-    const audio = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-    audio.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
-  }
-
-  let lastOrdersLength = 0;
-
   function checkForNewOrders() {
     const currentOrders = getOrders();
-
     if (currentOrders.length > lastOrdersLength) {
       if (!document.hasFocus()) {
-        playAlarm();
+        alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
         alert("وەسڵی نوێ زیاد بوو!");
       }
       lastOrdersLength = currentOrders.length;
@@ -182,10 +239,95 @@
     }
   }
 
+  function printSelectedOrders() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    if (checkboxes.length === 0) {
+      alert("تکایە یەک وەسل هەلبژێرە بۆ پرینت.");
+      return;
+    }
+
+    const printableOrders = [];
+
+    checkboxes.forEach(cb => {
+      const idx = cb.dataset.index;
+      const order = document.querySelector(`.order[data-index="${idx}"]`);
+      if (order) {
+        const clone = order.cloneNode(true);
+        clone.querySelectorAll('button, .order-checkbox, label').forEach(el => el.remove());
+        printableOrders.push(clone);
+      }
+    });
+
+    const newWindow = window.open('', '_blank', 'width=900,height=700');
+    newWindow.document.write(`
+      <html>
+      <head>
+        <title>وەسلەی چاپی</title>
+        <style>
+          body { font-family: 'Rabar_013', sans-serif; direction: rtl; padding: 30px; }
+          .order { border-bottom: 1px solid #999; padding: 20px 0; margin-bottom: 20px; }
+          .order-header { font-weight: bold; font-size: 18px; margin-bottom: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+          .order-info { font-size: 14px; margin-bottom: 10px; line-height: 1.5; }
+          .products { display: flex; flex-wrap: wrap; gap: 12px; }
+          .product { width: 140px; border: 1px solid #ccc; border-radius: 10px; padding: 10px; text-align: center; background: #fff; }
+          .product img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
+          .product-name { font-weight: bold; }
+          .product-price { font-size: 13px; color: #555; }
+          h2 { text-align: center; margin-bottom: 30px; }
+        </style>
+      </head>
+      <body>
+        <h2>🧾 وەسلەی کریار</h2>
+    `);
+    printableOrders.forEach(order => {
+      newWindow.document.body.appendChild(order);
+    });
+    newWindow.document.write(`</body></html>`);
+    newWindow.document.close();
+    newWindow.focus();
+    newWindow.print();
+  }
+
+  function editOrder(index) {
+    const orders = getOrders();
+    const order = orders[index];
+    if (!order) return alert("وەسڵ نەدۆزرایەوە.");
+
+    const newName = prompt("ناوی کریار نوێ بنوسە:", order.name || "");
+    if (newName !== null) order.name = newName.trim() || order.name;
+
+    const newMobile = prompt("ژمارە مۆبایل نوێ بنوسە:", order.mobile || "");
+    if (newMobile !== null) order.mobile = newMobile.trim() || order.mobile;
+
+    const newAddress = prompt("ناونیشان نوێ بنوسە:", order.address || "");
+    if (newAddress !== null) order.address = newAddress.trim() || order.address;
+
+    const newGPS = prompt("GPS نوێ بنوسە:", order.gps || "");
+    if (newGPS !== null) order.gps = newGPS.trim() || order.gps;
+
+    const newTime = prompt("کاتی داواکاری نوێ بنوسە:", order.time || "");
+    if (newTime !== null) order.time = newTime.trim() || order.time;
+
+    orders[index] = order;
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrders();
+  }
+
+  function deleteOrder(index) {
+    if (!confirm("دڵنیایت لە سڕینەوەی ئەم وەسڵە؟")) return;
+
+    const orders = getOrders();
+    orders.splice(index, 1);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrders();
+  }
+
+  let lastOrdersLength = 0;
+
   window.onload = () => {
     lastOrdersLength = getOrders().length;
     renderOrders();
-    setInterval(checkForNewOrders, 3000); // check every 3 seconds
+    setInterval(checkForNewOrders, 3000);
   };
 </script>
 
