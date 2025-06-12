@@ -111,6 +111,37 @@
     .order-checkbox {
       margin-left: 8px;
     }
+
+    /* زیادکردنی ستایلی چاپ بۆ A4 */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        width: 210mm;  /* A4 width */
+        height: 297mm; /* A4 height */
+        overflow: visible;
+        font-size: 12pt;
+      }
+      .order {
+        page-break-inside: avoid;
+        page-break-after: auto;
+        width: 190mm;
+        margin: auto;
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+        padding: 10mm !important;
+      }
+      .products {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        page-break-inside: avoid;
+      }
+    }
   </style>
 </head>
 <body>
@@ -169,10 +200,6 @@
     `;
   }
 
-  function calculateTotalOrderPrice(order) {
-    return order.products.reduce((sum, product) => sum + product.price, 0);
-  }
-
   function renderOrders() {
     const orders = getOrders();
 
@@ -185,7 +212,6 @@
 
     orders.forEach((order, index) => {
       const productsHTML = order.products.map(createProductHTML).join('');
-      const totalPrice = calculateTotalOrderPrice(order);
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
       orderHTML.dataset.index = index;
@@ -204,9 +230,6 @@
           کاتی داواکاری: ${order.time}
         </div>
         <div class="products">${productsHTML}</div>
-        <div style="margin-top: 12px; font-weight: bold; color: #2f855a;">
-          کۆی گشتی پارە: ${totalPrice.toLocaleString()} دینار
-        </div>
       `;
 
       ordersContainer.prepend(orderHTML);
