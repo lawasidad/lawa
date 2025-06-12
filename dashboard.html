@@ -111,6 +111,64 @@
     .order-checkbox {
       margin-left: 8px;
     }
+
+    /* Modal styles */
+    #editModal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; top: 0; width: 100%; height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.5);
+    }
+    #editModalContent {
+      background: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 16px;
+      max-width: 600px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #editModalContent h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    #editModalContent label {
+      display: block;
+      margin: 10px 0 4px;
+      font-weight: bold;
+    }
+    #editModalContent input[type="text"],
+    #editModalContent input[type="tel"],
+    #editModalContent textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #cbd5e0;
+      font-size: 16px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    #editModalContent textarea {
+      height: 60px;
+    }
+    #editModalContent button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #saveEditBtn {
+      background-color: #2b6cb0;
+      color: white;
+      margin-right: 10px;
+    }
+    #cancelEditBtn {
+      background-color: #e53e3e;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -131,10 +189,41 @@
   <p class="no-orders">هیچ داواکاریەک نییە.</p>
 </div>
 
+<!-- Edit Modal -->
+<div id="editModal">
+  <div id="editModalContent">
+    <h2>دەسکاریکردنی وەسڵ</h2>
+    <form id="editForm">
+      <label for="editName">ناوی کریار</label>
+      <input type="text" id="editName" name="name" required />
+
+      <label for="editMobile">ژمارە مۆبایل</label>
+      <input type="tel" id="editMobile" name="mobile" pattern="[0-9+()-\s]+" required />
+
+      <label for="editAddress">ناونیشان</label>
+      <textarea id="editAddress" name="address" required></textarea>
+
+      <label for="editGPS">GPS</label>
+      <input type="text" id="editGPS" name="gps" />
+
+      <label for="editTime">کاتی داواکاری</label>
+      <input type="text" id="editTime" name="time" required />
+
+      <div style="margin-top: 10px;">
+        <button type="submit" id="saveEditBtn">پاشەکەوتکردن</button>
+        <button type="button" id="cancelEditBtn">هەڵگرتنەوە</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
   const enableSoundBtn = document.getElementById('enableSoundBtn');
   const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+
+  let orders = [];
+  let editingIndex = null;
 
   enableSoundBtn.addEventListener('click', () => {
     alarmSound.play().then(() => {
@@ -155,6 +244,11 @@
     }
   }
 
+  function saveOrders(updatedOrders) {
+    localStorage.setItem('orders', JSON.stringify(updatedOrders));
+    orders = updatedOrders;
+  }
+
   function createProductHTML(product) {
     return `
       <div class="product">
@@ -166,7 +260,7 @@
   }
 
   function renderOrders() {
-    const orders = getOrders();
+    orders = getOrders();
 
     if (orders.length === 0) {
       ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
@@ -207,12 +301,12 @@
 
   function checkForNewOrders() {
     const currentOrders = getOrders();
-    if (currentOrders.length > lastOrdersLength) {
+    if (currentOrders.length > orders.length) {
       if (!document.hasFocus()) {
         alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
         alert("وەسڵی نوێ زیاد بوو!");
       }
-      lastOrdersLength = currentOrders.length;
+      orders = currentOrders;
       renderOrders();
     }
   }
@@ -299,31 +393,51 @@
     newWindow.print();
   }
 
+  // --- Edit order functions ---
+  const editModal = document.getElementById('editModal');
+  const editForm = document.getElementById('editForm');
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+
   function editOrder(index) {
-    const orders = getOrders();
+    editingIndex = index;
     const order = orders[index];
     if (!order) return alert("وەسڵ نەدۆزرایەوە.");
 
-    alert(`Editing order for: ${order.name}\n(کۆدی دەستکاری زیاد بکە لێرە)`);
+    // Fill form inputs
+    editForm.editName.value = order.name || '';
+    editForm.editMobile.value = order.mobile || '';
+    editForm.editAddress.value = order.address || '';
+    editForm.editGPS.value = order.gps || '';
+    editForm.editTime.value = order.time || '';
+
+    editModal.style.display = 'block';
   }
+
+  cancelEditBtn.addEventListener('click', () => {
+    editModal.style.display = 'none';
+    editingIndex = null;
+  });
+
+  editForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if (editingIndex === null) return;
+
+    // Update order data
+    orders[editingIndex] = {
+      ...orders[editingIndex],
+      name: editForm.editName.value.trim(),
+      mobile: editForm.editMobile.value.trim(),
+      address: editForm.editAddress.value.trim(),
+      gps: editForm.editGPS.value.trim(),
+      time: editForm.editTime.value.trim(),
+      products: orders[editingIndex].products || []
+    };
+
+    saveOrders(orders);
+    renderOrders();
+    editModal.style.display = 'none';
+    editingIndex = null;
+  });
 
   function deleteOrder(index) {
-    if (!confirm("دڵنیایت لە سڕینەوەی ئەم وەسڵە؟")) return;
-
-    const orders = getOrders();
-    orders.splice(index, 1);
-    localStorage.setItem('orders', JSON.stringify(orders));
-    renderOrders();
-  }
-
-  let lastOrdersLength = 0;
-
-  window.onload = () => {
-    lastOrdersLength = getOrders().length;
-    renderOrders();
-    setInterval(checkForNewOrders, 3000);
-  };
-</script>
-
-</body>
-</html>
+    if (!confirm("دڵنیایت لە سڕینەوەی ئەم وەسڵە؟"))
