@@ -107,10 +107,28 @@
 
   <button type="submit">✅ ناردنی داواکاری</button>
   <p id="successMessage" style="color:green; display:none; font-weight:bold; margin-top: 15px;">✅ داواکاری نێردرا!</p>
-  <p id="totalPriceDisplay" style="font-weight:bold; margin-top: 10px;"></p>
 </form>
 
 <script>
+  let autoGps = null;
+
+  async function autoFetchGPS() {
+    if (!navigator.geolocation) {
+      console.warn("گێڕی GPS پشتیوانی ناکرێت.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(pos => {
+      autoGps = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude
+      };
+    }, err => {
+      console.warn("ناتوانرێت GPS بگرت.");
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', autoFetchGPS);
+
   if (!localStorage.getItem('products')) {
     const sampleProducts = [
       { id: 1, name: 'شەکر', price: 2000, image: 'https://via.placeholder.com/160?text=شەکر', quantity: 1 },
@@ -122,19 +140,6 @@
 
   let selected = [];
   const productList = document.getElementById('productList');
-
-  function updateTotalPrice() {
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    let selectedProducts = products.filter(p => selected.includes(p.id));
-    let total = selectedProducts.reduce((sum, p) => {
-      return sum + (p.price * (p.quantity || 1));
-    }, 0);
-
-    const display = document.getElementById('totalPriceDisplay');
-    if (display) {
-      display.textContent = `💰 کۆی گشتی: ${total.toLocaleString()} دینار`;
-    }
-  }
 
   function loadProducts() {
     let products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -202,8 +207,6 @@
 
       productList.appendChild(div);
     });
-
-    updateTotalPrice();
   }
 
   function updateProductQuantity(productId, qty) {
@@ -230,29 +233,7 @@
       return;
     }
 
-    function getCurrentPosition() {
-      return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-          reject('گێڕی GPS پشتیوانی ناکرێت لە ئەم دێڤایسە.');
-        } else {
-          navigator.geolocation.getCurrentPosition(pos => {
-            resolve({
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude
-            });
-          }, err => {
-            reject('ناتوانرێت GPS بگرت.');
-          });
-        }
-      });
-    }
-
-    let gpsCoords = null;
-    try {
-      gpsCoords = await getCurrentPosition();
-    } catch (err) {
-      console.warn(err);
-    }
+    let gpsCoords = autoGps;
 
     let products = JSON.parse(localStorage.getItem('products') || '[]');
     let selectedProducts = products.filter(p => selected.includes(p.id));
@@ -282,7 +263,6 @@
     selected = [];
     document.getElementById('orderForm').reset();
     loadProducts();
-    updateTotalPrice();
   });
 </script>
 
