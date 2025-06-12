@@ -131,26 +131,13 @@
 
   async function autoFetchGPS() {
     if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        autoGps = {
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude
-        };
-        document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
-      },
-      err => {
-        console.warn("هەڵەی GPS:", err.message);
-        autoGps = null;
-        document.getElementById("gps").value = "شوێن نەدۆزرایەوە";
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      }
-    );
+    navigator.geolocation.getCurrentPosition(pos => {
+      autoGps = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude
+      };
+      document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
+    });
   }
 
   if (!localStorage.getItem('products')) {
@@ -168,7 +155,6 @@
   function loadProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     productList.innerHTML = '';
-
     let total = 0;
 
     products.forEach(product => {
@@ -218,9 +204,7 @@
         controls.appendChild(btnMinus);
         controls.appendChild(qtySpan);
         controls.appendChild(btnPlus);
-
         div.appendChild(controls);
-
         total += product.price * selected[product.id];
       }
 
@@ -266,6 +250,7 @@
     }
 
     const gps = autoGps;
+
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const selectedProducts = products
       .filter(p => selected[p.id])
@@ -286,7 +271,7 @@
       address,
       products: selectedProducts,
       time: new Date().toLocaleString(),
-      gps,
+      gps: gps ? `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}` : "شوێن نەدۆزرایەوە",
       total: totalAmount
     };
 
