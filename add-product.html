@@ -2,51 +2,184 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <title>کۆمپانیای دۆی قەندیل – سەرەکی</title>
+  <title>بەڕێوەبردنی کاڵاکان</title>
   <style>
     body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f4f4f4; }
     h2 { margin-bottom: 10px; }
+    label, input, button { display: block; margin: 10px 0; }
+    input[type="text"], input[type="number"], input[type="file"] {
+      padding: 8px; width: 100%; max-width: 300px;
+    }
+    button {
+      padding: 10px; background: #007bff; color: white; border: none;
+      cursor: pointer; margin-left: 5px;
+    }
     .product {
-      background: #fff; padding: 10px; border: 1px solid #ddd;
+      background: white; padding: 10px; border: 1px solid #ddd;
       margin: 10px 0; display: flex; align-items: center;
+      justify-content: space-between;
+    }
+    .product-info {
+      display: flex; align-items: center;
     }
     .product img {
       width: 80px; height: 80px; object-fit: cover; margin-left: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .actions button {
+      background: #dc3545;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      margin-left: 5px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .actions button.edit {
+      background: #28a745;
     }
   </style>
 </head>
 <body>
 
-<h2>📋 لیستی کاڵاکانی هەنووکە</h2>
+<h2>زیادکردنی کاڵا</h2>
+<form id="addProductForm">
+  <label>ناوی کاڵا</label>
+  <input type="text" id="productName" required placeholder="ناوی کاڵاکە" />
+
+  <label>نرخ (دینار)</label>
+  <input type="number" id="productPrice" required placeholder="نرخی کاڵا" min="0" step="any" />
+
+  <label>وێنەی کاڵا</label>
+  <input type="file" id="productImage" accept="image/*" />
+
+  <button type="submit">📦 زیادکردن</button>
+</form>
+
+<hr />
+
+<h2>📋 لیستی کاڵاکان</h2>
 <div id="productList"></div>
 
 <script>
+  let editMode = false;
+  let editId = null;
+
+  const form = document.getElementById('addProductForm');
+  const list = document.getElementById('productList');
+
+  // نیشاندانی لیستی کاڵا
   function renderProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const list = document.getElementById('productList');
     list.innerHTML = '';
 
     if (products.length === 0) {
-      list.innerHTML = '<p>❌ هیچ کاڵایەک بوونی نیە.</p>';
+      list.innerHTML = '<p>❌ هیچ کاڵایەک نەزیادکراوە.</p>';
       return;
     }
 
     products.forEach(product => {
       const item = document.createElement('div');
       item.className = 'product';
+
       item.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" />
-        <div>
-          <h4>${product.name}</h4>
-          <p>${product.price.toLocaleString()} دینار</p>
+        <div class="product-info">
+          <img src="${product.image}" alt="${product.name}" />
+          <div>
+            <h4>${product.name}</h4>
+            <p>${product.price.toLocaleString()} دینار</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="edit" onclick="editProduct(${product.id})">✏️ دەسکاری</button>
+          <button onclick="deleteProduct(${product.id})">🗑️ سڕینەوە</button>
         </div>
       `;
       list.appendChild(item);
     });
   }
 
+  // سڕینەوەی کاڵا
+  function deleteProduct(id) {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    products = products.filter(p => p.id !== id);
+    localStorage.setItem('products', JSON.stringify(products));
+    renderProducts();
+  }
+
+  // دەسکاریی کاڵا
+  function editProduct(id) {
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === id);
+    if (product) {
+      document.getElementById('productName').value = product.name;
+      document.getElementById('productPrice').value = product.price;
+      editId = id;
+      editMode = true;
+    }
+  }
+
+  // زیادکردن یان نوێکردنەوەی کاڵا
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('productName').value.trim();
+    const price = Number(document.getElementById('productPrice').value);
+    const fileInput = document.getElementById('productImage');
+    const file = fileInput.files[0];
+
+    if (editMode) {
+      let products = JSON.parse(localStorage.getItem('products') || '[]');
+      let index = products.findIndex(p => p.id === editId);
+
+      const updateProduct = (imageData) => {
+        products[index] = {
+          ...products[index],
+          name,
+          price,
+          image: imageData || products[index].image
+        };
+        localStorage.setItem('products', JSON.stringify(products));
+        renderProducts();
+        form.reset();
+        editMode = false;
+        editId = null;
+      };
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => updateProduct(event.target.result);
+        reader.readAsDataURL(file);
+      } else {
+        updateProduct();
+      }
+    } else {
+      if (!file) {
+        alert("تکایە وێنەیەک هەلبژێرە.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const image = event.target.result;
+        let products = JSON.parse(localStorage.getItem('products') || '[]');
+        products.push({
+          id: Date.now(),
+          name,
+          price,
+          image
+        });
+        localStorage.setItem('products', JSON.stringify(products));
+        renderProducts();
+        form.reset();
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // نیشاندانی کاڵاکان لە کاتی بارکردنەوەی پەڕە
   window.addEventListener('DOMContentLoaded', renderProducts);
-  window.addEventListener('storage', renderProducts);
 </script>
 
 </body>
