@@ -111,14 +111,12 @@
     .order-checkbox {
       margin-left: 8px;
     }
-
-    /* زیادکردنی ستایلی چاپ بۆ A4 */
     @media print {
       body {
         margin: 0;
         padding: 0;
-        width: 210mm;  /* A4 width */
-        height: 297mm; /* A4 height */
+        width: 210mm;
+        height: 297mm;
         overflow: visible;
         font-size: 12pt;
       }
@@ -195,7 +193,7 @@
       <div class="product">
         <img src="${product.image}" alt="${product.name}" />
         <div class="product-name">${product.name}</div>
-        <div class="product-price">${product.price.toLocaleString()} دینار</div>
+        <div class="product-price">${Number(product.price || 0).toLocaleString()} دینار</div>
       </div>
     `;
   }
@@ -212,6 +210,8 @@
 
     orders.forEach((order, index) => {
       const productsHTML = order.products.map(createProductHTML).join('');
+      const totalAmount = order.products.reduce((sum, p) => sum + Number(p.price || 0), 0);
+
       const orderHTML = document.createElement('div');
       orderHTML.className = 'order';
       orderHTML.dataset.index = index;
@@ -227,7 +227,8 @@
         <div class="order-info">
           ناونیشان: ${order.address}<br/>
           GPS: ${order.gps}<br/>
-          کاتی داواکاری: ${order.time}
+          کاتی داواکاری: ${order.time}<br/>
+          <strong>💰 کۆی گشتی پارە: ${totalAmount.toLocaleString()} دینار</strong>
         </div>
         <div class="products">${productsHTML}</div>
       `;
@@ -338,7 +339,6 @@
     setInterval(checkForNewOrders, 3000);
   };
 
-  // ✅ Checkbox for selecting all orders
   document.getElementById('selectAllCheckbox').addEventListener('change', function() {
     const allCheckboxes = document.querySelectorAll('.order-checkbox');
     allCheckboxes.forEach(cb => cb.checked = this.checked);
