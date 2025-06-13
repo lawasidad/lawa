@@ -21,8 +21,12 @@
     .product img {
       width: 80px; height: 80px; object-fit: cover; margin-left: 10px;
     }
-    .actions button { background: #dc3545; }
-    .actions button.edit { background: #28a745; }
+    .actions button {
+      background: #dc3545;
+    }
+    .actions button.edit {
+      background: #28a745;
+    }
   </style>
 </head>
 <body>
@@ -38,12 +42,12 @@
   <label>وێنەی کاڵا</label>
   <input type="file" id="productImage" accept="image/*" />
 
-  <button type="submit">زیادکردن</button>
+  <button type="submit">📦 زیادکردن</button>
 </form>
 
 <hr />
 
-<h2>لیستی کاڵاکان</h2>
+<h2>📋 لیستی کاڵاکان</h2>
 <div id="productList"></div>
 
 <script>
@@ -53,12 +57,13 @@
   const form = document.getElementById('addProductForm');
   const list = document.getElementById('productList');
 
+  // لیستی کاڵاکان پیشان بدە
   function renderProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     list.innerHTML = '';
 
     if (products.length === 0) {
-      list.innerHTML = '<p>هیچ کاڵایەک نەزیادکراوە.</p>';
+      list.innerHTML = '<p>❌ هیچ کاڵایەک نەزیادکراوە.</p>';
       return;
     }
 
@@ -69,10 +74,10 @@
         <img src="${product.image}" alt="${product.name}" />
         <div>
           <h4>${product.name}</h4>
-          <p>${product.price} دینار</p>
+          <p>${product.price.toLocaleString()} دینار</p>
           <div class="actions">
-            <button class="edit" onclick="editProduct(${product.id})">دەسکاری</button>
-            <button onclick="deleteProduct(${product.id})">سڕینەوە</button>
+            <button class="edit" onclick="editProduct(${product.id})">✏️ دەسکاری</button>
+            <button onclick="deleteProduct(${product.id})">🗑️ سڕینەوە</button>
           </div>
         </div>
       `;
@@ -80,6 +85,7 @@
     });
   }
 
+  // سڕینەوەی کاڵا
   function deleteProduct(id) {
     let products = JSON.parse(localStorage.getItem('products') || '[]');
     products = products.filter(p => p.id !== id);
@@ -87,6 +93,7 @@
     renderProducts();
   }
 
+  // دەسکاریی کاڵا
   function editProduct(id) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const product = products.find(p => p.id === id);
@@ -98,6 +105,7 @@
     }
   }
 
+  // زیادکردن یان نوێکردنەوەی کاڵا
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -109,28 +117,27 @@
     if (editMode) {
       let products = JSON.parse(localStorage.getItem('products') || '[]');
       let index = products.findIndex(p => p.id === editId);
-      if (index !== -1) {
-        const updateProduct = (imageData) => {
-          products[index] = {
-            ...products[index],
-            name,
-            price,
-            image: imageData || products[index].image
-          };
-          localStorage.setItem('products', JSON.stringify(products));
-          renderProducts();
-          form.reset();
-          editMode = false;
-          editId = null;
-        };
 
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => updateProduct(event.target.result);
-          reader.readAsDataURL(file);
-        } else {
-          updateProduct();
-        }
+      const updateProduct = (imageData) => {
+        products[index] = {
+          ...products[index],
+          name,
+          price,
+          image: imageData || products[index].image
+        };
+        localStorage.setItem('products', JSON.stringify(products));
+        renderProducts();
+        form.reset();
+        editMode = false;
+        editId = null;
+      };
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => updateProduct(event.target.result);
+        reader.readAsDataURL(file);
+      } else {
+        updateProduct();
       }
     } else {
       if (!file) {
