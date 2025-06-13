@@ -2,24 +2,38 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <title>زیادکردنی کاڵا</title>
+  <title>بەڕێوەبردنی کاڵاکان</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; direction: rtl; }
+    body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f4f4f4; }
+    h2 { margin-bottom: 10px; }
     label, input, button { display: block; margin: 10px 0; }
-    input { padding: 8px; width: 100%; max-width: 300px; }
-    button { padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
+    input[type="text"], input[type="number"], input[type="file"] {
+      padding: 8px; width: 100%; max-width: 300px;
+    }
+    button {
+      padding: 10px; background: #007bff; color: white; border: none;
+      cursor: pointer; margin-left: 5px;
+    }
+    .product {
+      background: white; padding: 10px; border: 1px solid #ddd;
+      margin: 10px 0; display: flex; align-items: center;
+    }
+    .product img {
+      width: 80px; height: 80px; object-fit: cover; margin-left: 10px;
+    }
+    .actions button { background: #dc3545; }
+    .actions button.edit { background: #28a745; }
   </style>
 </head>
 <body>
 
 <h2>زیادکردنی کاڵا</h2>
-
 <form id="addProductForm">
   <label>ناوی کاڵا</label>
-  <input type="text" id="productName" required placeholder="ناوی کاڵاکە بنووسە" />
+  <input type="text" id="productName" required placeholder="ناوی کاڵاکە" />
 
   <label>نرخ (دینار)</label>
-  <input type="number" id="productPrice" required placeholder="نرخی کاڵاکە بنووسە" />
+  <input type="number" id="productPrice" required placeholder="نرخی کاڵا" />
 
   <label>وێنەی کاڵا</label>
   <input type="file" id="productImage" accept="image/*" />
@@ -27,50 +41,122 @@
   <button type="submit">زیادکردن</button>
 </form>
 
-<p id="msg" style="color:green;"></p>
+<hr />
+
+<h2>لیستی کاڵاکان</h2>
+<div id="productList"></div>
 
 <script>
+  let editMode = false;
+  let editId = null;
+
   const form = document.getElementById('addProductForm');
-  const msg = document.getElementById('msg');
+  const list = document.getElementById('productList');
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();
+  function renderProducts() {
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    list.innerHTML = '';
 
-    let name = document.getElementById('productName').value.trim();
-    let price = Number(document.getElementById('productPrice').value);
-    let fileInput = document.getElementById('productImage');
-    let file = fileInput.files[0];
-
-    if (!file) {
-      msg.textContent = "تکایە وێنەیەک هەلبژێرە.";
+    if (products.length === 0) {
+      list.innerHTML = '<p>هیچ کاڵایەک نەزیادکراوە.</p>';
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      let imageData = event.target.result;
+    products.forEach(product => {
+      const item = document.createElement('div');
+      item.className = 'product';
+      item.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" />
+        <div>
+          <h4>${product.name}</h4>
+          <p>${product.price} دینار</p>
+          <div class="actions">
+            <button class="edit" onclick="editProduct(${product.id})">دەسکاری</button>
+            <button onclick="deleteProduct(${product.id})">سڕینەوە</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+  }
 
+  function deleteProduct(id) {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    products = products.filter(p => p.id !== id);
+    localStorage.setItem('products', JSON.stringify(products));
+    renderProducts();
+  }
+
+  function editProduct(id) {
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === id);
+    if (product) {
+      document.getElementById('productName').value = product.name;
+      document.getElementById('productPrice').value = product.price;
+      editId = id;
+      editMode = true;
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('productName').value.trim();
+    const price = Number(document.getElementById('productPrice').value);
+    const fileInput = document.getElementById('productImage');
+    const file = fileInput.files[0];
+
+    if (editMode) {
       let products = JSON.parse(localStorage.getItem('products') || '[]');
-      products.push({
-        id: Date.now(),
-        name,
-        price,
-        image: imageData
-      });
+      let index = products.findIndex(p => p.id === editId);
+      if (index !== -1) {
+        const updateProduct = (imageData) => {
+          products[index] = {
+            ...products[index],
+            name,
+            price,
+            image: imageData || products[index].image
+          };
+          localStorage.setItem('products', JSON.stringify(products));
+          renderProducts();
+          form.reset();
+          editMode = false;
+          editId = null;
+        };
 
-      localStorage.setItem('products', JSON.stringify(products));
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => updateProduct(event.target.result);
+          reader.readAsDataURL(file);
+        } else {
+          updateProduct();
+        }
+      }
+    } else {
+      if (!file) {
+        alert("تکایە وێنەیەک هەلبژێرە.");
+        return;
+      }
 
-      msg.textContent = "کاڵاکە بەسەرکەوتویی زیاد کرا!";
-      form.reset();
-
-      // بەردەوام بوون بۆ index.html
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1500);
-    };
-
-    reader.readAsDataURL(file); // وێنەکە دەبێت base64 بکرێتەوە
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const image = event.target.result;
+        let products = JSON.parse(localStorage.getItem('products') || '[]');
+        products.push({
+          id: Date.now(),
+          name,
+          price,
+          image
+        });
+        localStorage.setItem('products', JSON.stringify(products));
+        renderProducts();
+        form.reset();
+      };
+      reader.readAsDataURL(file);
+    }
   });
+
+  renderProducts();
 </script>
 
 </body>
