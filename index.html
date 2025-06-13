@@ -103,10 +103,6 @@
 </head>
 <body>
 
-<a href="https://wa.me/9647502020061" target="_blank" style="position: fixed; top: 20px; left: 20px; z-index: 9999; background: #25d366; color: white; padding: 10px 15px; border-radius: 8px; font-weight: bold; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-  واتس‌ئاپ 📱
-</a>
-
 <h2>فۆرمی داواکاری کاڵا</h2>
 
 <div class="product-list" id="productList"></div>
@@ -293,6 +289,25 @@
     let orders = JSON.parse(localStorage.getItem('orders') || '[]');
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
+
+    // 📤 ناردنی وەسلەکە بۆ واتس‌ئاپ
+    const orderText = `
+🧾 داواکاری نوێ - ${order.time}
+
+👤 کریار: ${order.name}
+📞 مۆبایل: ${order.mobile}
+📍 ناونیشان: ${order.address}
+📡 GPS: ${order.gps}
+📝 تێبینی: ${order.note || 'هیچی نییە'}
+
+📦 کاڵاکان:
+${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
+
+💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
+`;
+    const encodedText = encodeURIComponent(orderText);
+    const whatsappUrl = `https://wa.me/9647502020061?text=${encodedText}`;
+    window.open(whatsappUrl, '_blank');
 
     selected = {};
     document.getElementById('orderForm').reset();
