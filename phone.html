@@ -1,83 +1,185 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8" />
-  <title>WhatsApp Message Sender</title>
-  <style>
-    body { font-family: Arial; direction: rtl; }
-    .container { max-width: 600px; margin: auto; padding: 20px; }
-    textarea { width: 100%; height: 80px; margin-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
-    th { background-color: #eee; }
-    button { margin: 5px 0; padding: 8px 15px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لیستی ژمارە مۆبایلەکان</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; direction: rtl; }
+  h1 { color: #333; text-align: center; }
+  textarea {
+    width: 100%;
+    max-width: 600px;
+    height: 100px;
+    margin: 20px auto;
+    display: block;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    resize: vertical;
+  }
+  ul { list-style: none; padding: 0; max-width: 600px; margin: 20px auto; }
+  li { background: #fff; margin-bottom: 10px; padding: 12px; border-radius: 6px; box-shadow: 0 0 4px #ccc; display: flex; justify-content: space-between; align-items: center; }
+  a.whatsapp-link {
+    text-decoration: none;
+    background: #25D366;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  a.whatsapp-link:hover {
+    background: #1ebe57;
+  }
+  .select-all-container {
+    max-width: 600px;
+    margin: 10px auto;
+    background: #fff;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 0 4px #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  label {
+    user-select: none;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  button.send-btn {
+    display: block;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    padding: 14px 0;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+  }
+  button.send-btn:hover {
+    background-color: #1ebe57;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>ناردنی پەیام بۆ وەسڵەکان</h2>
-    
-    <textarea id="message" placeholder="پەیامەکەت لێرە بنوسە..."></textarea><br>
-    <button onclick="sendMessage()">📤 ناردنی پەیام بە WhatsApp</button>
-    <button onclick="selectAll()">✅ دیاریکردنی هەموو</button>
 
-    <table>
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAllTop" onclick="toggleAll(this)"></th>
-          <th>ژمارە مۆبایل</th>
-        </tr>
-      </thead>
-      <tbody id="phoneList"></tbody>
-    </table>
-  </div>
+<h1>لیستی ژمارە مۆبایلەکان</h1>
 
-  <script>
-    async function loadPhones() {
-      const response = await fetch("phones.json");
-      const data = await response.json();
-      const list = document.getElementById("phoneList");
-      list.innerHTML = "";
-      data.forEach((item, index) => {
-        const row = `<tr>
-          <td><input type="checkbox" class="phone-checkbox" value="${item.mobile}"></td>
-          <td>${item.mobile}</td>
-        </tr>`;
-        list.innerHTML += row;
-      });
+<textarea id="message" placeholder="ناوەڕۆکی نامەکەت بنوسە..."></textarea>
+
+<div class="select-all-container">
+  <input type="checkbox" id="selectAll" />
+  <label for="selectAll">هەلبژاردنی هەموو ژمارەکان</label>
+</div>
+
+<ul id="phone-list">
+  <!-- ژمارەکان لێرە دەنوسرێن -->
+</ul>
+
+<button class="send-btn" id="sendMessageBtn">ناردنی نامە بۆ واتسئاپ</button>
+
+<script>
+let phones = [];
+
+fetch('phones.json')
+  .then(response => {
+    if (!response.ok) throw new Error('Failed to load phones.json');
+    return response.json();
+  })
+  .then(data => {
+    phones = data.mobiles || [];
+    const list = document.getElementById('phone-list');
+    if (!phones.length) {
+      list.innerHTML = '<li>ژمارە مۆبایلەکان نەدۆزرایەوە</li>';
+      return;
     }
+    phones.forEach(phone => {
+      const li = document.createElement('li');
 
-    function toggleAll(source) {
-      const checkboxes = document.querySelectorAll(".phone-checkbox");
-      checkboxes.forEach(cb => cb.checked = source.checked);
-    }
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'phone-checkbox';
+      checkbox.value = phone;
 
-    function selectAll() {
-      const checkboxes = document.querySelectorAll(".phone-checkbox");
-      checkboxes.forEach(cb => cb.checked = true);
-      document.getElementById("selectAllTop").checked = true;
-    }
+      const phoneText = document.createElement('span');
+      phoneText.textContent = phone;
+      phoneText.style.flexGrow = '1';
+      phoneText.style.marginRight = '10px';
 
-    function sendMessage() {
-      const message = encodeURIComponent(document.getElementById("message").value.trim());
-      if (!message) {
-        alert("تکایە پەیام بنوسە");
-        return;
-      }
-      const numbers = Array.from(document.querySelectorAll(".phone-checkbox:checked"))
-        .map(cb => cb.value);
-      if (numbers.length === 0) {
-        alert("تکایە ژمارە دیاری بکە");
-        return;
-      }
+      const waLink = document.createElement('a');
+      waLink.href = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
+      waLink.target = '_blank';
+      waLink.rel = 'noopener noreferrer';
+      waLink.className = 'whatsapp-link';
+      waLink.textContent = 'واتسئاپ';
 
-      numbers.forEach(number => {
-        const url = `https://wa.me/${number}?text=${message}`;
-        window.open(url, '_blank');
-      });
-    }
+      li.appendChild(checkbox);
+      li.appendChild(phoneText);
+      li.appendChild(waLink);
 
-    window.onload = loadPhones;
-  </script>
+      list.appendChild(li);
+    });
+
+    const selectAllCheckbox = document.getElementById('selectAll');
+    selectAllCheckbox.addEventListener('change', () => {
+      const checkboxes = document.querySelectorAll('.phone-checkbox');
+      checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+    });
+  })
+  .catch(err => {
+    document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
+  });
+
+document.getElementById('sendMessageBtn').addEventListener('click', () => {
+  const message = document.getElementById('message').value.trim();
+  if (!message) {
+    alert('تکایە ناوەڕۆکی نامەکەت بنوسە');
+    return;
+  }
+
+  const selectedPhones = Array.from(document.querySelectorAll('.phone-checkbox:checked'))
+    .map(cb => cb.value);
+
+  if (selectedPhones.length === 0) {
+    alert('تکایە هەندێک ژمارە هەلبژێرە');
+    return;
+  }
+
+  // ئەم کۆدە ناردنی پەیامە بەرەو واتسئاپ بە شێوەی سەربەخۆ
+  // بەڵام بۆ ئاوتۆماتیکی ناردن بەڕێوەبردنی بەکارهێنەر دەبێت کلیک بکرێت
+
+  // بەرەوپێش کردنەوەی سەرەتا
+  const firstPhone = selectedPhones[0];
+  const waUrlFirst = `https://wa.me/964${firstPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+  window.open(waUrlFirst, '_blank');
+
+  // لە دوایان، وەندۆوکی دووەم بەم شێوەیە بکرێتەوە بە دوای 1 چرکە
+  let index = 1;
+  function openNext() {
+    if (index >= selectedPhones.length) return;
+    const phone = selectedPhones[index];
+    const waUrl = `https://wa.me/964${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
+    index++;
+    setTimeout(openNext, 1000); // هەموو چرکەیەک دوای یەک چرکە دواتر
+  }
+  setTimeout(openNext, 1000);
+});
+</script>
+
 </body>
 </html>
