@@ -146,6 +146,14 @@
 
 <h1>وەسڵەکانی کریار</h1>
 
+<!-- سەهمی لیستی کریار -->
+<div style="max-width: 900px; margin: 0 auto 20px auto; text-align: center;">
+  <label for="customerSelect" style="font-weight: bold; margin-left: 8px;">هەلبژاردنی کریار:</label>
+  <select id="customerSelect" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e0; min-width: 220px;">
+    <option value="all">هەموو کریارەکان</option>
+  </select>
+</div>
+
 <div class="add-link">
   <a href="add-product.html">➕ زیادکردنی کاڵا</a>
 </div>
@@ -167,6 +175,7 @@
 <script>
   const ordersContainer = document.getElementById('ordersContainer');
   const enableSoundBtn = document.getElementById('enableSoundBtn');
+  const customerSelect = document.getElementById('customerSelect');
   const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
 
   enableSoundBtn.addEventListener('click', () => {
@@ -198,17 +207,38 @@
     `;
   }
 
+  function populateCustomerSelect() {
+    const orders = getOrders();
+    const customers = [...new Set(orders.map(o => o.name))];
+    customerSelect.innerHTML = '<option value="all">هەموو کریارەکان</option>';
+    customers.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      customerSelect.appendChild(option);
+    });
+  }
+
+  customerSelect.addEventListener('change', () => {
+    renderOrders();
+  });
+
   function renderOrders() {
     const orders = getOrders();
+    const selectedCustomer = customerSelect.value;
 
-    if (orders.length === 0) {
+    const filteredOrders = selectedCustomer === 'all'
+      ? orders
+      : orders.filter(order => order.name === selectedCustomer);
+
+    if (filteredOrders.length === 0) {
       ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
       return;
     }
 
     ordersContainer.innerHTML = '';
 
-    orders.forEach((order, index) => {
+    filteredOrders.forEach((order, index) => {
       const productsHTML = order.products.map(createProductHTML).join('');
       const totalAmount = order.products.reduce((sum, p) => sum + Number(p.price || 0), 0);
 
@@ -245,6 +275,7 @@
         alert("وەسڵی نوێ زیاد بوو!");
       }
       lastOrdersLength = currentOrders.length;
+      populateCustomerSelect();
       renderOrders();
     }
   }
@@ -335,6 +366,7 @@
 
   window.onload = () => {
     lastOrdersLength = getOrders().length;
+    populateCustomerSelect();
     renderOrders();
     setInterval(checkForNewOrders, 3000);
   };
