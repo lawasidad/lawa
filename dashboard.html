@@ -1,95 +1,67 @@
-<!DOCTYPE html>
-<html lang="ku">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
-  <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Rabar_013', sans-serif;
-      background: #f5f7fa;
-      margin: 0; padding: 20px;
-      direction: rtl;
-    }
-    h1 {
-      text-align: center;
-      color: #1a202c;
-      margin-bottom: 10px;
-    }
-    select {
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid #cbd5e0;
-      min-width: 300px;
-    }
-    .customer-list-container {
-      max-width: 900px;
-      margin: 0 auto 20px auto;
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 30px;
-    }
-  </style>
-</head>
-<body>
+const customerSelect = document.getElementById('customerSelect');
 
-<h1>لیستی کریارەکان</h1>
+function populateCustomerSelect() {
+  const orders = getOrders();
+  const customers = [...new Set(orders.map(o => o.name))]; // یەکتایی ناوی کریارەکان
 
-<div class="customer-list-container">
-  <label for="customerSelect">هەلبژاردنی کریار:</label>
-  <select id="customerSelect">
-    <option value="all">هەموو کریارەکان</option>
-  </select>
-</div>
+  // پاککردنی هەموو هەڵبژاردەکان دواتر زیادکردنی نوێ
+  customerSelect.innerHTML = '<option value="all">هەموو کریارەکان</option>';
 
-<script>
-  // وەرگرتنی داتای وەسڵەکان لە localStorage
-  function getOrders() {
-    try {
-      const data = localStorage.getItem('orders');
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+  customers.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    customerSelect.appendChild(option);
+  });
+}
+
+// گۆڕینی هەلبژاردن بەردەوامکردنی فلتەر
+customerSelect.addEventListener('change', () => {
+  renderOrders(); // نوێکردنەوەی وەسڵەکان بە پەیوەندی بە هەلبژاردن
+});
+
+// گۆڕینی renderOrders بۆ فلتەرکردنی وەسڵەکان
+function renderOrders() {
+  const orders = getOrders();
+  const selectedCustomer = customerSelect.value;
+
+  // فلتەرکردن بەرەوپێش ئەگەر نەهەموو هەلبژێردرا
+  const filteredOrders = selectedCustomer === 'all'
+    ? orders
+    : orders.filter(order => order.name === selectedCustomer);
+
+  if (filteredOrders.length === 0) {
+    ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
+    return;
   }
 
-  // پڕکردنی سلێکت بە ناو و ژمارە مۆبایلەکان
-  function populateCustomerSelect() {
-    const orders = getOrders();
+  ordersContainer.innerHTML = '';
 
-    // داتای منحصربەفردی ناوی کریار و ژمارە موبایل
-    // جێبەجێکردنی dictionary بۆ کۆکردن بەناوبانگەکان و ژمارەکان
-    const customersMap = {};
+  filteredOrders.forEach((order, index) => {
+    const productsHTML = order.products.map(createProductHTML).join('');
+    const totalAmount = order.products.reduce((sum, p) => sum + Number(p.price || 0), 0);
 
-    orders.forEach(order => {
-      if (order.name) {
-        if (!customersMap[order.name]) {
-          customersMap[order.name] = new Set();
-        }
-        if (order.mobile) {
-          customersMap[order.name].add(order.mobile);
-        }
-      }
-    });
+    const orderHTML = document.createElement('div');
+    orderHTML.className = 'order';
+    orderHTML.dataset.index = index;
 
-    const customerSelect = document.getElementById('customerSelect');
-    customerSelect.innerHTML = '<option value="all">هەموو کریارەکان</option>';
+    orderHTML.innerHTML = `
+      <div style="margin-bottom: 10px">
+        <input type="checkbox" class="order-checkbox" data-index="${index}" /> وەسلەکە هەلبژێرە
+      </div>
+      <div class="order-header">
+        <span>ناوی کریار: ${order.name}</span>
+        <span>ژمارە مۆبایل: ${order.mobile}</span>
+      </div>
+      <div class="order-info">
+        ناونیشان: ${order.address}<br/>
+        GPS: ${order.gps}<br/>
+        کاتی داواکاری: ${order.time}<br/>
+        <strong>💰 کۆی گشتی پارە: ${totalAmount.toLocaleString()} دینار</strong>
+      </div>
+      <div class="products">${productsHTML}</div>
+    `;
 
-    // کرتەکردنی ناو و ژمارەکان بۆ هەر کریار
-    Object.keys(customersMap).forEach(name => {
-      const mobiles = Array.from(customersMap[name]).join(' ، ');
-      const option = document.createElement('option');
-      option.value = name;
-      option.textContent = `${name} — ${mobiles}`;
-      customerSelect.appendChild(option);
-    });
-  }
-
-  window.onload = () => {
-    populateCustomerSelect();
-  };
-</script>
-
-</body>
-</html>
+    ordersContainer.prepend(orderHTML);
+  });
+}
