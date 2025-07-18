@@ -1,53 +1,76 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ناردنی پەیام بە Viber</title>
+  <meta charset="UTF-8">
+  <title>WhatsApp Bulk Sender</title>
   <style>
-    body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
-    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-    ul { list-style: none; padding: 0; }
-    li { margin-bottom: 8px; }
-    button { padding: 10px 20px; background-color: #665CAC; color: white; border: none; cursor: pointer; }
+    body { font-family: sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background: #ddd; }
+    input[type="text"] { width: 70%; padding: 8px; margin: 10px 0; }
+    button { padding: 8px 16px; background: green; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
 
-<h2>ناردنی پەیام بۆ ژمارەکان بە Viber</h2>
+  <h2>ناردنی پەیام بە وەسڵ بۆ ژمارەکان</h2>
 
-<textarea id="message" placeholder="پەیامەکەت بنوسە..."></textarea>
+  <input type="text" id="message" placeholder="نامەکە بنوسە...">
+  <button onclick="sendToAll()">ناردن</button>
+  <br>
+  <label><input type="checkbox" id="selectAll" onclick="toggleAll(this)"> هەموو هەلبژێرە</label>
 
-<ul id="phoneList">
-  <li><input type="checkbox" class="phone" value="9647501234567" /> 9647501234567</li>
-  <li><input type="checkbox" class="phone" value="9647701234567" /> 9647701234567</li>
-  <li><input type="checkbox" class="phone" value="9647512345678" /> 9647512345678</li>
-</ul>
+  <table>
+    <thead>
+      <tr>
+        <th>هەلبژاردن</th>
+        <th>ناو</th>
+        <th>ژمارە</th>
+      </tr>
+    </thead>
+    <tbody id="phoneList"></tbody>
+  </table>
 
-<button id="sendBtn">ناردنی پەیام بە Viber</button>
+  <script>
+    // خوێندنەوەی phones.json
+    fetch("phones.json")
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("phoneList");
+        data.forEach((item, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><input type="checkbox" class="phoneCheck" value="${item.phone}"></td>
+            <td>${item.name}</td>
+            <td>${item.phone}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
 
-<script>
-  document.getElementById('sendBtn').addEventListener('click', () => {
-    const message = document.getElementById('message').value.trim();
-    if (!message) {
-      alert('تکایە پەیامەکەت بنوسە.');
-      return;
+    function toggleAll(source) {
+      document.querySelectorAll(".phoneCheck").forEach(ch => ch.checked = source.checked);
     }
 
-    const checkedPhones = Array.from(document.querySelectorAll('.phone:checked')).map(el => el.value);
-    if (checkedPhones.length === 0) {
-      alert('تکایە یەک ژمارە هەلبژێرە.');
-      return;
-    }
+    function sendToAll() {
+      const message = document.getElementById("message").value;
+      const selected = [...document.querySelectorAll(".phoneCheck")]
+        .filter(ch => ch.checked)
+        .map(ch => ch.value);
 
-    checkedPhones.forEach((phone, index) => {
-      const url = `viber://forward?text=${encodeURIComponent(message)}`;
-      setTimeout(() => {
-        window.open(url, '_blank');
-      }, index * 500); // ٥٠٠ms جیاوازی
-    });
-  });
-</script>
+      if (selected.length === 0 || !message.trim()) {
+        alert("تکایە ژمارەکان یان نامە بنووسە.");
+        return;
+      }
+
+      // ناردن بە وەتسئاپ
+      selected.forEach(phone => {
+        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        window.open(url, "_blank");
+      });
+    }
+  </script>
 
 </body>
 </html>
