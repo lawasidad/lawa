@@ -93,18 +93,21 @@
 <button class="send-btn" id="sendMessageBtn">ناردنی نامە بۆ واتسئاپ</button>
 
 <script>
+let phones = [];
+
 fetch('phones.json')
   .then(response => {
     if (!response.ok) throw new Error('Failed to load phones.json');
     return response.json();
   })
   .then(data => {
+    phones = data.mobiles || [];
     const list = document.getElementById('phone-list');
-    if (!data.mobiles || !Array.isArray(data.mobiles) || data.mobiles.length === 0) {
+    if (!phones.length) {
       list.innerHTML = '<li>ژمارە مۆبایلەکان نەدۆزرایەوە</li>';
       return;
     }
-    data.mobiles.forEach(phone => {
+    phones.forEach(phone => {
       const li = document.createElement('li');
 
       const checkbox = document.createElement('input');
@@ -131,7 +134,6 @@ fetch('phones.json')
       list.appendChild(li);
     });
 
-    // Select All functionality
     const selectAllCheckbox = document.getElementById('selectAll');
     selectAllCheckbox.addEventListener('change', () => {
       const checkboxes = document.querySelectorAll('.phone-checkbox');
@@ -157,11 +159,25 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
     return;
   }
 
-  // ناردنی پەیام بۆ هەر ژمارە لە وێندۆوکی نوێ
-  selectedPhones.forEach(phone => {
+  // ئەم کۆدە ناردنی پەیامە بەرەو واتسئاپ بە شێوەی سەربەخۆ
+  // بەڵام بۆ ئاوتۆماتیکی ناردن بەڕێوەبردنی بەکارهێنەر دەبێت کلیک بکرێت
+
+  // بەرەوپێش کردنەوەی سەرەتا
+  const firstPhone = selectedPhones[0];
+  const waUrlFirst = `https://wa.me/964${firstPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+  window.open(waUrlFirst, '_blank');
+
+  // لە دوایان، وەندۆوکی دووەم بەم شێوەیە بکرێتەوە بە دوای 1 چرکە
+  let index = 1;
+  function openNext() {
+    if (index >= selectedPhones.length) return;
+    const phone = selectedPhones[index];
     const waUrl = `https://wa.me/964${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank');
-  });
+    index++;
+    setTimeout(openNext, 1000); // هەموو چرکەیەک دوای یەک چرکە دواتر
+  }
+  setTimeout(openNext, 1000);
 });
 </script>
 
