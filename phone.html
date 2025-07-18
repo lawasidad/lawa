@@ -118,6 +118,7 @@
 <div class="info" id="status"></div>
 
 <script>
+// بارکردنی ژمارەکان
 fetch('phones.json')
   .then(response => {
     if (!response.ok) throw new Error('Failed to load phones.json');
@@ -147,7 +148,7 @@ fetch('phones.json')
       list.appendChild(li);
     });
 
-    // Select All functionality
+    // کارکردنی select all
     const selectAllCheckbox = document.getElementById('selectAll');
     selectAllCheckbox.addEventListener('change', () => {
       const checkboxes = document.querySelectorAll('.phone-checkbox');
@@ -158,7 +159,7 @@ fetch('phones.json')
     document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
   });
 
-// Send WhatsApp message for selected phones
+// ناردنی پەیام بۆ ژمارەکان
 document.getElementById('sendMessageBtn').addEventListener('click', () => {
   const message = document.getElementById('message').value.trim();
   const status = document.getElementById('status');
@@ -168,23 +169,22 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
   }
   const selectedCheckboxes = [...document.querySelectorAll('.phone-checkbox:checked')];
   if (selectedCheckboxes.length === 0) {
-    alert('تکایە یەک ژمارەیەک هەلبژێرە.');
+    alert('تکایە ژمارەیەک هەلبژێرە.');
     return;
   }
 
-  // واتسئاپ بەشێوەی لینک بۆ هەر ژمارەیەک ڕادەستی دەکات و هەریەک لە وێندۆوەکی نوێ دەکاتەوە
+  const encodedMessage = encodeURIComponent(message);
+
   selectedCheckboxes.forEach((cb, idx) => {
-    const phone = cb.value.replace(/[^0-9]/g, ''); // تەنها ژمارەکان بگرە
-    const encodedMessage = encodeURIComponent(message);
+    const phone = cb.value.replace(/[^0-9]/g, '');
     const url = `https://wa.me/${phone}?text=${encodedMessage}`;
-    // بۆ لە نوێ وێندۆو کردنەوە، setTimeout بکاربهێنە بۆ نای هەموو لینکەکان هەمانکات کڕین
     setTimeout(() => {
       window.open(url, '_blank');
-    }, idx * 300); // هەر 300 میلێک سەکنجدەبەشێت
+    }, idx * 400); // هەر ٤٠٠ میلێک جارێک بکرێتەوە
   });
 
   status.textContent = `پەیام نێردرا بۆ ${selectedCheckboxes.length} ژمارە.`;
-  setTimeout(() => { status.textContent = ''; }, 5000);
+  setTimeout(() => { status.textContent = ''; }, 6000);
 });
 </script>
 
