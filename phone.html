@@ -3,153 +3,189 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>زیادکردنی ژمارە مۆبایل</title>
+<title>ناردنی پەیام بە واتسئاپ</title>
 <style>
   body {
-    font-family: 'Rabar_013', sans-serif;
-    direction: rtl;
+    font-family: Arial, sans-serif;
     padding: 20px;
-    background: #f5f7fa;
+    background: #f9f9f9;
+    direction: rtl;
+  }
+  h1 {
+    color: #333;
+    text-align: center;
+  }
+  textarea {
+    width: 100%;
+    max-width: 600px;
+    height: 120px;
+    margin: 0 auto 20px auto;
+    display: block;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
+  .select-all-container {
+    max-width: 600px;
+    margin: 10px auto 20px auto;
+    background: #fff;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 0 4px #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
   }
   label {
-    display: block;
-    margin-top: 15px;
+    user-select: none;
     font-weight: bold;
-  }
-  input, select, button {
-    margin-top: 6px;
-    padding: 8px;
-    width: 250px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e0;
     font-size: 16px;
   }
-  button {
-    width: 150px;
-    background: #2b6cb0;
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    max-width: 600px;
+    margin: 0 auto 20px auto;
+  }
+  li {
+    background: #fff;
+    margin-bottom: 10px;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 0 4px #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .phone-number {
+    flex-grow: 1;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  button.send-btn {
+    display: block;
+    max-width: 600px;
+    margin: 10px auto;
+    background-color: #25D366;
     color: white;
     border: none;
-    cursor: pointer;
-    margin-top: 20px;
+    padding: 14px 0;
+    font-size: 18px;
     font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
   }
-  .mobiles-list {
-    margin-top: 20px;
-    max-width: 300px;
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  button.send-btn:hover {
+    background-color: #1ebe57;
   }
-  .mobiles-list h3 {
-    margin-top: 0;
-  }
-  .mobiles-list ul {
-    padding-right: 20px;
-  }
-  .mobiles-list ul li {
-    margin-bottom: 6px;
-    font-size: 16px;
+  .info {
+    max-width: 600px;
+    margin: 10px auto;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
-<h1>زیادکردنی ژمارە مۆبایل بۆ کریار</h1>
+<h1>ناردنی پەیام بە واتسئاپ</h1>
 
-<label for="customerSelect">هەلبژاردنی ناوی کریار (یان نوێ زیاد بکە):</label>
-<input list="customersList" id="customerSelect" placeholder="ناوی کریار بنووسە یان هەلبژێرە" />
+<textarea id="message" placeholder="پەیامەکەت بنوسە..."></textarea>
 
-<datalist id="customersList"></datalist>
-
-<label for="mobileInput">ژمارەی مۆبایل:</label>
-<input type="text" id="mobileInput" placeholder="ژمارەی مۆبایل بنووسە" />
-
-<button id="addMobileBtn">زیادکردن</button>
-
-<div class="mobiles-list" id="mobileList" style="display:none;">
-  <h3>ژمارە مۆبایلەکان بۆ کریار:</h3>
-  <ul id="mobiles"></ul>
+<div class="select-all-container">
+  <input type="checkbox" id="selectAll" />
+  <label for="selectAll">هەلبژاردنی هەموو ژمارەکان</label>
 </div>
 
+<ul id="phone-list">
+  <!-- ژمارەکان لێرە دەنوسرێن -->
+</ul>
+
+<button class="send-btn" id="sendMessageBtn">ناردنی پەیام بە واتسئاپ</button>
+
+<div class="info" id="status"></div>
+
 <script>
-  // داتاکان (نموونە، دەتوانیت localStorage بەکاربەریت)
-  let orders = [
-    { name: "عەلی", mobile: "07501234567" },
-    { name: "سارا", mobile: "07509876543" },
-    { name: "عەلی", mobile: "07501112233" },
-  ];
-
-  const customerInput = document.getElementById('customerSelect');
-  const customersList = document.getElementById('customersList');
-  const mobileInput = document.getElementById('mobileInput');
-  const addMobileBtn = document.getElementById('addMobileBtn');
-  const mobileListDiv = document.getElementById('mobileList');
-  const mobilesUl = document.getElementById('mobiles');
-
-  function populateCustomersList() {
-    // پاککردنی داتالێست
-    customersList.innerHTML = '';
-    // وەرگرتنی ناوەکانی یکتا
-    const uniqueNames = [...new Set(orders.map(o => o.name))];
-    uniqueNames.forEach(name => {
-      const option = document.createElement('option');
-      option.value = name;
-      customersList.appendChild(option);
-    });
-  }
-
-  // پێشنیازی ژمارە مۆبایلەکان بۆ ناوەکە هەلبژێردراو
-  function showMobilesForCustomer(name) {
-    if (!name) {
-      mobileListDiv.style.display = 'none';
-      mobilesUl.innerHTML = '';
+fetch('phones.json')
+  .then(response => {
+    if (!response.ok) throw new Error('Failed to load phones.json');
+    return response.json();
+  })
+  .then(data => {
+    const list = document.getElementById('phone-list');
+    if (!data.mobiles || !Array.isArray(data.mobiles) || data.mobiles.length === 0) {
+      list.innerHTML = '<li>ژمارە مۆبایلەکان نەدۆزرایەوە</li>';
       return;
     }
-    const mobilesSet = new Set(
-      orders.filter(o => o.name === name).map(o => o.mobile)
-    );
-    mobilesUl.innerHTML = '';
-    mobilesSet.forEach(mobile => {
+    data.mobiles.forEach(phone => {
       const li = document.createElement('li');
-      li.textContent = mobile;
-      mobilesUl.appendChild(li);
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'phone-checkbox';
+      checkbox.value = phone;
+
+      const phoneText = document.createElement('span');
+      phoneText.textContent = phone;
+      phoneText.className = 'phone-number';
+
+      li.appendChild(checkbox);
+      li.appendChild(phoneText);
+
+      list.appendChild(li);
     });
-    mobileListDiv.style.display = mobilesSet.size > 0 ? 'block' : 'none';
+
+    // Select All functionality
+    const selectAllCheckbox = document.getElementById('selectAll');
+    selectAllCheckbox.addEventListener('change', () => {
+      const checkboxes = document.querySelectorAll('.phone-checkbox');
+      checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+    });
+  })
+  .catch(err => {
+    document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
+  });
+
+// Send WhatsApp message for selected phones
+document.getElementById('sendMessageBtn').addEventListener('click', () => {
+  const message = document.getElementById('message').value.trim();
+  const status = document.getElementById('status');
+  if (!message) {
+    alert('تکایە پەیامەکەت بنوسە.');
+    return;
+  }
+  const selectedCheckboxes = [...document.querySelectorAll('.phone-checkbox:checked')];
+  if (selectedCheckboxes.length === 0) {
+    alert('تکایە یەک ژمارەیەک هەلبژێرە.');
+    return;
   }
 
-  // هەنگاوی زیادکردن
-  addMobileBtn.addEventListener('click', () => {
-    const name = customerInput.value.trim();
-    const mobile = mobileInput.value.trim();
-
-    if (!name) {
-      alert('تکایە ناوی کریار بنووسە.');
-      return;
-    }
-    if (!mobile) {
-      alert('تکایە ژمارەی مۆبایل بنووسە.');
-      return;
-    }
-    // داتای نوێ زیاد بکە
-    orders.push({ name, mobile });
-
-    // نوێکردنەوەی پێشنیارەکان و لیستەکە
-    populateCustomersList();
-    showMobilesForCustomer(name);
-
-    // پاكردن فۆرمەکان
-    mobileInput.value = '';
+  // واتسئاپ بەشێوەی لینک بۆ هەر ژمارەیەک ڕادەستی دەکات و هەریەک لە وێندۆوەکی نوێ دەکاتەوە
+  selectedCheckboxes.forEach((cb, idx) => {
+    const phone = cb.value.replace(/[^0-9]/g, ''); // تەنها ژمارەکان بگرە
+    const encodedMessage = encodeURIComponent(message);
+    const url = `https://wa.me/${phone}?text=${encodedMessage}`;
+    // بۆ لە نوێ وێندۆو کردنەوە، setTimeout بکاربهێنە بۆ نای هەموو لینکەکان هەمانکات کڕین
+    setTimeout(() => {
+      window.open(url, '_blank');
+    }, idx * 300); // هەر 300 میلێک سەکنجدەبەشێت
   });
 
-  // کاتێک ناوی کریار نوێ یان هەلبژێردرا پێشنیار بکە ژمارەکان
-  customerInput.addEventListener('input', () => {
-    showMobilesForCustomer(customerInput.value.trim());
-  });
-
-  window.onload = () => {
-    populateCustomersList();
-  };
+  status.textContent = `پەیام نێردرا بۆ ${selectedCheckboxes.length} ژمارە.`;
+  setTimeout(() => { status.textContent = ''; }, 5000);
+});
 </script>
 
 </body>
