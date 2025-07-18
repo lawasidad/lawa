@@ -8,7 +8,19 @@
   body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
   h1 { color: #333; }
   ul { list-style: none; padding: 0; }
-  li { background: #fff; margin-bottom: 5px; padding: 10px; border-radius: 4px; box-shadow: 0 0 3px #ccc; }
+  li { background: #fff; margin-bottom: 10px; padding: 12px; border-radius: 6px; box-shadow: 0 0 4px #ccc; display: flex; justify-content: space-between; align-items: center; }
+  a.whatsapp-link {
+    text-decoration: none;
+    background: #25D366;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  a.whatsapp-link:hover {
+    background: #1ebe57;
+  }
 </style>
 </head>
 <body>
@@ -19,7 +31,6 @@
 </ul>
 
 <script>
-// ئەم کۆدە JSON ـە لە فایلی phones.json دەتوانیت وێبگەڕەکەت بەکاردێنیت لەو ناوەوە لێ بدەیت
 fetch('phones.json')
   .then(response => {
     if (!response.ok) throw new Error('Failed to load phones.json');
@@ -27,14 +38,23 @@ fetch('phones.json')
   })
   .then(data => {
     const list = document.getElementById('phone-list');
-    if (!data.mobiles || !Array.isArray(data.mobiles)) {
+    if (!data.mobiles || !Array.isArray(data.mobiles) || data.mobiles.length === 0) {
       list.innerHTML = '<li>ژمارە مۆبایلەکان نەدۆزرایەوە</li>';
       return;
     }
-    // هەر ژمارەیەک لە مۆبایلەکان بنوسە لە ناو لیستەکە
     data.mobiles.forEach(phone => {
       const li = document.createElement('li');
       li.textContent = phone;
+
+      // دروستکردنی لینک واتسئاپ
+      const waLink = document.createElement('a');
+      waLink.href = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
+      waLink.target = '_blank';
+      waLink.rel = 'noopener noreferrer';
+      waLink.className = 'whatsapp-link';
+      waLink.textContent = 'واتسئاپ';
+
+      li.appendChild(waLink);
       list.appendChild(li);
     });
   })
