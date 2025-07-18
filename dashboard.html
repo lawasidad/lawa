@@ -2,1058 +2,417 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
-  <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
+  <title>لیستی ژمارە موبایلەکان</title>
   <style>
     body {
-      font-family: 'Rabar_013', sans-serif;
-      background: #f5f7fa;
-      margin: 0; padding: 20px;
+      font-family: sans-serif;
       direction: rtl;
+      padding: 20px;
     }
-    h1, h2 {
-      text-align: center;
-      color: #1a202c;
-      margin-bottom: 10px;
-    }
-    .add-link {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .add-link a {
-      display: inline-block;
-      background: #2b6cb0;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .orders, .customers {
-      max-width: 900px;
-      margin: 20px auto;
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
-      min-height: 150px;
-    }
-    /* وەسڵەکان */
-    .order {
-      border-bottom: 1px solid #e2e8f0;
-      padding: 18px 0;
-    }
-    .order:last-child {
-      border-bottom: none;
-    }
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #2d3748;
-    }
-    .order-header span a {
-      color: #2b6cb0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .order-info {
-      font-size: 14px;
-      color: #4a5568;
-      margin-bottom: 12px;
-    }
-    .products {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .product {
-      border: 1.5px solid #cbd5e0;
-      border-radius: 12px;
-      padding: 10px;
-      width: 140px;
-      text-align: center;
-      background: #fefefe;
-    }
-    .product img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 8px;
-    }
-    .product-name {
-      font-weight: 700;
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-    .product-price {
-      color: #718096;
-      font-size: 14px;
-    }
-    .no-orders, .no-customers {
-      text-align: center;
-      font-size: 18px;
-      color: #a0aec0;
-      padding: 40px 0;
-    }
-    .play-alarm-btn, .print-btn {
-      display: block;
-      margin: 20px auto;
-      background: #2f855a;
-      color: white;
-      border: none;
-      padding: 10px 30px;
-      font-size: 16px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .checkbox-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .order-checkbox {
-      margin-left: 8px;
-    }
-    /* کریارەکان */
-    #customersList ul {
-      list-style: none;
+    ul {
+      max-width: 300px;
+      margin: auto;
       padding: 0;
-      margin: 0;
+      list-style: none;
     }
-    #customersList li {
-      padding: 10px 0;
-      border-bottom: 1px solid #e2e8f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #customersList li:last-child {
-      border-bottom: none;
-    }
-    #customersList a {
-      color: #2b6cb0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    @media print {
-      body {
-        margin: 0;
-        padding: 0;
-        width: 210mm;
-        height: 297mm;
-        overflow: visible;
-        font-size: 12pt;
-      }
-      .order {
-        page-break-inside: avoid;
-        page-break-after: auto;
-        width: 190mm;
-        margin: auto;
-        border: none !important;
-        box-shadow: none !important;
-        background: white !important;
-        padding: 10mm !important;
-      }
-      .products {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      img {
-        max-width: 100%;
-        height: auto;
-        page-break-inside: avoid;
-      }
+    li {
+      background: #eee;
+      margin: 6px 0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 18px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-<h1>وەسڵەکانی کریار</h1>
-
-<div class="add-link">
-  <a href="add-product.html">➕ زیادکردنی کاڵا</a>
-</div>
-
-<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
-
-<div class="checkbox-container">
-  <label>
-    <input type="checkbox" id="selectAllCheckbox" /> هەلبژاردنی هەموو وەسلەکان
-  </label>
-  <br/>
-  <button onclick="printSelectedOrders()" class="print-btn">🖨️ پرینتی وەسڵە هەڵبژێردراوەکان</button>
-</div>
-
-<div class="orders" id="ordersContainer">
-  <p class="no-orders">هیچ داواکاریەک نییە.</p>
-</div>
-
-<h2>لیستی کریارەکان</h2>
-<div class="customers" id="customersList">
-  <p class="no-customers">هیچ کریارێک نییە.</p>
-</div>
+<h1 style="text-align:center;">لیستی ژمارە موبایلەکان</h1>
+<ul id="phoneList"></ul>
 
 <script>
-  const ordersContainer = document.getElementById('ordersContainer');
-  const customersList = document.getElementById('customersList');
-  const enableSoundBtn = document.getElementById('enableSoundBtn');
-  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-
-  enableSoundBtn.addEventListener('click', () => {
-    alarmSound.play().then(() => {
-      alert('دەنگ چالاککرا!');
-      enableSoundBtn.style.display = 'none';
-    }).catch(err => {
-      alert('ناتوانرێت دەنگ چالاک بکرێت.');
-      console.error(err);
-    });
-  });
-
-  function getOrders() {
-    try {
-      const data = localStorage.getItem('orders');
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  // لیستی کریارەکان لە ناو وەسڵەکان بەدست هێنە، بە شێوەی یکتا (ناو + ژمارە)
-  function getUniqueCustomers(orders) {
-    const map = new Map();
-    orders.forEach(order => {
-      if (!map.has(order.mobile)) {
-        map.set(order.mobile, { name: order.name, mobile: order.mobile });
-      }
-    });
-    return Array.from(map.values());
-  }
-
-  function createProductHTML(product) {
-    return `
-      <div class="product">
-        <img src="${product.image}" alt="${product.name}" />
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${Number(product.price || 0).toLocaleString()} دینار</div>
-      </div>
-    `;
-  }
-
-  function renderOrders() {
-    const orders = getOrders();
-
-    if (orders.length === 0) {
-      ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
-      customersList.innerHTML = '<p class="no-customers">هیچ کریارێک نییە.</p>';
-      return;
-    }
-
-    ordersContainer.innerHTML = '';
-
-    orders.forEach((order, index) => {
-      const productsHTML = order.products.map(createProductHTML).join('');
-      const totalAmount = order.products.reduce((sum, p) => sum + Number(p.price || 0), 0);
-
-      const orderHTML = document.createElement('div');
-      orderHTML.className = 'order';
-      orderHTML.dataset.index = index;
-
-      orderHTML.innerHTML = `
-        <div style="margin-bottom: 10px">
-          <input type="checkbox" class="order-checkbox" data-index="${index}" /> وەسلەکە هەلبژێرە
-        </div>
-        <div class="order-header">
-          <span>ناوی کریار: ${order.name}</span>
-          <span>
-            ژمارە مۆبایل: 
-            <a href="https://wa.me/${order.mobile.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" style="color:#2b6cb0; text-decoration:none; font-weight:bold;">
-              ${order.mobile} 📱
-            </a>
-          </span>
-        </div>
-        <div class="order-info">
-          ناونیشان: ${order.address}<br/>
-          GPS: ${order.gps}<br/>
-          کاتی داواکاری: ${order.time}<br/>
-          <strong>💰 کۆی گشتی پارە: ${totalAmount.toLocaleString()} دینار</strong>
-        </div>
-        <div class="products">${productsHTML}</div>
-      `;
-
-      ordersContainer.prepend(orderHTML);
-    });
-
-    renderCustomers(orders);
-  }
-
-  function renderCustomers(orders) {
-    const uniqueCustomers = getUniqueCustomers(orders);
-
-    if (uniqueCustomers.length === 0) {
-      customersList.innerHTML = '<p class="no-customers">هیچ کریارێک نییە.</p>';
-      return;
-    }
-
-    let html = '<ul>';
-    uniqueCustomers.forEach(cust => {
-      html += `
-        <li>
-          <span>${cust.name}</span>
-          <a href="https://wa.me/${cust.mobile.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" title="پەیوەندی واتسئەمانەش کۆدی تەواوی داشبۆردەکەتە بە زیادکردنی لیستی جیاوازی کریارەکان (بە ناو و ژمارەی موبایل و لینک واتس‌ئاپ):
-
-```html
-<!DOCTYPE html>
-<html lang="ku">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
-  <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Rabar_013', sans-serif;
-      background: #f5f7fa;
-      margin: 0; padding: 20px;
-      direction: rtl;
-    }
-    h1, h2 {
-      text-align: center;
-      color: #1a202c;
-      margin-bottom: 10px;
-    }
-    .add-link {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .add-link a {
-      display: inline-block;
-      background: #2b6cb0;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .orders, .customers {
-      max-width: 900px;
-      margin: 20px auto;
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
-      min-height: 150px;
-    }
-    .order {
-      border-bottom: 1px solid #e2e8f0;
-      padding: 18px 0;
-    }
-    .order:last-child {
-      border-bottom: none;
-    }
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #2d3748;
-    }
-    .order-header span a {
-      color: #2b6cb0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .order-info {
-      font-size: 14px;
-      color: #4a5568;
-      margin-bottom: 12px;
-    }
-    .products {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .product {
-      border: 1.5px solid #cbd5e0;
-      border-radius: 12px;
-      padding: 10px;
-      width: 140px;
-      text-align: center;
-      background: #fefefe;
-    }
-    .product img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 8px;
-    }
-    .product-name {
-      font-weight: 700;
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-    .product-price {
-      color: #718096;
-      font-size: 14px;
-    }
-    .no-orders, .no-customers {
-      text-align: center;
-      font-size: 18px;
-      color: #a0aec0;
-      padding: 40px 0;
-    }
-    .play-alarm-btn, .print-btn {
-      display: block;
-      margin: 20px auto;
-      background: #2f855a;
-      color: white;
-      border: none;
-      padding: 10px 30px;
-      font-size: 16px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .checkbox-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .order-checkbox {
-      margin-left: 8px;
-    }
-    #customersList ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    #customersList li {
-      padding: 10px 0;
-      border-bottom: 1px solid #e2e8f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #customersList li:last-child {
-      border-bottom: none;
-    }
-    #customersList a {
-      color: #2b6cb0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    @media print {
-      body {
-        margin: 0;
-        padding: 0;
-        width: 210mm;
-        height: 297mm;
-        overflow: visible;
-        font-size: 12pt;
-      }
-      .order {
-        page-break-inside: avoid;
-        page-break-after: auto;
-        width: 190mm;
-        margin: auto;
-        border: none !important;
-        box-shadow: none !important;
-        background: white !important;
-        padding: 10mm !important;
-      }
-      .products {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      img {
-        max-width: 100%;
-        height: auto;
-        page-break-inside: avoid;
-      }
-    }
-  </style>
-</head>
-<body>
-
-<h1>وەسڵەکانی کریار</h1>
-
-<div class="add-link">
-  <a href="add-product.html">➕ زیادکردنی کاڵا</a>
-</div>
-
-<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
-
-<div class="checkbox-container">
-  <label>
-    <input type="checkbox" id="selectAllCheckbox" /> هەلبژاردنی هەموو وەسلەکان
-  </label>
-  <br/>
-  <button onclick="printSelectedOrders()" class="print-btn">🖨️ پرینتی وەسڵە هەڵبژێردراوەکان</button>
-</div>
-
-<div class="orders" id="ordersContainer">
-  <p class="no-orders">هیچ داواکاریەک نییە.</p>
-</div>
-
-<h2>لیستی کریارەکان</h2>
-<div class="customers" id="customersList">
-  <p class="no-customers">هیچ کریارێک نییە.</p>
-</div>
-
-<script>
-  const ordersContainer = document.getElementById('ordersContainer');
-  const customersList = document.getElementById('customersList');
-  const enableSoundBtn = document.getElementById('enableSoundBtn');
-  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-
-  enableSoundBtn.addEventListener('click', () => {
-    alarmSound.play().then(() => {
-      alert('دەنگ چالاککرا!');
-      enableSoundBtn.style.display = 'none';
-    }).catch(err => {
-      alert('ناتوانرێت دەنگ چالاک بکرێت.');
-      console.error(err);
-    });
-  });
-
-  function getOrders() {
-    try {
-      const data = localStorage.getItem('orders');
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function getUniqueCustomers(orders) {
-    const map = new Map();
-    orders.forEach(order => {
-      if (!map.has(order.mobile)) {
-        map.set(order.mobile, { name: order.name, mobile: order.mobile });
-      }
-    });
-    return Array.from(map.values());
-  }
-
-  function createProductHTML(product) {
-    return `
-      <div class="product">
-        <img src="${product.image}" alt="${product.name}" />
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${Number(product.price || 0).toLocaleString()} دینار</div>
-      </div>
-    `;
-  }
-
-  function renderOrders() {
-    const orders = getOrders();
-
-    if (orders.length === 0) {
-      ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
-      customersList.innerHTML = '<p class="no-customers">هیچ کریارێک نییە.</p>';
-      return;
-    }
-
-    ordersContainer.innerHTML = '';
-
-    orders.forEach((order, index) => {
-      const productsHTML = order.products.map(createProductHTML).join('');
-      const totalAmount = order.products.reduce((sum, p) => sum + Number(p.price || 0), 0);
-
-      const orderHTML = document.createElement('div');
-      orderHTML.className = 'order';
-      orderHTML.dataset.index = index;
-
-      orderHTML.innerHTML = `
-        <div style="margin-bottom: 10px">
-          <input type="checkbox" class="order-checkbox" data-index="${index}" /> وەسلەکە هەلبژێرە
-        </div>
-        <div class="order-header">
-          <span>ناوی کریار: ${order.name}</span>
-          <span>
-            ژمارە مۆبایل: 
-            <a href="https://wa.me/${order.mobile.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" style="color:#2b6cb0; text-decoration:none; font-weight:bold;">
-              ${order.mobile} 📱
-            </a>
-          </span>
-        </div>
-        <div class="order-info">
-          ناونیشان: ${order.address}<br/>
-          GPS: ${order.gps}<br/>
-          کاتی داواکاری: ${order.time}<br/>
-          <strong>💰 کۆی گشتی پارە: ${totalAmount.toLocaleString()} دینار</strong>
-        </div>
-        <div class="products">${productsHTML}</div>
-      `;
-
-      ordersContainer.prepend(orderHTML);
-    });
-
-    renderCustomers(orders);
-  }
-
-  function renderCustomers(orders) {
-    const uniqueCustomers = getUniqueCustomers(orders);
-
-    if (uniqueCustomers.length === 0) {
-      customersList.innerHTML = '<p class="no-customers">هیچ کریارێک نییە.</p>';
-      return;
-    }
-
-    let html = '<ul>';
-    uniqueCustomers.forEach(cust => {
-      html += `
-        <li>
-          <span>${cust.name}</span>
-          <a href="https://wa.me/${cust.mobile.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" title="پەیوەندی واتس‌ئاپ">
-            ${cust.mobile} 📱
-          </a>
-        </li>
-      `;
-    });
-    html += '</ul>';
-    customersList.innerHTML = html;
-  }
-
-  function checkForNewOrders() {
-    const currentOrders = getOrders();
-    if (currentOrders.length > lastOrdersLength) {
-      if (!document.hasFocus()) {
-        alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
-        alert("وەسڵی نوێ زیاد بوو!");
-      }
-      lastOrdersLength = currentOrders.length;
-      renderOrders();
-    }
-  }
-
-  function printSelectedOrders() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    if (checkboxes.length === 0) {
-      alert("تکایە یەک وەسل هەلبژێرە بۆ پرینت.");
-      return;
-    }
-
-    const printableOrders = [];
-
-    checkboxes.forEach(cb => {
-      const idx = cb.dataset.index;
-      const order = document.querySelector(`.order[data-index="${idx}"]`);
-      if (order) printableOrders.push(order.cloneNode(true));
-    });
-
-    const newWindow = window.open('', '_blank', 'width=900,height=700');
-    newWindow.document.write(`
-      <html>
-      <head>
-        <title>وەسلەی چاپی</title>
-        <style>
-          body {
-            font-family: 'Rabar_013', sans-serif;
-            direction: rtl;
-            padding: 30px;
-          }
-          .order {
-            border-bottom: 1px solid #999;
-            padding: 20px 0;
-            margin-bottom: 20px;
-          }
-          .order-header {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 10px;
-          }
-          .order-info {
-            font-size: 14px;
-            margin-bottom: 10px;
-          }
-          .products {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-          }
-          .product {
-            width: 140px;
-            border: 1px solid```html
-<!DOCTYPE html>
-<html lang="ku">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>داشبۆرد - کۆمپانیای دۆی قەندیل</title>
-  <link href="https://cdn.jsdelivr.net/gh/rbarw/fonts@latest/rabar/Rabar_013.css" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Rabar_013', sans-serif;
-      background: #f5f7fa;
-      margin: 0; padding: 20px;
-      direction: rtl;
-    }
-    h1, h2 {
-      text-align: center;
-      color: #1a202c;
-      margin-bottom: 10px;
-    }
-    .add-link {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .add-link a {
-      display: inline-block;
-      background: #2b6cb0;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .orders, .customers {
-      max-width: 900px;
-      margin: 20px auto;
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
-      min-height: 150px;
-    }
-    .order {
-      border-bottom: 1px solid #e2e8f0;
-      padding: 18px 0;
-    }
-    .order:last-child {
-      border-bottom: none;
-    }
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #2d3748;
-    }
-    .order-header span a {
-      color: #2b6cb0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .order-info {
-      font-size: 14px;
-      color: #4a5568;
-      margin-bottom: 12px;
-    }
-    .products {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .product {
-      border: 1.5px solid #cbd5e0;
-      border-radius: 12px;
-      padding: 10px;
-      width: 140px;
-      text-align: center;
-      background: #fefefe;
-    }
-    .product img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 8px;
-    }
-    .product-name {
-      font-weight: 700;
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-    .product-price {
-      color: #718096;
-      font-size: 14px;
-    }
-    .no-orders, .no-customers {
-      text-align: center;
-      font-size: 18px;
-      color: #a0aec0;
-      padding: 40px 0;
-    }
-    .play-alarm-btn, .print-btn {
-      display: block;
-      margin: 20px auto;
-      background: #2f855a;
-      color: white;
-      border: none;
-      padding: 10px 30px;
-      font-size: 16px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .checkbox-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .order-checkbox {
-      margin-left: 8px;
-    }
-    #customersList ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    #customersList li {
-      padding: 10px 0;
-      border-bottom: 1px solid #e2e8f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #customersList li:last-child {
-      border-bottom: none;
-    }
-    #customersList a {
-      color: #2b6cb0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    @media print {
-      body {
-        margin: 0;
-        padding: 0;
-        width: 210mm;
-        height: 297mm;
-        overflow: visible;
-        font-size: 12pt;
-      }
-      .order {
-        page-break-inside: avoid;
-        page-break-after: auto;
-        width: 190mm;
-        margin: auto;
-        border: none !important;
-        box-shadow: none !important;
-        background: white !important;
-        padding: 10mm !important;
-      }
-      .products {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      img {
-        max-width: 100%;
-        height: auto;
-        page-break-inside: avoid;
-      }
-    }
-  </style>
-</head>
-<body>
-
-<h1>وەسڵەکانی کریار</h1>
-
-<div class="add-link">
-  <a href="add-product.html">➕ زیادکردنی کاڵا</a>
-</div>
-
-<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
-
-<div class="checkbox-container">
-  <label>
-    <input type="checkbox" id="selectAllCheckbox" /> هەلبژاردنی هەموو وەسلەکان
-  </label>
-  <br/>
-  <button onclick="printSelectedOrders()" class="print-btn">🖨️ پرینتی وەسڵە هەڵبژێردراوەکان</button>
-</div>
-
-<div class="orders" id="ordersContainer">
-  <p class="no-orders">هیچ داواکاریەک نییە.</p>
-</div>
-
-<h2>لیستی کریارەکان</h2>
-<div class="customers" id="customersList">
-  <p class="no-customers">هیچ کریارێک نییە.</p>
-</div>
-
-<script>
-  const ordersContainer = document.getElementById('ordersContainer');
-  const customersList = document.getElementById('customersList');
-  const enableSoundBtn = document.getElementById('enableSoundBtn');
-  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-
-  enableSoundBtn.addEventListener('click', () => {
-    alarmSound.play().then(() => {
-      alert('دەنگ چالاککرا!');
-      enableSoundBtn.style.display = 'none';
-    }).catch(err => {
-      alert('ناتوانرێت دەنگ چالاک بکرێت.');
-      console.error(err);
-    });
-  });
-
-  function getOrders() {
-    try {
-      const data = localStorage.getItem('orders');
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function getUniqueCustomers(orders) {
-    const map = new Map();
-    orders.forEach(order => {
-      if (!map.has(order.mobile)) {
-        map.set(order.mobile, { name: order.name, mobile: order.mobile });
-      }
-    });
-    return Array.from(map.values());
-  }
-
-  function createProductHTML(product) {
-    return `
-      <div class="product">
-        <img src="${product.image}" alt="${product.name}" />
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${Number(product.price || 0).toLocaleString()} دینار</div>
-      </div>
-    `;
-  }
-
-  function renderOrders() {
-    const orders = getOrders();
-
-    if (orders.length === 0) {
-      ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
-      customersList.innerHTML = '<p class="no-customers">هیچ کریارێک نییە.</p>';
-      return;
-    }
-
-    ordersContainer.innerHTML = '';
-
-    orders.forEach((order, index) => {
-      const productsHTML = order.products.map(createProductHTML).join('');
-      const totalAmount = order.products.reduce((sum, p) => sum + Number(p.price || 0), 0);
-
-      const orderHTML = document.createElement('div');
-      orderHTML.className = 'order';
-      orderHTML.dataset.index = index;
-
-      orderHTML.innerHTML = `
-        <div style="margin-bottom: 10px">
-          <input type="checkbox" class="order-checkbox" data-index="${index}" /> وەسلەکە هەلبژێرە
-        </div>
-        <div class="order-header">
-          <span>ناوی کریار: ${order.name}</span>
-          <span>
-            ژمارە مۆبایل: 
-            <a href="https://wa.me/${order.mobile.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" style="color:#2b6cb0; text-decoration:none; font-weight:bold;">
-              ${order.mobile} 📱
-            </a>
-          </span>
-        </div>
-        <div class="order-info">
-          ناونیشان: ${order.address}<br/>
-          GPS: ${order.gps}<br/>
-          کاتی داواکاری: ${order.time}<br/>
-          <strong>💰 کۆی گشتی پارە: ${totalAmount.toLocaleString()} دینار</strong>
-        </div>
-        <div class="products">${productsHTML}</div>
-      `;
-
-      ordersContainer.prepend(orderHTML);
-    });
-
-    renderCustomers(orders);
-  }
-
-  function renderCustomers(orders) {
-    const uniqueCustomers = getUniqueCustomers(orders);
-
-    if (uniqueCustomers.length === 0) {
-      customersList.innerHTML = '<p class="no-customers">هیچ کریارێک نییە.</p>';
-      return;
-    }
-
-    let html = '<ul>';
-    uniqueCustomers.forEach(cust => {
-      html += `
-        <li>
-          <span>${cust.name}</span>
-          <a href="https://wa.me/${cust.mobile.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" title="پەیوەندی واتس‌ئاپ">
-            ${cust.mobile} 📱
-          </a>
-        </li>
-      `;
-    });
-    html += '</ul>';
-    customersList.innerHTML = html;
-  }
-
-  function checkForNewOrders() {
-    const currentOrders = getOrders();
-    if (currentOrders.length > lastOrdersLength) {
-      if (!document.hasFocus()) {
-        alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
-        alert("وەسڵی نوێ زیاد بوو!");
-      }
-      lastOrdersLength = currentOrders.length;
-      renderOrders();
-    }
-  }
-
-  function printSelectedOrders() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    if (checkboxes.length === 0) {
-      alert("تکایە یەک وەسل هەلبژێرە بۆ پرینت.");
-      return;
-    }
-
-    const printableOrders = [];
-
-    checkboxes.forEach(cb => {
-      const idx = cb.dataset.index;
-      const order = document.querySelector(`.order[data-index="${idx}"]`);
-      if (order) printableOrders.push(order.cloneNode(true));
-    });
-
-    const newWindow = window.open('', '_blank', 'width=900,height=700');
-    newWindow.document.write(`
-      <html>
-      <head>
-        <title>وەسلەی چاپی</title>
-        <style>
-          body {
-            font-family: 'Rabar_013', sans-serif;
-            direction: rtl;
-            padding: 30px;
-          }
-          .order {
-            border-bottom: 1px solid #999;
-            padding: 20px 0;
-            margin-bottom: 20px;
-          }
-          .order-header {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 10px;
-          }
-          .order-info {
-            font-size: 14px;
-            margin-bottom: 10px;
-          }
-          .products {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-          }
-          .product {
-            width: 140px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-          }
-          .product img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 5
+  const phones = [
+    "7507312433",
+    "7504675327",
+    "7704083038",
+    "7518079597",
+    "7517305400",
+    "7507654133",
+    "7504858895",
+    "7503253200",
+    "7504991961",
+    "7504151467",
+    "7503516237",
+    "7504535444",
+    "7501906364",
+    "7504482267",
+    "7504085259",
+    "7504730305",
+    "7502463346",
+    "7509717174",
+    "7514847104",
+    "7517919639",
+    "7516799640",
+    "7502198636",
+    "7508417980",
+    "7504453163",
+    "7510455241",
+    "7503264616",
+    "7503603536",
+    "7505551455",
+    "7502626459",
+    "7507545968",
+    "7507737494",
+    "7517267025",
+    "7818009882",
+    "7517362327",
+    "7504548808",
+    "7505793010",
+    "7505793010",
+    "7714188864",
+    "7504103209",
+    "7512940310",
+    "7504730523",
+    "7507200711",
+    "7504685436",
+    "7504848954",
+    "7518457531",
+    "7511585379",
+    "7504760847",
+    "7728242084",
+    "7507524414",
+    "7501983168",
+    "7504991419",
+    "7504635941",
+    "7504481847",
+    "7717771381",
+    "7510109895",
+    "7504019282",
+    "7506177007",
+    "7502375778",
+    "7505131414",
+    "7514220770",
+    "7506826878",
+    "7728465230",
+    "7508114794",
+    "7772009036",
+    "7504199235",
+    "7507187162",
+    "7506322402",
+    "7829337165",
+    "7507414158",
+    "7519667565",
+    "7504420383",
+    "7506487971",
+    "7515389676",
+    "7514220770",
+    "7504034417",
+    "7511498099",
+    "7513001991",
+    "7507087020",
+    "7501314462",
+    "7507430607",
+    "7504934143",
+    "7507672365",
+    "7504939053",
+    "7506369173",
+    "7513968561",
+    "7516857001",
+    "7503165385",
+    "7504758879",
+    "7504758879",
+    "7508172412",
+    "7805340090",
+    "7507629206",
+    "7829486975",
+    "7829408369",
+    "7504836968",
+    "7505656167",
+    "7515131139",
+    "7504688404",
+    "7824453002",
+    "7507494210",
+    "7504161205",
+    "7514428081",
+    "7504566763",
+    "7514597393",
+    "7502914618",
+    "7508348015",
+    "7504486813",
+    "7504956112",
+    "7507191683",
+    "7509193030",
+    "7514034332",
+    "7504244190",
+    "7510070741",
+    "7504908944",
+    "7704665727",
+    "7704665727",
+    "7507901194",
+    "7512855194",
+    "7504979710",
+    "7504787459",
+    "7501139835",
+    "7512491552",
+    "7504425486",
+    "7506943074",
+    "7515413894",
+    "7507108081",
+    "7504615838",
+    "7511300149",
+    "7509304070",
+    "7502327001",
+    "7504624107",
+    "7503612381",
+    "7504308946",
+    "7507872981",
+    "7508926404",
+    "7507872981",
+    "7517263834",
+    "7508540004",
+    "7519606252",
+    "7517648861",
+    "7504673082",
+    "7504656697",
+    "7504684253",
+    "7504777415",
+    "7502121739",
+    "7503155245",
+    "7507668964",
+    "7724672575",
+    "7502613393",
+    "7504960331",
+    "7508658855",
+    "7503151685",
+    "7504833395",
+    "7503581356",
+    "7504830869",
+    "7832119697",
+    "7504562299",
+    "7504545529",
+    "7508234660",
+    "7510961819",
+    "7508664014",
+    "7504625583",
+    "7516563450",
+    "7504923147",
+    "7507745383",
+    "7504050618",
+    "7504746483",
+    "7501047881",
+    "7504910266",
+    "7504215021",
+    "7509966169",
+    "7504684824",
+    "7505501008",
+    "7504673312",
+    "7705241816",
+    "7503353091",
+    "7501381011",
+    "7503966279",
+    "7512408573",
+    "7509957350",
+    "7500000000",
+    "7508981378",
+    "7507606196",
+    "7508315189",
+    "7500265461",
+    "7514209117",
+    "7514209117",
+    "7505480866",
+    "7504634053",
+    "7504156246",
+    "7504754838",
+    "7508308677",
+    "7507493692",
+    "7508363135",
+    "7505462142",
+    "7504410655",
+    "7505130353",
+    "7507367878",
+    "7502303532",
+    "7508548516",
+    "7507131336",
+    "7504272146",
+    "7504272146",
+    "7508552369",
+    "7501621048",
+    "7511886938",
+    "7514990599",
+    "7504531489",
+    "7505466445",
+    "7503898986",
+    "7504101018",
+    "7504265671",
+    "7831669436",
+    "7502556367",
+    "7507194554",
+    "7503943094",
+    "7504627910",
+    "7504774947",
+    "7503410039",
+    "7504340023",
+    "7504965931",
+    "7506502829",
+    "7501623562",
+    "7506174830",
+    "7508487344",
+    "7503543154",
+    "7506951393",
+    "7503308028",
+    "7824728665",
+    "7513226073",
+    "7504103209",
+    "7503290029",
+    "7506899959",
+    "7504533623",
+    "7504538032",
+    "7504636451",
+    "7504117675",
+    "7512315835",
+    "7504859785",
+    "7511141515",
+    "7506007474",
+    "7504290464",
+    "7517929295",
+    "7507979294",
+    "7501898485",
+    "7509824042",
+    "7518272986",
+    "7511497994",
+    "7507248578",
+    "7504156993",
+    "7514453535",
+    "7504928716",
+    "7506354548",
+    "7504547286",
+    "7517084981",
+    "7508553641",
+    "7507569650",
+    "7504530257",
+    "7504093357",
+    "7507254048",
+    "7507319260",
+    "7508219121",
+    "7509281219",
+    "7814575253",
+    "7504567570",
+    "7508902611",
+    "7502173979",
+    "7507886599",
+    "7502422421",
+    "7514145668",
+    "7504422078",
+    "7507079393",
+    "7518783770",
+    "7508878260",
+    "7504520172",
+    "7504467315",
+    "7504532386",
+    "7504731717",
+    "7518525391",
+    "7504343001",
+    "7505374750",
+    "7507935584",
+    "7514406214",
+    "7504562141",
+    "7504302298",
+    "7504637202",
+    "7503357700",
+    "7814853545",
+    "7504665203",
+    "7504640766",
+    "7504848814",
+    "7504485604",
+    "7504738090",
+    "7507033134",
+    "7504453783",
+    "7504334975",
+    "7504483331",
+    "7504559697",
+    "7507079391",
+    "7504678173",
+    "7504542437",
+    "7504341436",
+    "7504746932",
+    "7824444344",
+    "7504278285",
+    "7504123808",
+    "7519951995",
+    "7503251217",
+    "7512415457",
+    "7505875659",
+    "7507523045",
+    "7504241466",
+    "7510314431",
+    "7504606254",
+    "7514140347",
+    "7514104015",
+    "7504638757",
+    "7507620820",
+    "7504710060",
+    "7504975161",
+    "7504644964",
+    "7514989887",
+    "7504616043",
+    "7504510143",
+    "7504218207",
+    "7509118672",
+    "7500000000",
+    "7504610541",
+    "7504202928",
+    "7504524747",
+    "7507086808",
+    "7510251220",
+    "7504533940",
+    "7504535859",
+    "7504831210",
+    "7503370047",
+    "7504410011",
+    "7515236014",
+    "7504467221",
+    "7507516381",
+    "7504618375",
+    "7504267547",
+    "7504469094",
+    "7504185886",
+    "7508517986",
+    "7504640052",
+    "7504759462",
+    "7504490378",
+    "7504967649",
+    "7507152238",
+    "7507212011",
+    "7503183618",
+    "7504224380",
+    "7507739213",
+    "7507232324",
+    "7504646972",
+    "7508191838",
+    "7504140824",
+    "7504893162",
+    "7518637717",
+    "7504552149",
+    "7506485254",
+    "7504461930",
+    "7507197425",
+    "7504669949",
+    "7511455751",
+    "7504753484",
+    "7507275546",
+    "7803967073",
+    "7503850008",
+    "7504465318",
+    "7502477287",
+    "7504480293",
+    "7507757231",
+    "7504632595",
+    "7503160021",
+    "7734649287",
+    "7504047097",
+    "7518255391",
+    "7507972014",
+    "7504537596",
+    "7503404071",
+    "7503241138",
+    "7514033766
