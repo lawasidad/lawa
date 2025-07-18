@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8">
-  <title>WhatsApp Bulk Sender</title>
+  <meta charset="UTF-8" />
+  <title>ناردنی پەیام بە Telegram</title>
   <style>
     body { font-family: sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background: #ddd; }
-    input[type="text"] { width: 70%; padding: 8px; margin: 10px 0; }
-    button { padding: 8px 16px; background: green; color: white; border: none; cursor: pointer; }
+    input[type="text"], textarea { width: 70%; padding: 8px; margin: 10px 0; }
+    button { padding: 8px 16px; background: #0088cc; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <h2>ناردنی پەیام بە وەسڵ بۆ ژمارەکان</h2>
+  <h2>ناردنی پەیام بە Telegram بۆ زۆر کەس</h2>
 
-  <input type="text" id="message" placeholder="نامەکە بنوسە...">
+  <textarea id="message" placeholder="نامەکە بنوسە..." rows="4"></textarea><br>
   <button onclick="sendToAll()">ناردن</button>
   <br>
   <label><input type="checkbox" id="selectAll" onclick="toggleAll(this)"> هەموو هەلبژێرە</label>
@@ -26,49 +26,65 @@
       <tr>
         <th>هەلبژاردن</th>
         <th>ناو</th>
-        <th>ژمارە</th>
+        <th>Chat ID</th>
       </tr>
     </thead>
-    <tbody id="phoneList"></tbody>
+    <tbody id="userList"></tbody>
   </table>
 
   <script>
-    // خوێندنەوەی phones.json
-    fetch("phones.json")
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.getElementById("phoneList");
-        data.forEach((item, index) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td><input type="checkbox" class="phoneCheck" value="${item.phone}"></td>
-            <td>${item.name}</td>
-            <td>${item.phone}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      });
+    // نمونەی ناو و Chat ID ـەکان (ئەمانە پێویستن لە Backend یان لە فایلێکی داتاکان)
+    const users = [
+      { name: "عەلی", chatId: "123456789" },
+      { name: "سارا", chatId: "987654321" },
+      { name: "حسین", chatId: "192837465" }
+    ];
+
+    const tbody = document.getElementById("userList");
+    users.forEach(user => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="checkbox" class="userCheck" value="${user.chatId}"></td>
+        <td>${user.name}</td>
+        <td>${user.chatId}</td>
+      `;
+      tbody.appendChild(row);
+    });
 
     function toggleAll(source) {
-      document.querySelectorAll(".phoneCheck").forEach(ch => ch.checked = source.checked);
+      document.querySelectorAll(".userCheck").forEach(ch => ch.checked = source.checked);
     }
 
     function sendToAll() {
-      const message = document.getElementById("message").value;
-      const selected = [...document.querySelectorAll(".phoneCheck")]
+      const message = document.getElementById("message").value.trim();
+      const selectedChatIds = [...document.querySelectorAll(".userCheck")]
         .filter(ch => ch.checked)
         .map(ch => ch.value);
 
-      if (selected.length === 0 || !message.trim()) {
-        alert("تکایە ژمارەکان یان نامە بنووسە.");
+      if (!message) {
+        alert("تکایە نامەکە بنوسە.");
+        return;
+      }
+      if (selectedChatIds.length === 0) {
+        alert("تکایە کەسێک هەلبژێرە.");
         return;
       }
 
-      // ناردن بە وەتسئاپ
-      selected.forEach(phone => {
-        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-        window.open(url, "_blank");
-      });
+      // ناردنی نامە بە Backend بە داواکاری POST
+      fetch("/sendTelegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatIds: selectedChatIds, message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert("نامەکان بە سەرکەوتوویی نێردران.");
+        } else {
+          alert("کێشەیەک ڕوویدا: " + data.error);
+        }
+      })
+      .catch(err => alert("هەڵەیەک ڕوویدا: " + err));
     }
   </script>
 
