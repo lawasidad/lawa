@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ناردنی پەیام بە واتسئاپ</title>
-<style>
-  body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
-  textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-  ul { list-style: none; padding: 0; }
-  li { margin-bottom: 8px; }
-  button { padding: 10px 20px; background-color: #25D366; color: white; border: none; cursor: pointer; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ناردنی پەیام بە Viber</title>
+  <style>
+    body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
+    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 8px; }
+    button { padding: 10px 20px; background-color: #665CAC; color: white; border: none; cursor: pointer; }
+  </style>
 </head>
 <body>
 
-<h2>ناردنی پەیام بۆ زۆر ژمارە</h2>
+<h2>ناردنی پەیام بۆ ژمارەکان بە Viber</h2>
 
 <textarea id="message" placeholder="پەیامەکەت بنوسە..."></textarea>
 
@@ -24,7 +24,7 @@
   <li><input type="checkbox" class="phone" value="9647512345678" /> 9647512345678</li>
 </ul>
 
-<button id="sendBtn">ناردنی پەیام بە واتسئاپ</button>
+<button id="sendBtn">ناردنی پەیام بە Viber</button>
 
 <script>
   document.getElementById('sendBtn').addEventListener('click', () => {
@@ -40,12 +40,11 @@
       return;
     }
 
-    // بۆ هەر ژمارە لینکێکی wa.me دروست دەکەین و لە وێندۆوەی نوێدا کرتە دەکەین
     checkedPhones.forEach((phone, index) => {
-      const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      const url = `viber://forward?text=${encodeURIComponent(message)}`;
       setTimeout(() => {
         window.open(url, '_blank');
-      }, index * 500); // هەر ٥٠٠ ملیسەکەند دیفرانسی ناردن
+      }, index * 500); // ٥٠٠ms جیاوازی
     });
   });
 </script>
