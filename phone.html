@@ -1,146 +1,155 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8" />
-  <title>لیستی ژمارە موبایلەکان</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      direction: rtl;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-      background: #f7fafc;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .phone-list {
-      max-height: 400px;
-      overflow-y: scroll;
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px #ddd;
-      margin-bottom: 20px;
-    }
-    label {
-      display: flex;
-      align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-    }
-    label:hover {
-      background: #f0f4f8;
-    }
-    input[type="checkbox"] {
-      margin-left: 10px;
-      transform: scale(1.2);
-      cursor: pointer;
-    }
-    button {
-      background: #2b6cb0;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      width: 100%;
-    }
-    button:hover {
-      background: #1e429f;
-    }
-    #copiedMessage {
-      color: green;
-      margin-top: 10px;
-      text-align: center;
-      font-weight: bold;
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>زیادکردنی ژمارە مۆبایل</title>
+<style>
+  body {
+    font-family: 'Rabar_013', sans-serif;
+    direction: rtl;
+    padding: 20px;
+    background: #f5f7fa;
+  }
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  input, select, button {
+    margin-top: 6px;
+    padding: 8px;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    font-size: 16px;
+  }
+  button {
+    width: 150px;
+    background: #2b6cb0;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  .mobiles-list {
+    margin-top: 20px;
+    max-width: 300px;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  .mobiles-list h3 {
+    margin-top: 0;
+  }
+  .mobiles-list ul {
+    padding-right: 20px;
+  }
+  .mobiles-list ul li {
+    margin-bottom: 6px;
+    font-size: 16px;
+  }
+</style>
 </head>
 <body>
 
-<h1>لیستی ژمارە موبایلەکان</h1>
+<h1>زیادکردنی ژمارە مۆبایل بۆ کریار</h1>
 
-<div class="phone-list" id="phoneList">
-  <!-- ژمارەکان ئەمە لێرە زیاد دەکرێن -->
+<label for="customerSelect">هەلبژاردنی ناوی کریار (یان نوێ زیاد بکە):</label>
+<input list="customersList" id="customerSelect" placeholder="ناوی کریار بنووسە یان هەلبژێرە" />
+
+<datalist id="customersList"></datalist>
+
+<label for="mobileInput">ژمارەی مۆبایل:</label>
+<input type="text" id="mobileInput" placeholder="ژمارەی مۆبایل بنووسە" />
+
+<button id="addMobileBtn">زیادکردن</button>
+
+<div class="mobiles-list" id="mobileList" style="display:none;">
+  <h3>ژمارە مۆبایلەکان بۆ کریار:</h3>
+  <ul id="mobiles"></ul>
 </div>
 
-<button id="copySelected">کۆپی کردنی ژمارە هەڵبژێردراوەکان</button>
-<button id="copyAll" style="margin-top: 10px; background:#38a169;">کۆپی کردنی هەموو ژمارەکان</button>
-
-<p id="copiedMessage">کۆپی کرا بە سەرکەوتوویی!</p>
-
 <script>
-  const phones = [
-    "7507312433",
-    "7504675327",
-    "7704083038",
-    "7518079597",
-    "7517305400",
-    "7507654133",
-    "7504858895",
-    "7503253200",
-    "7504991961",
-    "7504151467",
-    // ... بەردەوام لە لیستی ژمارەکانە
+  // داتاکان (نموونە، دەتوانیت localStorage بەکاربەریت)
+  let orders = [
+    { name: "عەلی", mobile: "07501234567" },
+    { name: "سارا", mobile: "07509876543" },
+    { name: "عەلی", mobile: "07501112233" },
   ];
 
-  const phoneListDiv = document.getElementById("phoneList");
-  const copySelectedBtn = document.getElementById("copySelected");
-  const copyAllBtn = document.getElementById("copyAll");
-  const copiedMessage = document.getElementById("copiedMessage");
+  const customerInput = document.getElementById('customerSelect');
+  const customersList = document.getElementById('customersList');
+  const mobileInput = document.getElementById('mobileInput');
+  const addMobileBtn = document.getElementById('addMobileBtn');
+  const mobileListDiv = document.getElementById('mobileList');
+  const mobilesUl = document.getElementById('mobiles');
 
-  // زیادکردنی لیستەکە
-  function renderPhones() {
-    phoneListDiv.innerHTML = "";
-    phones.forEach((phone, index) => {
-      const label = document.createElement("label");
-      label.innerHTML = `
-        <input type="checkbox" value="${phone}" />
-        ${phone}
-      `;
-      phoneListDiv.appendChild(label);
+  function populateCustomersList() {
+    // پاککردنی داتالێست
+    customersList.innerHTML = '';
+    // وەرگرتنی ناوەکانی یکتا
+    const uniqueNames = [...new Set(orders.map(o => o.name))];
+    uniqueNames.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      customersList.appendChild(option);
     });
   }
 
-  // کۆپی کردن بەرزکردنەوەی فیدباک
-  function showCopiedMessage() {
-    copiedMessage.style.display = "block";
-    setTimeout(() => {
-      copiedMessage.style.display = "none";
-    }, 2000);
-  }
-
-  // کۆپی کردن دەقی نووسراو بۆ clipboard
-  function copyTextToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      showCopiedMessage();
-    }).catch(err => {
-      alert("کێشەیەک ڕوویدا لە کۆپی کردن: " + err);
-    });
-  }
-
-  // کۆپی کردنی ژمارە هەڵبژێردراوەکان
-  copySelectedBtn.addEventListener("click", () => {
-    const checkedPhones = [...document.querySelectorAll("#phoneList input[type=checkbox]:checked")].map(cb => cb.value);
-    if (checkedPhones.length === 0) {
-      alert("تکایە یەک ژمارە هەڵبژێرە بۆ کۆپی کردن");
+  // پێشنیازی ژمارە مۆبایلەکان بۆ ناوەکە هەلبژێردراو
+  function showMobilesForCustomer(name) {
+    if (!name) {
+      mobileListDiv.style.display = 'none';
+      mobilesUl.innerHTML = '';
       return;
     }
-    copyTextToClipboard(checkedPhones.join("\n"));
+    const mobilesSet = new Set(
+      orders.filter(o => o.name === name).map(o => o.mobile)
+    );
+    mobilesUl.innerHTML = '';
+    mobilesSet.forEach(mobile => {
+      const li = document.createElement('li');
+      li.textContent = mobile;
+      mobilesUl.appendChild(li);
+    });
+    mobileListDiv.style.display = mobilesSet.size > 0 ? 'block' : 'none';
+  }
+
+  // هەنگاوی زیادکردن
+  addMobileBtn.addEventListener('click', () => {
+    const name = customerInput.value.trim();
+    const mobile = mobileInput.value.trim();
+
+    if (!name) {
+      alert('تکایە ناوی کریار بنووسە.');
+      return;
+    }
+    if (!mobile) {
+      alert('تکایە ژمارەی مۆبایل بنووسە.');
+      return;
+    }
+    // داتای نوێ زیاد بکە
+    orders.push({ name, mobile });
+
+    // نوێکردنەوەی پێشنیارەکان و لیستەکە
+    populateCustomersList();
+    showMobilesForCustomer(name);
+
+    // پاكردن فۆرمەکان
+    mobileInput.value = '';
   });
 
-  // کۆپی کردنی هەموو ژمارەکان
-  copyAllBtn.addEventListener("click", () => {
-    copyTextToClipboard(phones.join("\n"));
+  // کاتێک ناوی کریار نوێ یان هەلبژێردرا پێشنیار بکە ژمارەکان
+  customerInput.addEventListener('input', () => {
+    showMobilesForCustomer(customerInput.value.trim());
   });
 
-  renderPhones();
+  window.onload = () => {
+    populateCustomersList();
+  };
 </script>
 
 </body>
