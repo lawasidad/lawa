@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ku">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>زیادکردنی ژمارە مۆبایل</title>
+<style>
+  body {
+    font-family: 'Rabar_013', sans-serif;
+    direction: rtl;
+    padding: 20px;
+    background: #f5f7fa;
+  }
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  input, select, button {
+    margin-top: 6px;
+    padding: 8px;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    font-size: 16px;
+  }
+  button {
+    width: 150px;
+    background: #2b6cb0;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  .mobiles-list {
+    margin-top: 20px;
+    max-width: 300px;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  .mobiles-list h3 {
+    margin-top: 0;
+  }
+  .mobiles-list ul {
+    padding-right: 20px;
+  }
+  .mobiles-list ul li {
+    margin-bottom: 6px;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h1>زیادکردنی ژمارە مۆبایل بۆ کریار</h1>
+
+<label for="customerSelect">هەلبژاردنی ناوی کریار (یان نوێ زیاد بکە):</label>
+<input list="customersList" id="customerSelect" placeholder="ناوی کریار بنووسە یان هەلبژێرە" />
+
+<datalist id="customersList"></datalist>
+
+<label for="mobileInput">ژمارەی مۆبایل:</label>
+<input type="text" id="mobileInput" placeholder="ژمارەی مۆبایل بنووسە" />
+
+<button id="addMobileBtn">زیادکردن</button>
+
+<div class="mobiles-list" id="mobileList" style="display:none;">
+  <h3>ژمارە مۆبایلەکان بۆ کریار:</h3>
+  <ul id="mobiles"></ul>
+</div>
+
+<script>
+  // داتاکان (نموونە، دەتوانیت localStorage بەکاربەریت)
+  let orders = [
+    { name: "عەلی", mobile: "07501234567" },
+    { name: "سارا", mobile: "07509876543" },
+    { name: "عەلی", mobile: "07501112233" },
+  ];
+
+  const customerInput = document.getElementById('customerSelect');
+  const customersList = document.getElementById('customersList');
+  const mobileInput = document.getElementById('mobileInput');
+  const addMobileBtn = document.getElementById('addMobileBtn');
+  const mobileListDiv = document.getElementById('mobileList');
+  const mobilesUl = document.getElementById('mobiles');
+
+  function populateCustomersList() {
+    // پاککردنی داتالێست
+    customersList.innerHTML = '';
+    // وەرگرتنی ناوەکانی یکتا
+    const uniqueNames = [...new Set(orders.map(o => o.name))];
+    uniqueNames.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      customersList.appendChild(option);
+    });
+  }
+
+  // پێشنیازی ژمارە مۆبایلەکان بۆ ناوەکە هەلبژێردراو
+  function showMobilesForCustomer(name) {
+    if (!name) {
+      mobileListDiv.style.display = 'none';
+      mobilesUl.innerHTML = '';
+      return;
+    }
+    const mobilesSet = new Set(
+      orders.filter(o => o.name === name).map(o => o.mobile)
+    );
+    mobilesUl.innerHTML = '';
+    mobilesSet.forEach(mobile => {
+      const li = document.createElement('li');
+      li.textContent = mobile;
+      mobilesUl.appendChild(li);
+    });
+    mobileListDiv.style.display = mobilesSet.size > 0 ? 'block' : 'none';
+  }
+
+  // هەنگاوی زیادکردن
+  addMobileBtn.addEventListener('click', () => {
+    const name = customerInput.value.trim();
+    const mobile = mobileInput.value.trim();
+
+    if (!name) {
+      alert('تکایە ناوی کریار بنووسە.');
+      return;
+    }
+    if (!mobile) {
+      alert('تکایە ژمارەی مۆبایل بنووسە.');
+      return;
+    }
+    // داتای نوێ زیاد بکە
+    orders.push({ name, mobile });
+
+    // نوێکردنەوەی پێشنیارەکان و لیستەکە
+    populateCustomersList();
+    showMobilesForCustomer(name);
+
+    // پاكردن فۆرمەکان
+    mobileInput.value = '';
+  });
+
+  // کاتێک ناوی کریار نوێ یان هەلبژێردرا پێشنیار بکە ژمارەکان
+  customerInput.addEventListener('input', () => {
+    showMobilesForCustomer(customerInput.value.trim());
+  });
+
+  window.onload = () => {
+    populateCustomersList();
+  };
+</script>
+
+</body>
+</html>
