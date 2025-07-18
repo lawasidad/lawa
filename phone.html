@@ -1,79 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="ku">
 <head>
-  <meta charset="UTF-8">
-  <title>WhatsApp Bulk Sender</title>
+  <meta charset="UTF-8" />
+  <title>لیستی ژمارە موبایلەکان</title>
   <style>
     body {
       font-family: sans-serif;
+      direction: rtl;
       padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      background: #f7fafc;
     }
-    textarea {
-      width: 100%;
-      height: 100px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
+    h1 {
+      text-align: center;
       margin-bottom: 20px;
     }
-    ul {
-      list-style: none;
-      padding: 0;
+    .phone-list {
+      max-height: 400px;
+      overflow-y: scroll;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ddd;
+      margin-bottom: 20px;
     }
-    li {
-      padding: 5px;
+    label {
+      display: flex;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    label:hover {
+      background: #f0f4f8;
+    }
+    input[type="checkbox"] {
+      margin-left: 10px;
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+    button {
+      background: #2b6cb0;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background: #1e429f;
+    }
+    #copiedMessage {
+      color: green;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <h2>✉️ ناردنی پەیام بە واتس ئاپ</h2>
+<h1>لیستی ژمارە موبایلەکان</h1>
 
-  <!-- پەیام -->
-  <textarea id="message" placeholder="پەیامەکەت بنوسە..."></textarea>
+<div class="phone-list" id="phoneList">
+  <!-- ژمارەکان ئەمە لێرە زیاد دەکرێن -->
+</div>
 
-  <!-- دوگمەی ناردن لە سەرەوە -->
-  <button onclick="sendToAll()">📤 ناردنی بۆ هەموو ژمارەکان</button>
+<button id="copySelected">کۆپی کردنی ژمارە هەڵبژێردراوەکان</button>
+<button id="copyAll" style="margin-top: 10px; background:#38a169;">کۆپی کردنی هەموو ژمارەکان</button>
 
-  <!-- لیستی ژمارەکان -->
-  <h3>📱 ژمارەکان</h3>
-  <ul id="numberList"></ul>
+<p id="copiedMessage">کۆپی کرا بە سەرکەوتوویی!</p>
 
-  <script>
-    let phoneNumbers = [];
+<script>
+  const phones = [
+    "7507312433",
+    "7504675327",
+    "7704083038",
+    "7518079597",
+    "7517305400",
+    "7507654133",
+    "7504858895",
+    "7503253200",
+    "7504991961",
+    "7504151467",
+    // ... بەردەوام لە لیستی ژمارەکانە
+  ];
 
-    // وەرگرتنی داتاکان لە phones.json
-    fetch('phones.json')
-      .then(res => res.json())
-      .then(data => {
-        phoneNumbers = data;
-        const list = document.getElementById("numberList");
-        data.forEach(phone => {
-          const li = document.createElement("li");
-          li.textContent = phone;
-          list.appendChild(li);
-        });
-      })
-      .catch(err => {
-        alert("نەتوانرا پەیوەندیکردن بە فایلەکە. دڵنیابە لەوەی بە ڕێی سێرڤەرە.");
-        console.error(err);
-      });
+  const phoneListDiv = document.getElementById("phoneList");
+  const copySelectedBtn = document.getElementById("copySelected");
+  const copyAllBtn = document.getElementById("copyAll");
+  const copiedMessage = document.getElementById("copiedMessage");
 
-    // ناردنی پەیام بۆ هەموو
-    function sendToAll() {
-      const msg = document.getElementById("message").value.trim();
-      if (!msg) return alert("تکایە پەیامەکە بنوسە!");
+  // زیادکردنی لیستەکە
+  function renderPhones() {
+    phoneListDiv.innerHTML = "";
+    phones.forEach((phone, index) => {
+      const label = document.createElement("label");
+      label.innerHTML = `
+        <input type="checkbox" value="${phone}" />
+        ${phone}
+      `;
+      phoneListDiv.appendChild(label);
+    });
+  }
 
-      phoneNumbers.forEach((phone, i) => {
-        setTimeout(() => {
-          const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-          window.open(url, '_blank');
-        }, i * 1000); // ناردنەکان بە مەودایەکی کەم
-      });
+  // کۆپی کردن بەرزکردنەوەی فیدباک
+  function showCopiedMessage() {
+    copiedMessage.style.display = "block";
+    setTimeout(() => {
+      copiedMessage.style.display = "none";
+    }, 2000);
+  }
+
+  // کۆپی کردن دەقی نووسراو بۆ clipboard
+  function copyTextToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showCopiedMessage();
+    }).catch(err => {
+      alert("کێشەیەک ڕوویدا لە کۆپی کردن: " + err);
+    });
+  }
+
+  // کۆپی کردنی ژمارە هەڵبژێردراوەکان
+  copySelectedBtn.addEventListener("click", () => {
+    const checkedPhones = [...document.querySelectorAll("#phoneList input[type=checkbox]:checked")].map(cb => cb.value);
+    if (checkedPhones.length === 0) {
+      alert("تکایە یەک ژمارە هەڵبژێرە بۆ کۆپی کردن");
+      return;
     }
-  </script>
+    copyTextToClipboard(checkedPhones.join("\n"));
+  });
+
+  // کۆپی کردنی هەموو ژمارەکان
+  copyAllBtn.addEventListener("click", () => {
+    copyTextToClipboard(phones.join("\n"));
+  });
+
+  renderPhones();
+</script>
 
 </body>
 </html>
