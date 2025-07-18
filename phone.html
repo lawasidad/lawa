@@ -118,46 +118,45 @@
 <div class="info" id="status"></div>
 
 <script>
-// بارکردنی ژمارەکان
-fetch('phones.json')
-  .then(response => {
-    if (!response.ok) throw new Error('Failed to load phones.json');
-    return response.json();
-  })
-  .then(data => {
-    const list = document.getElementById('phone-list');
-    if (!data.mobiles || !Array.isArray(data.mobiles) || data.mobiles.length === 0) {
-      list.innerHTML = '<li>ژمارە مۆبایلەکان نەدۆزرایەوە</li>';
-      return;
-    }
-    data.mobiles.forEach(phone => {
-      const li = document.createElement('li');
+// ژمارە مۆبایلەکان لێرە زیاد بکە
+const phones = [
+  "9647501234567",
+  "9647707654321",
+  "9647801122334",
+  "9647512345678",
+  "9647723456789",
+  "9647834567890",
+  "9647001122334",
+  "9647012233445",
+  "9647023344556"
+];
 
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'phone-checkbox';
-      checkbox.value = phone;
+// نیشاندانی ژمارەکان لە لیستەکە
+const list = document.getElementById('phone-list');
+phones.forEach(phone => {
+  const li = document.createElement('li');
 
-      const phoneText = document.createElement('span');
-      phoneText.textContent = phone;
-      phoneText.className = 'phone-number';
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = 'phone-checkbox';
+  checkbox.value = phone;
 
-      li.appendChild(checkbox);
-      li.appendChild(phoneText);
+  const phoneText = document.createElement('span');
+  phoneText.textContent = phone;
+  phoneText.className = 'phone-number';
 
-      list.appendChild(li);
-    });
+  li.appendChild(checkbox);
+  li.appendChild(phoneText);
 
-    // کارکردنی select all
-    const selectAllCheckbox = document.getElementById('selectAll');
-    selectAllCheckbox.addEventListener('change', () => {
-      const checkboxes = document.querySelectorAll('.phone-checkbox');
-      checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
-    });
-  })
-  .catch(err => {
-    document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
-  });
+  list.appendChild(li);
+});
+
+// کارکردنی select all
+const selectAllCheckbox = document.getElementById('selectAll');
+selectAllCheckbox.addEventListener('change', () => {
+  const checkboxes = document.querySelectorAll('.phone-checkbox');
+  checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+});
 
 // ناردنی پەیام بۆ ژمارەکان
 document.getElementById('sendMessageBtn').addEventListener('click', () => {
