@@ -2,75 +2,82 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8">
-  <title>WhatsApp Bulk Sender</title>
+  <title>Phone List</title>
   <style>
-    body { font-family: sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+    body { font-family: sans-serif; padding: 10px; background: #f2f2f2; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background: #ddd; }
-    input[type="text"] { width: 70%; padding: 8px; margin: 10px 0; }
-    button { padding: 8px 16px; background: green; color: white; border: none; cursor: pointer; }
+    th { background: #eee; }
+    textarea { width: 100%; height: 80px; margin: 10px 0; }
+    button { padding: 10px 20px; background: green; color: white; border: none; cursor: pointer; }
+    button:hover { background: darkgreen; }
   </style>
 </head>
 <body>
 
-  <h2>ناردنی پەیام بە وەسڵ بۆ ژمارەکان</h2>
+<h2>لیستی ژمارەکان</h2>
 
-  <input type="text" id="message" placeholder="نامەکە بنوسە...">
-  <button onclick="sendToAll()">ناردن</button>
-  <br>
-  <label><input type="checkbox" id="selectAll" onclick="toggleAll(this)"> هەموو هەلبژێرە</label>
+<label><input type="checkbox" id="selectAll"> هەمووی دیاری بکە</label>
+<br>
+<textarea id="message" placeholder="نامەکە لێرە بنووسە..."></textarea>
+<button onclick="sendMessage()">ناردنی پەیام بۆ وەتس‌ئاپ</button>
 
-  <table>
-    <thead>
-      <tr>
-        <th>هەلبژاردن</th>
-        <th>ناو</th>
-        <th>ژمارە</th>
-      </tr>
-    </thead>
-    <tbody id="phoneList"></tbody>
-  </table>
+<table id="phoneTable">
+  <thead>
+    <tr>
+      <th>دیاری بکە</th>
+      <th>ناو</th>
+      <th>ژمارە</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-  <script>
-    // خوێندنەوەی phones.json
-    fetch("phones.json")
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.getElementById("phoneList");
-        data.forEach((item, index) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td><input type="checkbox" class="phoneCheck" value="${item.phone}"></td>
-            <td>${item.name}</td>
-            <td>${item.phone}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      });
+<script>
+fetch('phones.json')
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.querySelector("#phoneTable tbody");
+    data.forEach((item, index) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="checkbox" class="phoneCheck" value="${item.phone}"></td>
+        <td>${item.name}</td>
+        <td>${item.phone}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
 
-    function toggleAll(source) {
-      document.querySelectorAll(".phoneCheck").forEach(ch => ch.checked = source.checked);
-    }
+// هەموو checkbox ـەکان دیاری بکە
+document.getElementById("selectAll").addEventListener("change", function () {
+  const allChecks = document.querySelectorAll(".phoneCheck");
+  allChecks.forEach(ch => ch.checked = this.checked);
+});
 
-    function sendToAll() {
-      const message = document.getElementById("message").value;
-      const selected = [...document.querySelectorAll(".phoneCheck")]
-        .filter(ch => ch.checked)
-        .map(ch => ch.value);
+// ناردنی واتس‌ئاپ
+function sendMessage() {
+  const message = document.getElementById("message").value.trim();
+  if (!message) {
+    alert("تکایە نامەکە بنووسە.");
+    return;
+  }
 
-      if (selected.length === 0 || !message.trim()) {
-        alert("تکایە ژمارەکان یان نامە بنووسە.");
-        return;
-      }
+  const selectedPhones = Array.from(document.querySelectorAll(".phoneCheck:checked"))
+    .map(input => input.value);
 
-      // ناردن بە وەتسئاپ
-      selected.forEach(phone => {
-        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-        window.open(url, "_blank");
-      });
-    }
-  </script>
+  if (selectedPhones.length === 0) {
+    alert("تکایە ژمارە دیاری بکە.");
+    return;
+  }
+
+  selectedPhones.forEach(phone => {
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  });
+}
+</script>
 
 </body>
 </html>
