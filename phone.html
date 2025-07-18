@@ -5,105 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>لیستی ژمارە مۆبایلەکان</title>
 <style>
-  body {
-    font-family: 'Rabar_013', sans-serif;
-    direction: rtl;
-    padding: 20px;
-    background: #f5f7fa;
-  }
-  label {
-    display: block;
-    margin-top: 15px;
-    font-weight: bold;
-  }
-  input, button {
-    margin-top: 6px;
-    padding: 8px;
-    width: 250px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e0;
-    font-size: 16px;
-  }
-  button {
-    width: 150px;
-    background: #2b6cb0;
-    color: white;
-    border: none;
-    cursor: pointer;
-    margin-top: 20px;
-    font-weight: bold;
-  }
-  ul {
-    margin-top: 20px;
-    max-width: 300px;
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    list-style: none;
-  }
-  ul li {
-    padding: 6px 10px;
-    border-bottom: 1px solid #cbd5e0;
-    font-size: 16px;
-  }
-  ul li:last-child {
-    border-bottom: none;
-  }
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+  h1 { color: #333; }
+  ul { list-style: none; padding: 0; }
+  li { background: #fff; margin-bottom: 5px; padding: 10px; border-radius: 4px; box-shadow: 0 0 3px #ccc; }
 </style>
 </head>
 <body>
 
 <h1>لیستی ژمارە مۆبایلەکان</h1>
-
-<label for="mobileInput">ژمارەی مۆبایل:</label>
-<input type="text" id="mobileInput" placeholder="ژمارەی مۆبایل بنووسە" />
-
-<button id="addMobileBtn">زیادکردن</button>
-
-<ul id="mobileList"></ul>
+<ul id="phone-list">
+  <!-- ژمارەکان لێرە دەنوسرێن -->
+</ul>
 
 <script>
-  // ئەم لیستەوە دەبێت ژمارە مۆبایلەکان بنوسرێن لێرە هەمانجۆر
-  let mobiles = [
-    "07501234567",
-    "07509876543",
-    "07501112233"
-  ];
-
-  const mobileInput = document.getElementById('mobileInput');
-  const addMobileBtn = document.getElementById('addMobileBtn');
-  const mobileList = document.getElementById('mobileList');
-
-  function renderMobiles() {
-    mobileList.innerHTML = '';
-    mobiles.forEach(mobile => {
+// ئەم کۆدە JSON ـە لە فایلی phones.json دەتوانیت وێبگەڕەکەت بەکاردێنیت لەو ناوەوە لێ بدەیت
+fetch('phones.json')
+  .then(response => {
+    if (!response.ok) throw new Error('Failed to load phones.json');
+    return response.json();
+  })
+  .then(data => {
+    const list = document.getElementById('phone-list');
+    if (!data.mobiles || !Array.isArray(data.mobiles)) {
+      list.innerHTML = '<li>ژمارە مۆبایلەکان نەدۆزرایەوە</li>';
+      return;
+    }
+    // هەر ژمارەیەک لە مۆبایلەکان بنوسە لە ناو لیستەکە
+    data.mobiles.forEach(phone => {
       const li = document.createElement('li');
-      li.textContent = mobile;
-      mobileList.appendChild(li);
+      li.textContent = phone;
+      list.appendChild(li);
     });
-  }
-
-  addMobileBtn.addEventListener('click', () => {
-    const mobile = mobileInput.value.trim();
-    if (!mobile) {
-      alert('تکایە ژمارەی مۆبایل بنووسە');
-      return;
-    }
-    if (mobiles.includes(mobile)) {
-      alert('ئەم ژمارەیە پێشتر هەیە');
-      return;
-    }
-    mobiles.push(mobile);
-    renderMobiles();
-    mobileInput.value = '';
-    mobileInput.focus();
+  })
+  .catch(err => {
+    document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
   });
-
-  // بەردەوام کردنی نیشاندانی لیست بەهۆی کڕدنەوەی پەیج
-  window.onload = () => {
-    renderMobiles();
-  };
 </script>
 
 </body>
