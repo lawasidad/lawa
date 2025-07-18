@@ -17,183 +17,34 @@
       color: #1a202c;
       margin-bottom: 10px;
     }
-    .add-link {
-      text-align: center;
-      margin-bottom: 30px;
+    select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e0;
+      min-width: 300px;
     }
-    .add-link a {
-      display: inline-block;
-      background: #2b6cb0;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .orders {
+    .customer-list-container {
       max-width: 900px;
-      margin: auto;
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
-      min-height: 150px;
-    }
-    .order {
-      border-bottom: 1px solid #e2e8f0;
-      padding: 18px 0;
-    }
-    .order:last-child {
-      border-bottom: none;
-    }
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
+      margin: 0 auto 20px auto;
+      text-align: center;
       font-weight: bold;
-      color: #2d3748;
-    }
-    .order-info {
-      font-size: 14px;
-      color: #4a5568;
-      margin-bottom: 12px;
-    }
-    .products {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .product {
-      border: 1.5px solid #cbd5e0;
-      border-radius: 12px;
-      padding: 10px;
-      width: 140px;
-      text-align: center;
-      background: #fefefe;
-    }
-    .product img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 8px;
-    }
-    .product-name {
-      font-weight: 700;
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-    .product-price {
-      color: #718096;
-      font-size: 14px;
-    }
-    .no-orders {
-      text-align: center;
-      font-size: 18px;
-      color: #a0aec0;
-      padding: 40px 0;
-    }
-    .play-alarm-btn, .print-btn {
-      display: block;
-      margin: 20px auto;
-      background: #2f855a;
-      color: white;
-      border: none;
-      padding: 10px 30px;
-      font-size: 16px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .checkbox-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .order-checkbox {
-      margin-left: 8px;
-    }
-    /* سەهمی گەورە لە سەر لیست */
-    #selectAllOrders {
-      transform: scale(1.3);
-      margin-left: 6px;
-      cursor: pointer;
-    }
-    @media print {
-      body {
-        margin: 0;
-        padding: 0;
-        width: 210mm;
-        height: 297mm;
-        overflow: visible;
-        font-size: 12pt;
-      }
-      .order {
-        page-break-inside: avoid;
-        page-break-after: auto;
-        width: 190mm;
-        margin: auto;
-        border: none !important;
-        box-shadow: none !important;
-        background: white !important;
-        padding: 10mm !important;
-      }
-      .products {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      img {
-        max-width: 100%;
-        height: auto;
-        page-break-inside: avoid;
-      }
+      margin-bottom: 30px;
     }
   </style>
 </head>
 <body>
 
-<h1>وەسڵەکانی کریار</h1>
+<h1>لیستی کریارەکان</h1>
 
-<!-- سەهمی هەلبژاردنی هەموو وەسلەکان -->
-<div style="max-width: 900px; margin: 0 auto 20px auto; text-align: center; font-weight: bold; padding: 10px 5px; border-bottom: 2px solid #cbd5e0; margin-bottom: 20px;">
-  <label style="cursor: pointer;">
-    <input type="checkbox" id="selectAllOrders" />
-    هەلبژاردنی هەموو وەسلەکان (سەهم)
-  </label>
-</div>
-
-<div class="add-link">
-  <a href="add-product.html">➕ زیادکردنی کاڵا</a>
-</div>
-
-<button id="enableSoundBtn" class="play-alarm-btn">چالاککردنی دەنگ (یەک کلیک بکە)</button>
-
-<div class="checkbox-container">
-  <label>
-    <input type="checkbox" id="selectAllCheckbox" /> هەلبژاردنی هەموو وەسلەکان
-  </label>
-  <br/>
-  <button onclick="printSelectedOrders()" class="print-btn">🖨️ پرینتی وەسڵە هەڵبژێردراوەکان</button>
-</div>
-
-<div class="orders" id="ordersContainer">
-  <p class="no-orders">هیچ داواکاریەک نییە.</p>
+<div class="customer-list-container">
+  <label for="customerSelect">هەلبژاردنی کریار:</label>
+  <select id="customerSelect">
+    <option value="all">هەموو کریارەکان</option>
+  </select>
 </div>
 
 <script>
-  const ordersContainer = document.getElementById('ordersContainer');
-  const enableSoundBtn = document.getElementById('enableSoundBtn');
-  const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-  const selectAllOrdersCheckbox = document.getElementById('selectAllOrders');
-
-  enableSoundBtn.addEventListener('click', () => {
-    alarmSound.play().then(() => {
-      alert('دەنگ چالاککرا!');
-      enableSoundBtn.style.display = 'none';
-    }).catch(err => {
-      alert('ناتوانرێت دەنگ چالاک بکرێت.');
-      console.error(err);
-    });
-  });
-
+  // وەرگرتنی داتای وەسڵەکان لە localStorage
   function getOrders() {
     try {
       const data = localStorage.getItem('orders');
@@ -203,66 +54,42 @@
     }
   }
 
-  function createProductHTML(product) {
-    return `
-      <div class="product">
-        <img src="${product.image}" alt="${product.name}" />
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${Number(product.price || 0).toLocaleString()} دینار</div>
-      </div>
-    `;
-  }
-
-  function renderOrders() {
+  // پڕکردنی سلێکت بە ناو و ژمارە مۆبایلەکان
+  function populateCustomerSelect() {
     const orders = getOrders();
 
-    if (orders.length === 0) {
-      ordersContainer.innerHTML = '<p class="no-orders">هیچ داواکاریەک نییە.</p>';
-      return;
-    }
+    // داتای منحصربەفردی ناوی کریار و ژمارە موبایل
+    // جێبەجێکردنی dictionary بۆ کۆکردن بەناوبانگەکان و ژمارەکان
+    const customersMap = {};
 
-    ordersContainer.innerHTML = '';
+    orders.forEach(order => {
+      if (order.name) {
+        if (!customersMap[order.name]) {
+          customersMap[order.name] = new Set();
+        }
+        if (order.mobile) {
+          customersMap[order.name].add(order.mobile);
+        }
+      }
+    });
 
-    orders.forEach((order, index) => {
-      const productsHTML = order.products.map(createProductHTML).join('');
-      const totalAmount = order.products.reduce((sum, p) => sum + Number(p.price || 0), 0);
+    const customerSelect = document.getElementById('customerSelect');
+    customerSelect.innerHTML = '<option value="all">هەموو کریارەکان</option>';
 
-      const orderHTML = document.createElement('div');
-      orderHTML.className = 'order';
-      orderHTML.dataset.index = index;
-
-      orderHTML.innerHTML = `
-        <div style="margin-bottom: 10px">
-          <input type="checkbox" class="order-checkbox" data-index="${index}" />
-          وەسلەکە هەلبژێرە
-        </div>
-        <div class="order-header">
-          <span>ناوی کریار: ${order.name}</span>
-          <span>ژمارە مۆبایل: ${order.mobile}</span>
-        </div>
-        <div class="order-info">
-          ناونیشان: ${order.address}<br/>
-          GPS: ${order.gps}<br/>
-          کاتی داواکاری: ${order.time}<br/>
-          <strong>💰 کۆی گشتی پارە: ${totalAmount.toLocaleString()} دینار</strong>
-        </div>
-        <div class="products">${productsHTML}</div>
-      `;
-
-      ordersContainer.appendChild(orderHTML);
+    // کرتەکردنی ناو و ژمارەکان بۆ هەر کریار
+    Object.keys(customersMap).forEach(name => {
+      const mobiles = Array.from(customersMap[name]).join(' ، ');
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = `${name} — ${mobiles}`;
+      customerSelect.appendChild(option);
     });
   }
 
-  selectAllOrdersCheckbox.addEventListener('change', function() {
-    const allOrderCheckboxes = document.querySelectorAll('.order-checkbox');
-    allOrderCheckboxes.forEach(cb => cb.checked = this.checked);
-  });
+  window.onload = () => {
+    populateCustomerSelect();
+  };
+</script>
 
-  let lastOrdersLength = 0;
-
-  function checkForNewOrders() {
-    const currentOrders = getOrders();
-    if (currentOrders.length > lastOrdersLength) {
-      if (!document.hasFocus()) {
-        alarmSound.play().catch(e => console.error("ناتوانێت دەنگ پێبکات:", e));
-        alert("وەس
+</body>
+</html>
