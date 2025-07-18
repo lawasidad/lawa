@@ -1,56 +1,79 @@
 <!DOCTYPE html>
-<html lang="ku">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Whatsapp Bulk Sender</title>
+  <meta charset="UTF-8">
+  <title>WhatsApp Bulk Sender</title>
   <style>
-    body { font-family: Arial; direction: rtl; text-align: right; padding: 20px; }
-    #send { margin: 10px 0; }
-    input[type="checkbox"] { transform: scale(1.3); margin-left: 5px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 5px;
+    }
   </style>
 </head>
 <body>
 
-<h3>📩 ناردنی پەیام بۆ ژمارەکان بە وەتسئاپ</h3>
+  <h2>✉️ ناردنی پەیام بە واتس ئاپ</h2>
 
-<textarea id="message" rows="4" cols="50" placeholder="پەیامەکەت لێرە بنوسە..."></textarea><br>
-<button id="send">📤 ناردن بە وەتس‌ئاپ</button>
-<br><br>
+  <!-- پەیام -->
+  <textarea id="message" placeholder="پەیامەکەت بنوسە..."></textarea>
 
-<label><input type="checkbox" id="selectAll"> هەموو ژمارەکان دیاری بکە</label>
-<ul id="phoneList"></ul>
+  <!-- دوگمەی ناردن لە سەرەوە -->
+  <button onclick="sendToAll()">📤 ناردنی بۆ هەموو ژمارەکان</button>
 
-<script>
-fetch('phones.json')
-  .then(response => response.json())
-  .then(data => {
-    const list = document.getElementById('phoneList');
-    data.forEach((item, index) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<input type="checkbox" class="phone" value="${item.phone}"> ${item.name} - ${item.phone}`;
-      list.appendChild(li);
-    });
+  <!-- لیستی ژمارەکان -->
+  <h3>📱 ژمارەکان</h3>
+  <ul id="numberList"></ul>
 
-    document.getElementById('selectAll').addEventListener('change', function () {
-      document.querySelectorAll('.phone').forEach(cb => cb.checked = this.checked);
-    });
+  <script>
+    let phoneNumbers = [];
 
-    document.getElementById('send').addEventListener('click', () => {
-      const message = encodeURIComponent(document.getElementById('message').value.trim());
-      const selectedPhones = Array.from(document.querySelectorAll('.phone:checked')).map(cb => cb.value);
-      if (!message || selectedPhones.length === 0) return alert("تکایە پەیام بنوسە و ژمارە دیاری بکە");
-
-      selectedPhones.forEach(phone => {
-        const link = `https://wa.me/${phone}?text=${message}`;
-        window.open(link, '_blank');
+    // وەرگرتنی داتاکان لە phones.json
+    fetch('phones.json')
+      .then(res => res.json())
+      .then(data => {
+        phoneNumbers = data;
+        const list = document.getElementById("numberList");
+        data.forEach(phone => {
+          const li = document.createElement("li");
+          li.textContent = phone;
+          list.appendChild(li);
+        });
+      })
+      .catch(err => {
+        alert("نەتوانرا پەیوەندیکردن بە فایلەکە. دڵنیابە لەوەی بە ڕێی سێرڤەرە.");
+        console.error(err);
       });
-    });
-  })
-  .catch(err => {
-    console.error("هەڵە لە وەرگرتنی phones.json:", err);
-    alert("نەتوانرا پەیوەندیکردن بە فایلەکە. دڵنیابە لەوەی بە ڕێی سێرڤەرە.");
-  });
-</script>
+
+    // ناردنی پەیام بۆ هەموو
+    function sendToAll() {
+      const msg = document.getElementById("message").value.trim();
+      if (!msg) return alert("تکایە پەیامەکە بنوسە!");
+
+      phoneNumbers.forEach((phone, i) => {
+        setTimeout(() => {
+          const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+          window.open(url, '_blank');
+        }, i * 1000); // ناردنەکان بە مەودایەکی کەم
+      });
+    }
+  </script>
 
 </body>
 </html>
