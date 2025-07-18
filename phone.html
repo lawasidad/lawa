@@ -54,7 +54,7 @@
 </head>
 <body>
 
-<h1>زیادکردنی ژمارە مۆبایل</h1>
+<h1>لیستی ژمارە مۆبایلەکان</h1>
 
 <label for="mobileInput">ژمارەی مۆبایل:</label>
 <input type="text" id="mobileInput" placeholder="ژمارەی مۆبایل بنووسە" />
@@ -64,7 +64,12 @@
 <ul id="mobileList"></ul>
 
 <script>
-  let mobiles = [];
+  // ئەم لیستەوە دەبێت ژمارە مۆبایلەکان بنوسرێن لێرە هەمانجۆر
+  let mobiles = [
+    "07501234567",
+    "07509876543",
+    "07501112233"
+  ];
 
   const mobileInput = document.getElementById('mobileInput');
   const addMobileBtn = document.getElementById('addMobileBtn');
@@ -86,7 +91,7 @@
       return;
     }
     if (mobiles.includes(mobile)) {
-      alert('ئەم ژمارەیە پێشتر زیادکراوە');
+      alert('ئەم ژمارەیە پێشتر هەیە');
       return;
     }
     mobiles.push(mobile);
@@ -94,6 +99,11 @@
     mobileInput.value = '';
     mobileInput.focus();
   });
+
+  // بەردەوام کردنی نیشاندانی لیست بەهۆی کڕدنەوەی پەیج
+  window.onload = () => {
+    renderMobiles();
+  };
 </script>
 
 </body>
