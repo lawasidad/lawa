@@ -194,6 +194,7 @@
       if (isSelected) div.classList.add('selected');
 
       div.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" />
         <div><strong>${product.name}</strong></div>
         <div>${product.price.toLocaleString()} دینار</div>
       `;
@@ -312,12 +313,17 @@
 🧾 *داواکاری نوێ* - ${order.time}
 
 👤 *کریار:* ${order.name}
+
 📞 *مۆبایل:* ${order.mobile}
+
 📍 *ناونیشان:* ${order.address}
+
 📡 *GPS:* ${order.gps}
+
 📝 *تێبینی:* ${order.note || 'هیچی نییە'}
 
 📦 *کاڵاکان:*
+
 ${order.products.map(p => `• ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
 
 💰 *کۆی گشتی:* ${order.total.toLocaleString()} دینار
