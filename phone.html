@@ -10,6 +10,7 @@
     ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
     li { padding: 5px 10px; border-bottom: 1px solid #eee; }
     .preview img { max-width: 100%; margin-bottom: 10px; display: block; }
+    .total { font-weight: bold; margin-top: 10px; background: #fff; padding: 10px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
@@ -24,6 +25,8 @@
 <div id="preview" class="preview"></div>
 
 <ul id="phoneList"></ul>
+
+<div id="totalCount" class="total"></div>
 
 <button id="sendBtn">ناردن بۆ هەموو ژمارەکان</button>
 
@@ -41,6 +44,9 @@
         li.innerHTML = `<label><input type="checkbox" class="phone" value="${fullPhone}" checked /> ${fullPhone}</label>`;
         list.appendChild(li);
       });
+
+      // پیشاندانی ژمارە گشتی
+      document.getElementById("totalCount").textContent = `گشتی ژمارەکان: ${data.length}`;
     })
     .catch(() => alert("نەتوانرا phones.json بخوێندرێت"));
 
@@ -84,7 +90,7 @@
       let fullMessage = message;
 
       if (base64Images.length > 0) {
-        fullMessage += `\n\n[${base64Images.length} وێنە هەیە — نیشان دەدرێن لەم پەیامەدا، بەڵام ناتوانرێت بە wa.me بنێردرێن]`;
+        fullMessage += `\n\n[${base64Images.length} وێنە هەیە — پیشاندەکرێن، بەڵام ناتوانرێن بە واتسئاپ نێردرێن]`;
       }
 
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`;
