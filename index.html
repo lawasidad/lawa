@@ -105,7 +105,6 @@
 
 <h2>فۆرمی داواکاری کاڵا</h2>
 
-<!-- فلتەری کەتەگۆری زیادکرا -->
 <label for="categoryFilter">فلتەر بەپێی کەتەگۆری</label>
 <select id="categoryFilter">
   <option value="">هەموو کەتەگۆری</option>
@@ -163,7 +162,6 @@
       if (!response.ok) throw new Error('نەتوانرا فایل بخوێندرێت');
       products = await response.json();
 
-      // خانەکانی کەتەگۆری لێبگرە بۆ فلتەر
       const categories = [...new Set(products.map(p => p.category).filter(c => c))];
       categoryFilter.innerHTML = `<option value="">هەموو کەتەگۆری</option>`;
       categories.forEach(cat => {
@@ -173,7 +171,7 @@
         categoryFilter.appendChild(opt);
       });
 
-      filteredProducts = products; // سەرەتا هەموو کاڵاکان نیشان بدە
+      filteredProducts = products;
       updateUI();
     } catch (error) {
       console.error('هەڵە لە خوێندنەوەی products.json:', error);
@@ -261,7 +259,7 @@
     } else {
       filteredProducts = products.filter(p => p.category === cat);
     }
-    selected = {}; // پاککردنی هەڵبژاردەکان کاتێک فلتەر دەگۆڕێت
+    selected = {};
     updateUI();
   });
 
@@ -273,83 +271,4 @@
   document.getElementById('orderForm').addEventListener('submit', e => {
     e.preventDefault();
 
-    const name = document.getElementById('customerName').value.trim();
-    const mobile = document.getElementById('mobile').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const note = document.getElementById('note').value.trim();
-
-    if (!name || !mobile || !address) {
-      alert('تکایە هەموو خانەکان پڕ بکە.');
-      return;
-    }
-
-    if (Object.keys(selected).length === 0) {
-      alert('تکایە کاڵایەک هەلبژێرە.');
-      return;
-    }
-
-    const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
-
-    const selectedProducts = products
-      .filter(p => selected[p.id])
-      .map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        quantity: selected[p.id],
-        totalPrice: p.price * selected[p.id]
-      }));
-
-    const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
-
-    const order = {
-      id: Date.now(),
-      name,
-      mobile,
-      address,
-      note,
-      products: selectedProducts,
-      time: new Date().toLocaleString(),
-      gps,
-      total: totalAmount
-    };
-
-    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-
-    // 📤 ناردنی وەسلەکە بۆ واتس‌ئاپ
-    const orderText = `
-🧾 داواکاری نوێ - ${order.time}
-
-👤 کریار: ${order.name}
-📞 مۆبایل: ${order.mobile}
-📍 ناونیشان: ${order.address}
-📡 GPS: ${order.gps}
-📝 تێبینی: ${order.note || 'هیچی نییە'}
-
-📦 کاڵاکان:
-${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
-
-💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
-`;
-    const encodedText = encodeURIComponent(orderText);
-    const whatsappUrl = `https://wa.me/9647502020061?text=${encodedText}`;
-    window.open(whatsappUrl, '_blank');
-
-    selected = {};
-    document.getElementById('orderForm').reset();
-    document.getElementById('gps').value = '';
-    autoFetchGPS();
-    updateUI();
-
-    const successMsg = document.getElementById('successMessage');
-    successMsg.style.display = 'block';
-    setTimeout(() => {
-      successMsg.style.display = 'none';
-    }, 3000);
-  });
-</script>
-
-</body>
-</html>
+    const name = document.getElementById('customerName').value
