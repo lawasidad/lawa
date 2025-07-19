@@ -3,197 +3,105 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ناردنی پەیام بە واتسئاپ</title>
+<title>ناردنی پەیام بە تیلگرام</title>
 <style>
   body {
     font-family: Arial, sans-serif;
     padding: 20px;
     background: #f9f9f9;
     direction: rtl;
+    max-width: 600px;
+    margin: auto;
   }
   h1 {
-    color: #333;
     text-align: center;
+    color: #333;
   }
-  textarea {
+  textarea, input {
     width: 100%;
-    max-width: 600px;
-    height: 120px;
-    margin: 0 auto 20px auto;
-    display: block;
+    font-size: 16px;
     padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
+    margin: 10px 0;
+    border-radius: 6px;
     border: 1px solid #ccc;
-    resize: vertical;
+    box-sizing: border-box;
   }
-  .select-all-container {
-    max-width: 600px;
-    margin: 10px auto 20px auto;
-    background: #fff;
-    padding: 12px 20px;
-    border-radius: 6px;
-    box-shadow: 0 0 4px #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-  }
-  label {
-    user-select: none;
-    font-weight: bold;
-    font-size: 16px;
-  }
-  input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-  }
-  ul {
-    list-style: none;
-    padding: 0;
-    max-width: 600px;
-    margin: 0 auto 20px auto;
-  }
-  li {
-    background: #fff;
-    margin-bottom: 10px;
-    padding: 12px;
-    border-radius: 6px;
-    box-shadow: 0 0 4px #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .phone-number {
-    flex-grow: 1;
-    margin-right: 10px;
-    font-weight: bold;
-    font-size: 16px;
-  }
-  button.send-btn {
-    display: block;
-    max-width: 600px;
-    margin: 10px auto;
-    background-color: #25D366;
+  button {
+    width: 100%;
+    background-color: #0088cc;
     color: white;
     border: none;
-    padding: 14px 0;
+    padding: 14px;
     font-size: 18px;
     font-weight: bold;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 100%;
   }
-  button.send-btn:hover {
-    background-color: #1ebe57;
+  button:hover {
+    background-color: #006699;
   }
   .info {
-    max-width: 600px;
-    margin: 10px auto;
-    font-size: 14px;
-    color: #666;
     text-align: center;
+    margin-top: 10px;
+    color: green;
+    font-weight: bold;
+  }
+  .error {
+    color: red;
   }
 </style>
 </head>
 <body>
 
-<h1>ناردنی پەیام بە واتسئاپ</h1>
+<h1>ناردنی پەیام بە تیلگرام</h1>
 
-<textarea id="message" placeholder="پەیامەکەت بنوسە..."></textarea>
+<label for="chatId">Chat ID:</label>
+<input type="text" id="chatId" placeholder="Chat ID بنوسە" />
 
-<div class="select-all-container">
-  <input type="checkbox" id="selectAll" />
-  <label for="selectAll">هەلبژاردنی هەموو ژمارەکان</label>
-</div>
+<label for="message">پەیامەکەت بنوسە:</label>
+<textarea id="message" rows="5" placeholder="پەیامەکەت بنوسە"></textarea>
 
-<ul id="phone-list">
-  <!-- ژمارەکان لێرە دەنوسرێن -->
-</ul>
-
-<button class="send-btn" id="sendMessageBtn">ناردنی پەیام بە واتسئاپ</button>
+<button id="sendBtn">ناردنی پەیام</button>
 
 <div class="info" id="status"></div>
 
 <script>
-// بارکردنی ژمارەکان
-fetch('phones.json')
-  .then(response => {
-    if (!response.ok) throw new Error('Failed to load phones.json');
-    return response.json();
-  })
-  .then(data => {
-    const list = document.getElementById('phone-list');
-    if (!data.mobiles || !Array.isArray(data.mobiles) || data.mobiles.length === 0) {
-      list.innerHTML = '<li>ژمارە مۆبایلەکان نەدۆزرایەوە</li>';
-      return;
-    }
-    data.mobiles.forEach(phone => {
-      const li = document.createElement('li');
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'phone-checkbox';
-      checkbox.value = phone;
-
-      const phoneText = document.createElement('span');
-      phoneText.textContent = phone;
-      phoneText.className = 'phone-number';
-
-      li.appendChild(checkbox);
-      li.appendChild(phoneText);
-
-      list.appendChild(li);
-    });
-
-    // کارکردنی select all
-    const selectAllCheckbox = document.getElementById('selectAll');
-    selectAllCheckbox.addEventListener('change', () => {
-      const checkboxes = document.querySelectorAll('.phone-checkbox');
-      checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
-    });
-  })
-  .catch(err => {
-    document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
-  });
-
-// ناردنی پەیام بۆ هەموو ژمارە هەلبژێردراو بە popup بە setTimeout بەم کاتی ٦٠٠ms
-document.getElementById('sendMessageBtn').addEventListener('click', () => {
+document.getElementById('sendBtn').addEventListener('click', () => {
+  const chatId = document.getElementById('chatId').value.trim();
   const message = document.getElementById('message').value.trim();
   const status = document.getElementById('status');
+  status.textContent = '';
+  status.classList.remove('error');
+
+  if (!chatId) {
+    status.textContent = 'تکایە Chat ID بنوسە.';
+    status.classList.add('error');
+    return;
+  }
   if (!message) {
-    alert('تکایە پەیامەکەت بنوسە.');
-    return;
-  }
-  const selectedCheckboxes = [...document.querySelectorAll('.phone-checkbox:checked')];
-  if (selectedCheckboxes.length === 0) {
-    alert('تکایە ژمارەیەک هەلبژێرە.');
+    status.textContent = 'تکایە پەیامەکەت بنوسە.';
+    status.classList.add('error');
     return;
   }
 
-  const encodedMessage = encodeURIComponent(message);
-
-  let blockedPopups = 0;
-
-  selectedCheckboxes.forEach((cb, idx) => {
-    const phone = cb.value.replace(/[^0-9]/g, '');
-    const url = `https://wa.me/${phone}?text=${encodedMessage}`;
-
-    setTimeout(() => {
-      const newWindow = window.open(url, '_blank');
-      if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-        blockedPopups++;
-        if(blockedPopups === 1){
-          alert('Popup blocker کەسراوە، تکایە ڕێگە بدە بۆ popup ـەکان!');
-        }
-      }
-    }, idx * 600); // ٦٠٠ms نێوان popup ـەکان
+  fetch('send_telegram.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text: message })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if(data.ok) {
+      status.textContent = 'پەیام بە سەرکەوتوویی نێردرا.';
+    } else {
+      status.textContent = 'کێشە هەیە لە ناردن: ' + (data.description || 'نازانراو');
+      status.classList.add('error');
+    }
+  })
+  .catch(err => {
+    status.textContent = 'هەڵەی تۆمارکردن: ' + err.message;
+    status.classList.add('error');
   });
-
-  status.textContent = `پەیام نێردرا بۆ ${selectedCheckboxes.length} ژمارە.`;
-  setTimeout(() => { status.textContent = ''; }, 6000);
 });
 </script>
 
