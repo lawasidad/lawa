@@ -1,110 +1,76 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>زیادکردنی کاڵا</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>زیادکردنی بەرهەم</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      font-family: sans-serif;
+      background: #f4f4f4;
       padding: 20px;
+      direction: rtl;
     }
     .form-container {
       background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
       max-width: 500px;
       margin: auto;
-    }
-    h2 {
-      text-align: center;
-      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
     }
     label {
       display: block;
-      margin: 10px 0 5px;
-      color: #444;
+      margin-top: 15px;
+      font-weight: bold;
     }
-    input, textarea {
+    input, select, textarea {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
+      margin-top: 5px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      margin-bottom: 10px;
-      box-sizing: border-box;
+      font-size: 16px;
     }
     button {
-      background: #28a745;
+      background: green;
       color: white;
-      padding: 10px;
-      width: 100%;
+      padding: 10px 15px;
       border: none;
       border-radius: 5px;
+      margin-top: 20px;
       font-size: 16px;
       cursor: pointer;
     }
     button:hover {
-      background: #218838;
+      background: darkgreen;
     }
   </style>
 </head>
 <body>
-
   <div class="form-container">
-    <h2>زیادکردنی کاڵا</h2>
-    <form id="productForm">
-      <label>کۆدی کاڵا</label>
-      <input type="text" id="code" required>
+    <h2>📦 زیادکردنی بەرهەم</h2>
+    <form action="save-product.php" method="POST">
+      <label>🔢 کۆدەک</label>
+      <input type="text" name="code" required />
 
-      <label>ناوی کاڵا</label>
-      <input type="text" id="name" required>
+      <label>📛 ناوی بەرهەم</label>
+      <input type="text" name="name" required />
 
-      <label>ژمارەی بارکۆد</label>
-      <input type="text" id="barcode">
+      <label>💲 نرخ</label>
+      <input type="number" name="price" required />
 
-      <label>نرخی یەکە</label>
-      <input type="number" id="unit_price" required>
+      <label>📦 بڕ</label>
+      <input type="number" name="quantity" required />
 
-      <label>بڕ (Qty)</label>
-      <input type="number" id="quantity" required>
+      <label>🔢 بارکۆد</label>
+      <input type="text" name="barcode" />
 
-      <label>بەروار</label>
-      <input type="date" id="date">
+      <label>📅 بەرواری بەسەرچوون (کەتە)</label>
+      <input type="date" name="expiry_date" />
 
       <button type="submit">✅ زیادکردن</button>
     </form>
   </div>
-
-  <script>
-    document.getElementById("productForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-
-      const code = document.getElementById("code").value;
-      const name = document.getElementById("name").value;
-      const barcode = document.getElementById("barcode").value;
-      const unit_price = parseFloat(document.getElementById("unit_price").value);
-      const quantity = parseInt(document.getElementById("quantity").value);
-      const date = document.getElementById("date").value;
-
-      const product = {
-        code,
-        name,
-        barcode,
-        unit_price,
-        quantity,
-        date
-      };
-
-      let products = JSON.parse(localStorage.getItem("products") || "[]");
-      products.push(product);
-      localStorage.setItem("products", JSON.stringify(products));
-
-      alert("✅ کاڵا زیادکرا");
-      this.reset();
-    });
-  </script>
-
 </body>
 </html>
