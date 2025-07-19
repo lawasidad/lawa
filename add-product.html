@@ -17,6 +17,47 @@
   .action-btn { cursor: pointer; margin: 0 5px; font-size: 18px; user-select: none; }
   .edit-btn { color: #007bff; }
   .delete-btn { color: #dc3545; }
+
+  /* Modal styles */
+  #editModal {
+    display: none; 
+    position: fixed; 
+    z-index: 999; 
+    left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5);
+  }
+  #editModalContent {
+    background-color: #fefefe;
+    margin: 10% auto; 
+    padding: 20px; 
+    border-radius: 10px;
+    width: 90%; max-width: 400px;
+  }
+  #editModalContent label, #editModalContent input {
+    width: 100%;
+    margin: 8px 0;
+  }
+  #editModalContent input {
+    padding: 8px;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+  }
+  #editModalContent button {
+    margin-top: 15px;
+  }
+  #editModalClose {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+  }
+  #editModalClose:hover {
+    color: black;
+  }
 </style>
 </head>
 <body>
@@ -52,20 +93,30 @@
   <tbody></tbody>
 </table>
 
-<script>
-  async function loadProductsFromJson() {
-    try {
-      const response = await fetch('products.json');
-      if (!response.ok) throw new Error('Error loading products.json');
-      const products = await response.json();
-      localStorage.setItem('products', JSON.stringify(products));
-      renderProducts();
-    } catch(e) {
-      console.warn('ناتوانرایە products.json بخوێندرێت, داتاکانی localStorage بەکار دەهێنرێت');
-      renderProducts();
-    }
-  }
+<!-- Edit Modal -->
+<div id="editModal">
+  <div id="editModalContent">
+    <span id="editModalClose">&times;</span>
+    <h3>دەستکاری کاڵا</h3>
+    <form id="editProductForm">
+      <label for="editProductName">ناوی کاڵا</label>
+      <input type="text" id="editProductName" required />
 
+      <label for="editProductPrice">نرخ (دینار)</label>
+      <input type="number" id="editProductPrice" required min="0" />
+
+      <label for="editProductCategory">کەتەگۆری</label>
+      <input type="text" id="editProductCategory" />
+
+      <label for="editProductImage">وێنەی کاڵا (URL)</label>
+      <input type="url" id="editProductImage" />
+
+      <button type="submit">💾 نوێکردنەوە</button>
+    </form>
+  </div>
+</div>
+
+<script>
   function getProducts() {
     return JSON.parse(localStorage.getItem('products') || '[]');
   }
@@ -94,6 +145,7 @@
     });
   }
 
+  // Add product form submit
   document.getElementById('addProductForm').addEventListener('submit', e => {
     e.preventDefault();
     const nameInput = document.getElementById('productName');
@@ -119,44 +171,19 @@
     e.target.reset();
   });
 
+  // Table action buttons (edit/delete)
   document.querySelector('#productTable tbody').addEventListener('click', e => {
     const target = e.target;
     if (target.classList.contains('edit-btn')) {
       const idx = parseInt(target.dataset.index);
-      editProduct(idx);
+      openEditModal(idx);
     } else if (target.classList.contains('delete-btn')) {
       const idx = parseInt(target.dataset.index);
       deleteProduct(idx);
     }
   });
 
-  function editProduct(index) {
-    const products = getProducts();
-    const product = products[index];
-
-    const newName = prompt('ناوی نوێی کاڵا بنووسە:', product.name);
-    if (newName === null) return;
-
-    const newCategory = prompt('کەتەگۆری نوێی کاڵا بنووسە:', product.category || '');
-    if (newCategory === null) return;
-
-    const newPriceStr = prompt('نرخی نوێی کاڵا بنووسە:', product.price);
-    if (newPriceStr === null) return;
-
-    const newPrice = parseInt(newPriceStr);
-    if (isNaN(newPrice) || newPrice < 0) {
-      alert('نرخەکە هەڵەیە!');
-      return;
-    }
-
-    products[index].name = newName.trim();
-    products[index].category = newCategory.trim();
-    products[index].price = newPrice;
-
-    saveProducts(products);
-    renderProducts();
-  }
-
+  // Delete product
   function deleteProduct(index) {
     if (!confirm('دڵنیایت لە سڕینەوەی ئەم کاڵایە؟')) return;
 
@@ -166,8 +193,72 @@
     renderProducts();
   }
 
+  // Modal controls
+  const editModal = document.getElementById('editModal');
+  const editModalClose = document.getElementById('editModalClose');
+
+  editModalClose.onclick = () => {
+    editModal.style.display = 'none';
+  };
+  window.onclick = e => {
+    if (e.target === editModal) {
+      editModal.style.display = 'none';
+    }
+  };
+
+  let currentEditIndex = null;
+
+  function openEditModal(index) {
+    currentEditIndex = index;
+    const products = getProducts();
+    const product = products[index];
+
+    document.getElementById('editProductName').value = product.name;
+    document.getElementById('editProductPrice').value = product.price;
+    document.getElementById('editProductCategory').value = product.category || '';
+    document.getElementById('editProductImage').value = product.image || '';
+
+    editModal.style.display = 'block';
+  }
+
+  // Edit form submit
+  document.getElementById('editProductForm').addEventListener('submit', e => {
+    e.preventDefault();
+
+    const name = document.getElementById('editProductName').value.trim();
+    const price = parseInt(document.getElementById('editProductPrice').value.trim());
+    const category = document.getElementById('editProductCategory').value.trim();
+    const image = document.getElementById('editProductImage').value.trim();
+
+    if (!name || isNaN(price) || price < 0) {
+      alert('تکایە ناو و نرخ بە دروستی بنووسە.');
+      return;
+    }
+
+    const products = getProducts();
+    products[currentEditIndex] = { name, price, category, image };
+    saveProducts(products);
+    renderProducts();
+
+    editModal.style.display = 'none';
+  });
+
+  // On load
   window.addEventListener('DOMContentLoaded', () => {
-    loadProductsFromJson();
+    // Try to load products.json, if fails load from localStorage
+    fetch('products.json')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load');
+        return res.json();
+      })
+      .then(json => {
+        localStorage.setItem('products', JSON.stringify(json));
+        renderProducts();
+      })
+      .catch(() => {
+        // localStorage used if fetch failed
+        renderProducts();
+      });
   });
 </script>
 
