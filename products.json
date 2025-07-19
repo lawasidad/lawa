@@ -1,6 +1,32 @@
 [
-  { "id": 1, "name": "پەنیر سنور 180 گرام", "price": 32000, "image": "https://via.placeholder.com/160?text=پەنیر+سنور+180+گرام" },
-  { "id": 2, "name": "پەنیر سنور 500 گرام", "price": 36000, "image": "https://via.placeholder.com/160?text=پەنیر+سنور+500+گرام" },
-  { "id": 3, "name": "پەنیر سنور 1 کیلۆ گرام", "price": 36000, "image": "https://via.placeholder.com/160?text=پەنیر+سنور+1+کیلۆ" },
-  { "id": 4, "name": "پەنیر سنور 2 کیلۆ", "price": 36000, "image": "https://via.placeholder.com/160?text=پەنیر+سنور+2+کیلۆ" }
+  {
+    "name": "کەلوپەلی سێوز",
+    "category": "میوە",
+    "price": 1500,
+    "image": "https://example.com/images/apple.jpg"
+  },
+  {
+    "name": "شیر",
+    "category": "خواردنی سەربەخۆ",
+    "price": 800,
+    "image": "https://example.com/images/milk.jpg"
+  },
+  {
+    "name": "نان",
+    "category": "خواردنی سەربەخۆ",
+    "price": 500,
+    "image": "https://example.com/images/bread.jpg"
+  },
+  {
+    "name": "کەلوپەلی مانگۆ",
+    "category": "میوە",
+    "price": 2000,
+    "image": "https://example.com/images/mango.jpg"
+  },
+  {
+    "name": "قەھوە",
+    "category": "خواردنی سەربەخۆ",
+    "price": 1200,
+    "image": "https://example.com/images/coffee.jpg"
+  }
 ]
