@@ -26,10 +26,10 @@
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById("phoneList");
-      data.forEach(item => {
+      data.forEach(phone => {
+        const fullPhone = phone.startsWith('964') ? phone : '964' + phone;
         const li = document.createElement("li");
-        // تەنها ژمارە دابنێ
-        li.innerHTML = `<label><input type="checkbox" class="phone" value="${item.phone}"/> ${item.phone}</label>`;
+        li.innerHTML = `<label><input type="checkbox" class="phone" value="${fullPhone}" checked /> ${fullPhone}</label>`;
         list.appendChild(li);
       });
     })
