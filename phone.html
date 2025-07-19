@@ -1,45 +1,76 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Upload 3 Images</title>
-  <style>
-    .preview img {
-      width: 150px;
-      height: auto;
-      margin: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+<?php
+// زانیاریەکان لە فایلەکە بخوێنەوە
+$dataFile = 'customers.json';
+$customers = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = $_POST['name'];
+    $mobile = $_POST['mobile'];
+
+    // وێنەکان باربکە (تا 3 دانە)
+    $uploadedImages = [];
+    for ($i = 0; $i < 3; $i++) {
+        if (isset($_FILES['images']['name'][$i]) && $_FILES['images']['name'][$i]) {
+            $filename = uniqid() . '_' . basename($_FILES['images']['name'][$i]);
+            $target = 'uploads/' . $filename;
+            move_uploaded_file($_FILES['images']['tmp_name'][$i], $target);
+            $uploadedImages[] = $target;
+        }
     }
-  </style>
+
+    // زانیاری زیادبکە
+    $customers[] = [
+        'name' => $name,
+        'mobile' => $mobile,
+        'images' => $uploadedImages
+    ];
+
+    // نووسینی داتا
+    file_put_contents($dataFile, json_encode($customers, JSON_PRETTY_PRINT));
+    header("Location: form.php");
+    exit;
+}
+?>
+
+<!DOCTYPE html>
+<html lang="ku">
+<head>
+    <meta charset="UTF-8">
+    <title>زیادکردنی کریار</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+        img { width: 100px; height: 100px; object-fit: cover; margin: 5px; border-radius: 10px; }
+        .customer { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 8px; }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; }
+        form { margin-bottom: 30px; }
+        .images-container { display: flex; flex-wrap: wrap; }
+    </style>
 </head>
 <body>
 
-<h2>وێنە بنێرە (تا ٣ دانە)</h2>
-<input type="file" id="imageInput" accept="image/*" multiple>
-<div class="preview" id="previewContainer"></div>
+<h2>زیادکردنی کریار + وێنە</h2>
+<form method="POST" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="ناوی کریار" required>
+    <input type="text" name="mobile" placeholder="ژمارەی مۆبایل" required>
+    <label>وێنە (تا 3 دانە):</label>
+    <input type="file" name="images[]" accept="image/*" multiple>
+    <button type="submit">زیادکردن</button>
+</form>
 
-<script>
-  document.getElementById('imageInput').addEventListener('change', function (event) {
-    const files = event.target.files;
-    const preview = document.getElementById('previewContainer');
-    preview.innerHTML = ""; // سڕینەوەی وێنەکانی پێشووتر
+<h3>کۆی ژمارەی مۆبایلەکان: <?= count($customers) ?></h3>
 
-    if (files.length > 3) {
-      alert("تەنها دەتوانیت ٣ وێنە بنێریت");
-      return;
-    }
-
-    for (let i = 0; i < files.length; i++) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        preview.appendChild(img);
-      }
-      reader.readAsDataURL(files[i]);
-    }
-  });
-</script>
+<?php foreach ($customers as $cust): ?>
+    <div class="customer">
+        <strong><?= htmlspecialchars($cust['name']) ?></strong><br>
+        📱 <?= htmlspecialchars($cust['mobile']) ?><br>
+        <div class="images-container">
+            <?php foreach ($cust['images'] as $img): ?>
+                <img src="<?= $img ?>" alt="Customer Image">
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endforeach; ?>
 
 </body>
 </html>
+
