@@ -2,10 +2,8 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <title>سلێکتکردنی هەموو ژمارەکان و ناردنی پەیام</title>
-  <style>
-    label { display: block; margin: 5px 0; }
-  </style>
+  <title>ناردنی پەیام بۆ ژمارەکان</title>
+  <style>label { display: block; margin: 5px 0; }</style>
 </head>
 <body>
   <h3>ژمارەکان هەلبژێرە</h3>
@@ -13,22 +11,19 @@
   <label><input type="checkbox" id="selectAll" /> هەموو سلێکت بکە</label>
 
   <div id="phoneList">
-    <label><input type="checkbox" class="phone" value="+9647501234567" /> +9647501234567</label>
-    <label><input type="checkbox" class="phone" value="+9647507654321" /> +9647507654321</label>
-    <label><input type="checkbox" class="phone" value="+9647701234567" /> +9647701234567</label>
-    <!-- ژمارە زیاتر زیاد بکە -->
+    <label><input type="checkbox" class="phone" value="+9647502020061" checked /> 7502020061</label>
+    <label><input type="checkbox" class="phone" value="+9647503272277" checked /> 7503272277</label>
+    <label><input type="checkbox" class="phone" value="+9647506257941" checked /> 7506257941</label>
   </div>
 
   <button id="sendMsg">پەیام بۆ هەلبژێردراوەکان بنێرە</button>
 
   <script>
-    // سلێکت/دیسێلت هەموو چەکبوکسەکان
     document.getElementById('selectAll').addEventListener('change', function() {
       const checked = this.checked;
       document.querySelectorAll('.phone').forEach(chk => chk.checked = checked);
     });
 
-    // ناردنی پەیام بۆ هەموو ژمارەی هەلبژێردراو
     document.getElementById('sendMsg').addEventListener('click', () => {
       const message = encodeURIComponent("سڵاو، ئەمە پەیامێکی تاقیکردنەوەیە.");
       const selectedPhones = Array.from(document.querySelectorAll('.phone:checked')).map(chk => chk.value);
