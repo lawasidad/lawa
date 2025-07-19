@@ -131,6 +131,9 @@
 
 <script>
   let autoGps = null;
+  let products = [];
+  let selected = {};
+  const productList = document.getElementById('productList');
 
   async function autoFetchGPS() {
     if (!navigator.geolocation) return;
@@ -146,27 +149,19 @@
     });
   }
 
-  // *** گۆڕینی ئەم لاینی کۆدە بۆ هەموو جار بۆ نوێکردنەوەی کاڵاکان:
-  function initializeProducts() {
-    const productsFromStorage = localStorage.getItem('products');
-    if (!productsFromStorage) {
-      const sampleProducts = [
-        { id: 1, name: 'پەنیر سنور 180 گرام', price: 32000, image: 'https://via.placeholder.com/160?text=پەنیر+سنور+180+گرام' },
-        { id: 2, name: 'پەنیر سنور 500 گرام', price: 36000, image: 'https://via.placeholder.com/160?text=پەنیر+سنور+500+گرام' },
-        { id: 3, name: 'پەنیر سنور 1 کیلۆ گرام', price: 36000, image: 'https://via.placeholder.com/160?text=پەنیر+سنور+1+کیلۆ' },
-        { id: 4, name: 'پەنیر سنور 2 کیلۆ', price: 36000, image: 'https://via.placeholder.com/160?text=پەنیر+سنور+2+کیلۆ' }
-      ];
-      localStorage.setItem('products', JSON.stringify(sampleProducts));
+  async function loadProductsFromJson() {
+    try {
+      const response = await fetch('products.json');
+      if (!response.ok) throw new Error('نەتوانرا فایل بخوێندرێت');
+      products = await response.json();
+      updateUI();
+    } catch (error) {
+      console.error('هەڵە لە خوێندنەوەی products.json:', error);
+      productList.innerHTML = '<p style="color:red;">ناتوانرایە کاڵا بخوێندرێت.</p>';
     }
   }
 
-  let selected = {};
-  const productList = document.getElementById('productList');
-
-  function loadProducts() {
-    initializeProducts();  // دڵنیابە کە هەموو جار کاڵاکان پێداچوونەوە دەکرێن
-
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
+  function updateUI() {
     productList.innerHTML = '';
 
     let total = 0;
@@ -239,13 +234,9 @@
     document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
   }
 
-  function updateUI() {
-    loadProducts();
-  }
-
   window.addEventListener('DOMContentLoaded', () => {
     autoFetchGPS();
-    loadProducts();
+    loadProductsFromJson();
   });
 
   document.getElementById('orderForm').addEventListener('submit', e => {
@@ -268,7 +259,6 @@
 
     const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
 
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
     const selectedProducts = products
       .filter(p => selected[p.id])
       .map(p => ({
