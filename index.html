@@ -3,112 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>کۆمپانیای دۆی قەندیل - داواکاری کاڵا</title>
+  <title>فۆرمی داواکاری کاڵا - سابت وەستایەتی</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f7f9fc; }
-    .product-list { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-    .product {
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      width: 180px;
-      text-align: center;
-      cursor: pointer;
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      direction: rtl;
+      background: #f7f9fc;
+      margin: 0;
+    }
+    form {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
       background: white;
-      transition: 0.3s;
-      user-select: none;
-      position: relative;
+      padding: 15px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 9999;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 0 0 15px 15px;
     }
-    .product.selected {
-      border-color: #28a745;
-      background: #e0f7e9;
-    }
-    .product img {
-      width: 160px;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    .quantity-controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .quantity-controls button {
-      width: 30px;
-      height: 30px;
-      border: none;
-      border-radius: 5px;
-      background-color: #28a745;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-    }
-    .quantity-controls span {
-      min-width: 25px;
-      display: inline-block;
-      text-align: center;
-      font-weight: bold;
-      user-select: none;
-    }
-    label, input, button {
+    label, input, button, #totalAmount {
       display: block;
-      margin: 10px 0;
       width: 100%;
-      max-width: 400px;
-    }
-    input, button {
-      padding: 10px;
+      max-width: 600px;
+      margin: 5px auto;
       font-size: 16px;
-      border-radius: 10px;
+      box-sizing: border-box;
+    }
+    input {
+      padding: 10px;
+      border-radius: 8px;
       border: 1.5px solid #ccc;
+    }
+    input[readonly] {
+      background: #eee;
     }
     button {
       background: #28a745;
       color: white;
       border: none;
-      cursor: pointer;
+      border-radius: 8px;
       font-weight: bold;
+      cursor: pointer;
+      padding: 12px;
+      margin-top: 10px;
+      transition: background-color 0.3s;
     }
     button:hover {
       background: #218838;
-    }
-    form {
-      max-width: 400px;
-      margin-top: 20px;
-      position: sticky;
-      top: 20px;
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 100;
     }
     #totalAmount {
       font-weight: bold;
       font-size: 18px;
       color: #28a745;
-      margin-top: 10px;
+      margin: 8px auto;
+      text-align: center;
     }
-    #successMessage {
-      color: green;
-      font-weight: bold;
-      margin-top: 15px;
-      display: none;
+    /* Body padding top so content below form */
+    body > *:not(form) {
+      margin-top: 280px; /* adjust based on form height */
+      padding: 0 20px;
     }
   </style>
 </head>
 <body>
 
-<h2>فۆرمی داواکاری کاڵا</h2>
-
-<div class="product-list" id="productList"></div>
-
 <form id="orderForm">
-  <label for="customerName">ناوی کریار</label>
+  <label for="customerName">ناوی خۆت بنووسە</label>
   <input type="text" id="customerName" required placeholder="ناوی خۆت بنووسە" />
 
   <label for="mobile">ژمارەی مۆبایل</label>
@@ -118,205 +82,50 @@
   <input type="text" id="address" required />
 
   <label for="gps">GPS</label>
-  <input type="text" id="gps" readonly />
+  <input type="text" id="gps" readonly value="36.22175, 44.03364" />
 
   <label for="note">تێبینی (Note)</label>
   <input type="text" id="note" placeholder="تێبینیەکانت بنووسە..." />
 
-  <div id="totalAmount">کۆی گشتی: ٠ دینار</div>
+  <div id="totalAmount">کۆی گشتی: 0 دینار</div>
 
   <button type="submit">✅ ناردنی داواکاری</button>
-  <p id="successMessage">✅ داواکاری نێردرا!</p>
 </form>
 
 <script>
-  let autoGps = null;
-  let products = [];
-  let selected = {};
-  const productList = document.getElementById('productList');
+  // ئەگەر دەتەوێت ناو و کۆی گشتی وەرگرتنی پرۆگرامەکان زیاد بکەیت ئەمش کۆدە زیاد بکە
 
-  async function autoFetchGPS() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => {
-      autoGps = {
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude
-      };
-      document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
-    }, error => {
-      console.warn('ناتوانرایە GPS بگەڕێنرێت:', error.message);
-      document.getElementById("gps").value = 'GPS نەدۆزرایەوە';
-    });
+  // نمونەی بۆ کۆی گشتی:
+  // لێرە دەتوانی کۆی گشتی هەژمار بکەیت بە شێوەی دیاریکراو
+  // لە کاتی کۆتایی کۆد بۆ submit ئەمە زیاد بکە
+
+  const orderForm = document.getElementById('orderForm');
+  const totalAmountEl = document.getElementById('totalAmount');
+
+  // بۆ نموونە بەرزکردنی کۆی گشتی بە ژمارەی 0 تا هێشتا فەرمیە
+  function updateTotal(total) {
+    totalAmountEl.textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
   }
 
-  async function loadProductsFromJson() {
-    try {
-      const response = await fetch('products.json');
-      if (!response.ok) throw new Error('نەتوانرا فایل بخوێندرێت');
-      products = await response.json();
-      updateUI();
-    } catch (error) {
-      console.error('هەڵە لە خوێندنەوەی products.json:', error);
-      productList.innerHTML = '<p style="color:red;">ناتوانرایە کاڵا بخوێندرێت.</p>';
-    }
-  }
+  // پێشەکی total 0
+  updateTotal(0);
 
-  function updateUI() {
-    productList.innerHTML = '';
-
-    let total = 0;
-
-    products.forEach(product => {
-      const isSelected = selected[product.id] > 0;
-
-      const div = document.createElement('div');
-      div.className = 'product';
-      if (isSelected) div.classList.add('selected');
-
-      div.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" />
-        <div><strong>${product.name}</strong></div>
-        <div>${product.price.toLocaleString()} دینار</div>
-      `;
-
-      if (isSelected) {
-        const controls = document.createElement('div');
-        controls.className = 'quantity-controls';
-
-        const btnMinus = document.createElement('button');
-        btnMinus.type = 'button';
-        btnMinus.textContent = '-';
-
-        const qtySpan = document.createElement('span');
-        qtySpan.textContent = selected[product.id];
-
-        const btnPlus = document.createElement('button');
-        btnPlus.type = 'button';
-        btnPlus.textContent = '+';
-
-        btnMinus.onclick = e => {
-          e.stopPropagation();
-          if (selected[product.id] > 1) {
-            selected[product.id]--;
-          } else {
-            delete selected[product.id];
-          }
-          updateUI();
-        };
-
-        btnPlus.onclick = e => {
-          e.stopPropagation();
-          selected[product.id] = (selected[product.id] || 0) + 1;
-          updateUI();
-        };
-
-        controls.appendChild(btnMinus);
-        controls.appendChild(qtySpan);
-        controls.appendChild(btnPlus);
-
-        div.appendChild(controls);
-
-        total += product.price * selected[product.id];
-      }
-
-      div.onclick = () => {
-        if (isSelected) {
-          delete selected[product.id];
-        } else {
-          selected[product.id] = 1;
-        }
-        updateUI();
-      };
-
-      productList.appendChild(div);
-    });
-
-    document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    autoFetchGPS();
-    loadProductsFromJson();
-  });
-
-  document.getElementById('orderForm').addEventListener('submit', e => {
+  orderForm.addEventListener('submit', e => {
     e.preventDefault();
 
     const name = document.getElementById('customerName').value.trim();
     const mobile = document.getElementById('mobile').value.trim();
     const address = document.getElementById('address').value.trim();
-    const note = document.getElementById('note').value.trim();
 
     if (!name || !mobile || !address) {
       alert('تکایە هەموو خانەکان پڕ بکە.');
       return;
     }
 
-    if (Object.keys(selected).length === 0) {
-      alert('تکایە کاڵایەک هەلبژێرە.');
-      return;
-    }
-
-    const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
-
-    const selectedProducts = products
-      .filter(p => selected[p.id])
-      .map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        quantity: selected[p.id],
-        totalPrice: p.price * selected[p.id]
-      }));
-
-    const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
-
-    const order = {
-      id: Date.now(),
-      name,
-      mobile,
-      address,
-      note,
-      products: selectedProducts,
-      time: new Date().toLocaleString(),
-      gps,
-      total: totalAmount
-    };
-
-    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-
-    // 📤 ناردنی وەسلەکە بۆ واتس‌ئاپ
-    const orderText = `
-🧾 داواکاری نوێ - ${order.time}
-
-👤 کریار: ${order.name}
-📞 مۆبایل: ${order.mobile}
-📍 ناونیشان: ${order.address}
-📡 GPS: ${order.gps}
-📝 تێبینی: ${order.note || 'هیچی نییە'}
-
-📦 کاڵاکان:
-${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
-
-💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
-`;
-    const encodedText = encodeURIComponent(orderText);
-    const whatsappUrl = `https://wa.me/9647502020061?text=${encodedText}`;
-    window.open(whatsappUrl, '_blank');
-
-    selected = {};
-    document.getElementById('orderForm').reset();
-    document.getElementById('gps').value = '';
-    autoFetchGPS();
-    updateUI();
-
-    const successMsg = document.getElementById('successMessage');
-    successMsg.style.display = 'block';
-    setTimeout(() => {
-      successMsg.style.display = 'none';
-    }, 3000);
+    alert(`✅ داواکاری نێردرا بۆ:\n\nناوی کریار: ${name}\nژمارەی مۆبایل: ${mobile}\nناونیشان: ${address}\nکۆی گشتی: 0 دینار`);
+    
+    orderForm.reset();
+    updateTotal(0);
   });
 </script>
 
