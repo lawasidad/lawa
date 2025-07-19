@@ -1,74 +1,44 @@
+<?php
+$data = json_decode(file_get_contents("phones.json"), true);
+$total = count($data);
+?>
+
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ناردنی پەیام بە واتس‌ئاپ</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ژمارە مۆبایلەکان</title>
   <style>
-    body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f5f5f5; }
-    textarea, button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
-    ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
-    li { padding: 5px 10px; border-bottom: 1px solid #eee; }
-    .total { font-weight: bold; margin-top: 10px; background: #fff; padding: 10px; border: 1px solid #ccc; }
+    body { font-family: sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .number { background: #e3e3e3; padding: 10px; margin: 10px 0; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; }
+    .number img { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
+    .total { margin-top: 20px; font-weight: bold; }
+    .upload-form { margin-bottom: 20px; }
   </style>
 </head>
 <body>
 
-<h2>ناردنی پەیام بە واتس‌ئاپ</h2>
+<div class="container">
+  <form class="upload-form" action="upload.php" method="post" enctype="multipart/form-data">
+    <label>ژمارە مۆبایل و وێنە بنێرە:</label><br>
+    <input type="text" name="number" placeholder="ژمارە" required>
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">ناردن</button>
+  </form>
 
-<textarea id="message" rows="4" placeholder="نامەکەت بنوسە..."></textarea>
+  <?php foreach ($data as $item): ?>
+    <div class="number">
+      <span><?= htmlspecialchars($item["number"]) ?></span>
+      <?php if (!empty($item["image"]) && file_exists($item["image"])): ?>
+        <img src="<?= $item["image"] ?>" alt="وێنە">
+      <?php endif; ?>
+    </div>
+  <?php endforeach; ?>
 
-<ul id="phoneList"></ul>
-
-<div id="totalCount" class="total"></div>
-
-<button id="sendBtn">ناردن بۆ هەموو ژمارەکان</button>
-
-<script>
-  // خوێندنەوەی customers.json (دەبێ فایلەکە لە هەمان فۆڵدەری سێرڤەر بێت)
-  fetch("customers.json")
-    .then(res => res.json())
-    .then(data => {
-      const list = document.getElementById("phoneList");
-      data.forEach(cust => {
-        const phone = cust.mobile.startsWith('964') ? cust.mobile : '964' + cust.mobile;
-        const images = cust.images || [];
-        let imgLinks = '';
-        if (images.length > 0) {
-          imgLinks = images.map((src, i) =>
-            `<a href="${src}" target="_blank" rel="noopener noreferrer">وێنە ${i+1}</a>`
-          ).join(' | ');
-        }
-
-        const li = document.createElement("li");
-        li.innerHTML = `<label><input type="checkbox" class="phone" value="${phone}" checked /> ${phone} ${imgLinks ? ' - ' + imgLinks : ''}</label>`;
-        list.appendChild(li);
-      });
-
-      document.getElementById("totalCount").textContent = `کۆی ژمارەکان: ${data.length}`;
-    })
-    .catch(() => alert("نەتوانرا customers.json بخوێندرێت"));
-
-  document.getElementById("sendBtn").addEventListener("click", () => {
-    const message = document.getElementById("message").value.trim();
-    const selectedPhones = [...document.querySelectorAll(".phone:checked")].map(i => i.value);
-
-    if (!message) {
-      alert("تکایە نامەکەت بنوسە.");
-      return;
-    }
-
-    if (selectedPhones.length === 0) {
-      alert("تکایە ژمارەیەک هەلبژێرە.");
-      return;
-    }
-
-    selectedPhones.forEach((phone, i) => {
-      const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-      setTimeout(() => window.open(url, "_blank"), i * 700);
-    });
-  });
-</script>
+  <div class="total">گەشتی ژمارەکان: <?= $total ?></div>
+</div>
 
 </body>
 </html>
