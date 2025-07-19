@@ -162,6 +162,7 @@
       if (!response.ok) throw new Error('نەتوانرا فایل بخوێندرێت');
       products = await response.json();
 
+      // Generate categories for filter dropdown
       const categories = [...new Set(products.map(p => p.category).filter(c => c))];
       categoryFilter.innerHTML = `<option value="">هەموو کەتەگۆری</option>`;
       categories.forEach(cat => {
@@ -184,8 +185,9 @@
 
     let total = 0;
 
-    filteredProducts.forEach(product => {
-      const isSelected = selected[product.id] > 0;
+    filteredProducts.forEach((product, index) => {
+      const id = product.id ?? index;
+      const isSelected = selected[id] > 0;
 
       const div = document.createElement('div');
       div.className = 'product';
@@ -206,7 +208,7 @@
         btnMinus.textContent = '-';
 
         const qtySpan = document.createElement('span');
-        qtySpan.textContent = selected[product.id];
+        qtySpan.textContent = selected[id];
 
         const btnPlus = document.createElement('button');
         btnPlus.type = 'button';
@@ -214,17 +216,17 @@
 
         btnMinus.onclick = e => {
           e.stopPropagation();
-          if (selected[product.id] > 1) {
-            selected[product.id]--;
+          if (selected[id] > 1) {
+            selected[id]--;
           } else {
-            delete selected[product.id];
+            delete selected[id];
           }
           updateUI();
         };
 
         btnPlus.onclick = e => {
           e.stopPropagation();
-          selected[product.id] = (selected[product.id] || 0) + 1;
+          selected[id] = (selected[id] || 0) + 1;
           updateUI();
         };
 
@@ -234,14 +236,14 @@
 
         div.appendChild(controls);
 
-        total += product.price * selected[product.id];
+        total += product.price * selected[id];
       }
 
       div.onclick = () => {
         if (isSelected) {
-          delete selected[product.id];
+          delete selected[id];
         } else {
-          selected[product.id] = 1;
+          selected[id] = 1;
         }
         updateUI();
       };
@@ -271,4 +273,56 @@
   document.getElementById('orderForm').addEventListener('submit', e => {
     e.preventDefault();
 
-    const name = document.getElementById('customerName').value
+    const name = document.getElementById('customerName').value.trim();
+    const mobile = document.getElementById('mobile').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const note = document.getElementById('note').value.trim();
+
+    if (!name || !mobile || !address) {
+      alert('تکایە هەموو خانەکان پڕ بکە.');
+      return;
+    }
+
+    if (Object.keys(selected).length === 0) {
+      alert('تکایە کاڵایەک هەلبژێرە.');
+      return;
+    }
+
+    const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
+
+    const selectedProducts = products
+      .filter(p => selected[p.id ?? products.indexOf(p)])
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        quantity: selected[p.id ?? products.indexOf(p)],
+        totalPrice: p.price * selected[p.id ?? products.indexOf(p)]
+      }));
+
+    const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
+
+    const order = {
+      id: Date.now(),
+      name,
+      mobile,
+      address,
+      note,
+      products: selectedProducts,
+      time: new Date().toLocaleString(),
+      gps,
+      total: totalAmount
+    };
+
+    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    const orderText = `
+🧾 داواکاری نوێ - ${order.time}
+
+👤 کریار: ${order.name}
+📞 مۆبایل: ${order.mobile}
+📍 ناونیشان: ${order.address}
+📡 GPS: ${order.gps}
+📝
