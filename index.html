@@ -162,7 +162,6 @@
       if (!response.ok) throw new Error('نەتوانرا فایل بخوێندرێت');
       products = await response.json();
 
-      // Generate categories for filter dropdown
       const categories = [...new Set(products.map(p => p.category).filter(c => c))];
       categoryFilter.innerHTML = `<option value="">هەموو کەتەگۆری</option>`;
       categories.forEach(cat => {
@@ -325,4 +324,30 @@
 📞 مۆبایل: ${order.mobile}
 📍 ناونیشان: ${order.address}
 📡 GPS: ${order.gps}
-📝
+📝 تێبینی: ${order.note || 'هیچی نییە'}
+
+📦 کاڵاکان:
+${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
+
+💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
+`;
+    const encodedText = encodeURIComponent(orderText);
+    const whatsappUrl = `https://wa.me/9647502020061?text=${encodedText}`;
+    window.open(whatsappUrl, '_blank');
+
+    selected = {};
+    document.getElementById('orderForm').reset();
+    document.getElementById('gps').value = '';
+    autoFetchGPS();
+    updateUI();
+
+    const successMsg = document.getElementById('successMessage');
+    successMsg.style.display = 'block';
+    setTimeout(() => {
+      successMsg.style.display = 'none';
+    }, 3000);
+  });
+</script>
+
+</body>
+</html>
