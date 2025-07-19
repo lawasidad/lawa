@@ -220,7 +220,7 @@ document.getElementById('addPhoneBtn').addEventListener('click', () => {
   newPhoneInput.value = '';
 });
 
-// ناردنی پەیام بۆ ژمارەکان بە یەکەی یەکەوە بە setTimeout
+// ناردنی پەیام بۆ هەموو ژمارە هەلبژێردراو بە popup بە setTimeout
 document.getElementById('sendMessageBtn').addEventListener('click', () => {
   const message = document.getElementById('message').value.trim();
   const status = document.getElementById('status');
@@ -236,12 +236,21 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
 
   const encodedMessage = encodeURIComponent(message);
 
+  let blockedPopups = 0;
+
   selectedCheckboxes.forEach((cb, idx) => {
     const phone = cb.value.replace(/[^0-9]/g, '');
     const url = `https://wa.me/${phone}?text=${encodedMessage}`;
+
     setTimeout(() => {
-      window.open(url, '_blank');
-    }, idx * 500); // هر ٥٠٠ میلێک جارێک popup نوێ دروست دەکات
+      const newWindow = window.open(url, '_blank');
+      if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+        blockedPopups++;
+        if(blockedPopups === 1){
+          alert('Popup blocker کەسراوە، تکایە ڕێگە بدە بۆ popup ـەکان!');
+        }
+      }
+    }, idx * 500); // ٥٠٠ms نێوان هەر popup
   });
 
   status.textContent = `پەیام نێردرا بۆ ${selectedCheckboxes.length} ژمارە.`;
