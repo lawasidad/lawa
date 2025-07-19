@@ -23,13 +23,6 @@
       border-color: #28a745;
       background: #e0f7e9;
     }
-    .product img {
-      width: 160px;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
     .quantity-controls {
       display: flex;
       justify-content: center;
@@ -99,24 +92,15 @@
       margin-top: 15px;
       display: none;
     }
-
-    /* ریسپۆنسیڤ بۆ مۆبایل */
     @media (max-width: 600px) {
       .product-list {
         flex-direction: column;
         align-items: center;
       }
-
       .product {
         width: 100%;
         max-width: 320px;
       }
-
-      .product img {
-        width: 100%;
-        height: auto;
-      }
-
       form {
         position: static;
         box-shadow: none;
@@ -139,21 +123,15 @@
 <form id="orderForm">
   <label for="customerName">ناوی کریار</label>
   <input type="text" id="customerName" required placeholder="ناوی خۆت بنووسە" />
-
   <label for="mobile">ژمارەی مۆبایل</label>
   <input type="text" id="mobile" required placeholder="07XX XXX XXX" />
-
   <label for="address">ناونیشان</label>
   <input type="text" id="address" required />
-
   <label for="gps">GPS</label>
   <input type="text" id="gps" readonly />
-
   <label for="note">تێبینی (Note)</label>
   <input type="text" id="note" placeholder="تێبینیەکانت بنووسە..." />
-
   <div id="totalAmount">کۆی گشتی: ٠ دینار</div>
-
   <button type="submit">✅ ناردنی داواکاری</button>
   <p id="successMessage">✅ داواکاری نێردرا!</p>
 </form>
@@ -205,7 +183,6 @@
 
   function updateUI() {
     productList.innerHTML = '';
-
     let total = 0;
 
     filteredProducts.forEach((product, index) => {
@@ -217,7 +194,6 @@
       if (isSelected) div.classList.add('selected');
 
       div.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" />
         <div><strong>${product.name}</strong></div>
         <div>${product.price.toLocaleString()} دینار</div>
       `;
@@ -256,7 +232,6 @@
         controls.appendChild(btnMinus);
         controls.appendChild(qtySpan);
         controls.appendChild(btnPlus);
-
         div.appendChild(controls);
 
         total += product.price * selected[id];
@@ -279,11 +254,7 @@
 
   categoryFilter.addEventListener('change', () => {
     const cat = categoryFilter.value;
-    if (!cat) {
-      filteredProducts = products;
-    } else {
-      filteredProducts = products.filter(p => p.category === cat);
-    }
+    filteredProducts = cat ? products.filter(p => p.category === cat) : products;
     selected = {};
     updateUI();
   });
@@ -343,16 +314,13 @@
 
     const orderText = `
 🧾 داواکاری نوێ - ${order.time}
-
 👤 کریار: ${order.name}
 📞 مۆبایل: ${order.mobile}
 📍 ناونیشان: ${order.address}
 📡 GPS: ${order.gps}
 📝 تێبینی: ${order.note || 'هیچی نییە'}
-
 📦 کاڵاکان:
 ${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
-
 💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
 `;
     const encodedText = encodeURIComponent(orderText);
