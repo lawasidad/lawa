@@ -1,185 +1,166 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8" />
-  <title>بەڕێوەبردنی کاڵاکان</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f4f4f4; }
-    h2 { margin-bottom: 10px; }
-    label, input, button { display: block; margin: 10px 0; }
-    input[type="text"], input[type="number"], input[type="file"] {
-      padding: 8px; width: 100%; max-width: 300px;
-    }
-    button {
-      padding: 10px; background: #007bff; color: white; border: none;
-      cursor: pointer; margin-left: 5px;
-    }
-    .product {
-      background: white; padding: 10px; border: 1px solid #ddd;
-      margin: 10px 0; display: flex; align-items: center;
-      justify-content: space-between;
-    }
-    .product-info {
-      display: flex; align-items: center;
-    }
-    .product img {
-      width: 80px; height: 80px; object-fit: cover; margin-left: 10px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    .actions button {
-      background: #dc3545;
-      border: none;
-      color: white;
-      padding: 6px 10px;
-      margin-left: 5px;
-      cursor: pointer;
-      border-radius: 3px;
-    }
-    .actions button.edit {
-      background: #28a745;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>زیادکردنی کاڵا و لیستی کاڵاکان</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f7f9fc; }
+  label, input, button { display: block; width: 100%; max-width: 400px; margin: 10px 0; }
+  input { padding: 8px; font-size: 16px; border-radius: 6px; border: 1.5px solid #ccc; }
+  button { background: #28a745; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+  button:hover { background: #218838; }
+  table { border-collapse: collapse; width: 100%; max-width: 800px; margin-top: 30px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+  th { background-color: #28a745; color: white; }
+  img { width: 80px; height: 80px; object-fit: contain; border-radius: 5px; }
+  .action-btn { cursor: pointer; margin: 0 5px; font-size: 18px; user-select: none; }
+  .edit-btn { color: #007bff; }
+  .delete-btn { color: #dc3545; }
+</style>
 </head>
 <body>
 
 <h2>زیادکردنی کاڵا</h2>
 <form id="addProductForm">
-  <label>ناوی کاڵا</label>
-  <input type="text" id="productName" required placeholder="ناوی کاڵاکە" />
+  <label for="productName">ناوی کاڵا</label>
+  <input type="text" id="productName" required placeholder="ناوی کاڵاکە بنووسە" />
 
-  <label>نرخ (دینار)</label>
-  <input type="number" id="productPrice" required placeholder="نرخی کاڵا" min="0" step="any" />
+  <label for="productPrice">نرخ (دینار)</label>
+  <input type="number" id="productPrice" required placeholder="نرخی کاڵا" min="0" />
 
-  <label>وێنەی کاڵا</label>
-  <input type="file" id="productImage" accept="image/*" />
+  <label for="productImage">وێنەی کاڵا (URL)</label>
+  <input type="url" id="productImage" placeholder="لینکی وێنە" />
 
   <button type="submit">📦 زیادکردن</button>
 </form>
 
-<hr />
-
-<h2>📋 لیستی کاڵاکان</h2>
-<div id="productList"></div>
+<h3>📋 لیستی کاڵاکان</h3>
+<table id="productTable">
+  <thead>
+    <tr>
+      <th>ناو</th>
+      <th>نرخ (دینار)</th>
+      <th>وێنە</th>
+      <th>کردارەکان</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
 <script>
-  let editMode = false;
-  let editId = null;
+  // داتاکان لە localStorage بەناوی 'products' هەڵگرن یان فڕۆشراوەکەی دیفالت دانرێت
+  function getProducts() {
+    return JSON.parse(localStorage.getItem('products') || '[]');
+  }
 
-  const form = document.getElementById('addProductForm');
-  const list = document.getElementById('productList');
+  function saveProducts(products) {
+    localStorage.setItem('products', JSON.stringify(products));
+  }
 
-  // نیشاندانی لیستی کاڵا
   function renderProducts() {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    list.innerHTML = '';
+    const tbody = document.querySelector('#productTable tbody');
+    tbody.innerHTML = '';
+    const products = getProducts();
+    products.forEach((p, index) => {
+      const tr = document.createElement('tr');
 
-    if (products.length === 0) {
-      list.innerHTML = '<p>❌ هیچ کاڵایەک نەزیادکراوە.</p>';
-      return;
-    }
-
-    products.forEach(product => {
-      const item = document.createElement('div');
-      item.className = 'product';
-
-      item.innerHTML = `
-        <div class="product-info">
-          <img src="${product.image}" alt="${product.name}" />
-          <div>
-            <h4>${product.name}</h4>
-            <p>${product.price.toLocaleString()} دینار</p>
-          </div>
-        </div>
-        <div class="actions">
-          <button class="edit" onclick="editProduct(${product.id})">✏️ دەسکاری</button>
-          <button onclick="deleteProduct(${product.id})">🗑️ سڕینەوە</button>
-        </div>
+      tr.innerHTML = `
+        <td>${p.name}</td>
+        <td>${p.price.toLocaleString()}</td>
+        <td>${p.image ? `<img src="${p.image}" alt="${p.name}" />` : ''}</td>
+        <td>
+          <span class="action-btn edit-btn" data-index="${index}">✏️</span>
+          <span class="action-btn delete-btn" data-index="${index}">🗑️</span>
+        </td>
       `;
-      list.appendChild(item);
+
+      tbody.appendChild(tr);
     });
   }
 
-  // سڕینەوەی کاڵا
-  function deleteProduct(id) {
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    products = products.filter(p => p.id !== id);
-    localStorage.setItem('products', JSON.stringify(products));
-    renderProducts();
-  }
-
-  // دەسکاریی کاڵا
-  function editProduct(id) {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const product = products.find(p => p.id === id);
-    if (product) {
-      document.getElementById('productName').value = product.name;
-      document.getElementById('productPrice').value = product.price;
-      editId = id;
-      editMode = true;
-    }
-  }
-
-  // زیادکردن یان نوێکردنەوەی کاڵا
-  form.addEventListener('submit', function (e) {
+  // زیادکردن کاڵا
+  document.getElementById('addProductForm').addEventListener('submit', e => {
     e.preventDefault();
+    const nameInput = document.getElementById('productName');
+    const priceInput = document.getElementById('productPrice');
+    const imageInput = document.getElementById('productImage');
 
-    const name = document.getElementById('productName').value.trim();
-    const price = Number(document.getElementById('productPrice').value);
-    const fileInput = document.getElementById('productImage');
-    const file = fileInput.files[0];
+    const name = nameInput.value.trim();
+    const price = parseInt(priceInput.value.trim());
+    const image = imageInput.value.trim();
 
-    if (editMode) {
-      let products = JSON.parse(localStorage.getItem('products') || '[]');
-      let index = products.findIndex(p => p.id === editId);
+    if (!name || isNaN(price) || price < 0) {
+      alert('تکایە ناو و نرخ بە دروستی بنووسە.');
+      return;
+    }
 
-      const updateProduct = (imageData) => {
-        products[index] = {
-          ...products[index],
-          name,
-          price,
-          image: imageData || products[index].image
-        };
-        localStorage.setItem('products', JSON.stringify(products));
-        renderProducts();
-        form.reset();
-        editMode = false;
-        editId = null;
-      };
+    const products = getProducts();
 
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => updateProduct(event.target.result);
-        reader.readAsDataURL(file);
-      } else {
-        updateProduct();
-      }
-    } else {
-      if (!file) {
-        alert("تکایە وێنەیەک هەلبژێرە.");
-        return;
-      }
+    // زیادکردن بۆ ئەریە
+    products.push({ name, price, image });
 
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const image = event.target.result;
-        let products = JSON.parse(localStorage.getItem('products') || '[]');
-        products.push({
-          id: Date.now(),
-          name,
-          price,
-          image
-        });
-        localStorage.setItem('products', JSON.stringify(products));
-        renderProducts();
-        form.reset();
-      };
-      reader.readAsDataURL(file);
+    saveProducts(products);
+    renderProducts();
+
+    e.target.reset();
+  });
+
+  // دەسکاری و سڕینەوە بۆ تێبلەکە
+  document.querySelector('#productTable tbody').addEventListener('click', e => {
+    const target = e.target;
+    if (target.classList.contains('edit-btn')) {
+      const idx = parseInt(target.dataset.index);
+      editProduct(idx);
+    } else if (target.classList.contains('delete-btn')) {
+      const idx = parseInt(target.dataset.index);
+      deleteProduct(idx);
     }
   });
 
-  // نیشاندانی کاڵاکان لە کاتی بارکردنەوەی پەڕە
-  window.addEventListener('DOMContentLoaded', renderProducts);
+  function editProduct(index) {
+    const products = getProducts();
+    const product = products[index];
+
+    const newName = prompt('ناوی نوێی کاڵا بنووسە:', product.name);
+    if (newName === null) return; // بەکارهێنەر وەستاند
+
+    const newPriceStr = prompt('نرخی نوێی کاڵا بنووسە:', product.price);
+    if (newPriceStr === null) return;
+
+    const newPrice = parseInt(newPriceStr);
+    if (isNaN(newPrice) || newPrice < 0) {
+      alert('نرخەکە هەڵەیە!');
+      return;
+    }
+
+    // گۆڕین داتاکان
+    products[index].name = newName.trim();
+    products[index].price = newPrice;
+
+    saveProducts(products);
+    renderProducts();
+  }
+
+  function deleteProduct(index) {
+    if (!confirm('دڵنیایت لە سڕینەوەی ئەم کاڵایە؟')) return;
+
+    const products = getProducts();
+    products.splice(index, 1);
+    saveProducts(products);
+    renderProducts();
+  }
+
+  // ئەگەر localStorage بەتاڵ بێت، فەرمی بە نمونه زیاد دەکات
+  if (getProducts().length === 0) {
+    const defaultProducts = [
+      { name: 'سنور180 گرام', price: 32000, image: '' },
+      { name: 'سنور500 گرام', price: 36000, image: '' }
+    ];
+    saveProducts(defaultProducts);
+  }
+
+  renderProducts();
 </script>
 
 </body>
