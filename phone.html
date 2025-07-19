@@ -1,55 +1,65 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ناردنی پەیام بۆ تیلەگرام</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    textarea, button {
+      width: 100%;
+      font-size: 16px;
+      margin-top: 10px;
+      padding: 10px;
+    }
+    .status {
+      margin-top: 15px;
+      color: green;
+    }
+  </style>
 </head>
 <body>
   <h2>ناردنی پەیام بۆ تیلەگرام</h2>
-  <textarea id="message" placeholder="پەیام بنووسە..."></textarea>
-  <br><br>
-  <button onclick="sendMessages()">ناردن</button>
-
-  <div id="status"></div>
+  <textarea id="message" placeholder="پەیام بنووسە...">سلاو</textarea>
+  <button onclick="sendToTelegram()">ناردن</button>
+  <div class="status" id="status"></div>
 
   <script>
-    const BOT_TOKEN = 'YOUR_BOT_TOKEN';  // گۆڕە بە توکینی خۆت
-    const phonesFile = 'phones.json';    // پەیوەندیدانی ژمارەکان
-
-    async function sendMessages() {
-      const status = document.getElementById('status');
-      status.innerText = "ناردن دەستپێدەکات...";
-
-      let message = document.getElementById('message').value;
-      if (!message) {
-        status.innerText = "تکایە پەیامێک بنووسە.";
-        return;
-      }
+    async function sendToTelegram() {
+      const message = document.getElementById("message").value;
+      const statusEl = document.getElementById("status");
+      statusEl.innerText = "ناردنەوە دەستپێکرد...";
 
       try {
-        const response = await fetch(phonesFile);
-        const phones = await response.json();
+        const res = await fetch("phones.json");
+        const phones = await res.json();
 
         if (!Array.isArray(phones)) {
-          status.innerText = "⚠️ phones.json پێویستە لیست بێت.";
+          statusEl.innerText = "⚠️ phones.json پێویستە لیست بێت.";
           return;
         }
 
-        for (let phone of phones) {
-          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        const botToken = "YOUR_BOT_TOKEN"; // ناوی بووتەکەت لێرە دانێ
+        const promises = phones.map(phone =>
+          fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: phone,
               text: message
             })
-          });
-        }
+          })
+        );
 
-        status.innerText = "✅ پەیامەکان نێردرا.";
+        await Promise.all(promises);
+        statusEl.innerText = "✅ پەیامەکان نێردران!";
       } catch (err) {
         console.error(err);
-        status.innerText = "❌ کێشەیەک ڕوویدا: " + err.message;
+        statusEl.innerText = "❌ هەڵەیەک ڕوویدا.";
       }
     }
   </script>
