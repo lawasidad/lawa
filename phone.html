@@ -2,64 +2,84 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8">
-  <title>Whatsapp Bulk Sender</title>
+  <title>ناردنی پەیام بە وەستسئاپ</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 20px;
       background: #f4f4f4;
     }
-    input, textarea, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      font-size: 16px;
-    }
-    .link {
-      margin: 5px 0;
-      padding: 10px;
-      background: white;
+    .phone-box {
+      background: #fff;
       border: 1px solid #ccc;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
     }
-    .link a {
-      color: green;
-      text-decoration: none;
+    .number-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .number-row input {
+      flex: 1;
+      padding: 6px;
+    }
+    .number {
+      font-weight: bold;
+    }
+    button {
+      padding: 6px 10px;
+      background: green;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: darkgreen;
     }
   </style>
 </head>
 <body>
-  <h2>ناردنی پەیام بۆ ژمارەکان لە واتس‌ئاپ</h2>
-
-  <textarea id="message" rows="4" placeholder="پەیامەکەت بنوسە..."></textarea>
-  <button onclick="loadAndGenerateLinks()">ناردنی پەیامەکە</button>
-
-  <div id="output"></div>
+  <h2>ناردنی پەیام بە وەستسئاپ</h2>
+  <div id="phoneList"></div>
 
   <script>
-    function loadAndGenerateLinks() {
-      const message = document.getElementById('message').value;
-      const output = document.getElementById('output');
-      output.innerHTML = "پەیامەکان دروستدەکرێن ...";
+    fetch("phones.json")
+      .then(res => res.json())
+      .then(numbers => {
+        const phoneList = document.getElementById("phoneList");
+        numbers.forEach(num => {
+          const box = document.createElement("div");
+          box.className = "phone-box";
 
-      fetch('phones.json')
-        .then(res => res.json())
-        .then(data => {
-          output.innerHTML = '';
-          data.forEach(phone => {
-            const fullNumber = `+964${phone}`;
-            const encodedMessage = encodeURIComponent(message);
-            const waLink = `https://wa.me/${fullNumber}?text=${encodedMessage}`;
+          box.innerHTML = `
+            <div class="number-row">
+              <span class="number">${num}</span>
+              <a href="https://wa.me/964${num}" target="_blank">
+                <button>WhatsApp</button>
+              </a>
+            </div>
+            <div class="number-row">
+              <input type="text" placeholder="پەیام بنووسە..." class="message">
+              <button onclick="sendMessage(this, '${num}')">ناردن</button>
+            </div>
+          `;
 
-            const div = document.createElement('div');
-            div.className = 'link';
-            div.innerHTML = `<a href="${waLink}" target="_blank">${fullNumber}</a>`;
-            output.appendChild(div);
-          });
-        })
-        .catch(err => {
-          output.innerHTML = 'کێشەیەک هەیە لە خوێندنەوەی phones.json';
-          console.error(err);
+          phoneList.appendChild(box);
         });
+      });
+
+    function sendMessage(btn, number) {
+      const msg = btn.parentElement.querySelector(".message").value;
+      const encodedMsg = encodeURIComponent(msg);
+      const link = `https://wa.me/964${number}?text=${encodedMsg}`;
+      window.open(link, "_blank");
     }
   </script>
 </body>
