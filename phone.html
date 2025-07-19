@@ -1,85 +1,77 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-  <meta charset="UTF-8">
-  <title>ناردنی پەیام بە وەستسئاپ</title>
+  <meta charset="UTF-8" />
+  <title>ناردنی پەیام بە وەستسئاپ بۆ هەموو ژمارەکان</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 20px;
       background: #f4f4f4;
+      direction: rtl;
     }
-    .phone-box {
-      background: #fff;
-      border: 1px solid #ccc;
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1em;
       margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-    }
-    .number-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .number-row input {
-      flex: 1;
-      padding: 6px;
-    }
-    .number {
-      font-weight: bold;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
     button {
-      padding: 6px 10px;
-      background: green;
-      color: white;
+      background-color: #25D366;
       border: none;
-      border-radius: 5px;
+      color: white;
+      padding: 12px 20px;
+      font-size: 1.1em;
       cursor: pointer;
+      border-radius: 6px;
+      width: 100%;
     }
     button:hover {
-      background: darkgreen;
+      background-color: #128C7E;
     }
   </style>
 </head>
 <body>
-  <h2>ناردنی پەیام بە وەستسئاپ</h2>
-  <div id="phoneList"></div>
+
+  <h2>ناردنی پەیام بۆ هەموو ژمارەکان بە وەستسئاپ</h2>
+
+  <input type="text" id="message" placeholder="پەیامەکەت بنوسە..." />
+
+  <button onclick="sendToAll()">ناردن بۆ هەموو ژمارەکان</button>
 
   <script>
+    let phones = [];
+
+    // خوێندنەوەی phones.json
     fetch("phones.json")
-      .then(res => res.json())
-      .then(numbers => {
-        const phoneList = document.getElementById("phoneList");
-        numbers.forEach(num => {
-          const box = document.createElement("div");
-          box.className = "phone-box";
-
-          box.innerHTML = `
-            <div class="number-row">
-              <span class="number">${num}</span>
-              <a href="https://wa.me/964${num}" target="_blank">
-                <button>WhatsApp</button>
-              </a>
-            </div>
-            <div class="number-row">
-              <input type="text" placeholder="پەیام بنووسە..." class="message">
-              <button onclick="sendMessage(this, '${num}')">ناردن</button>
-            </div>
-          `;
-
-          phoneList.appendChild(box);
-        });
+      .then(response => response.json())
+      .then(data => {
+        phones = data; // هەموو ژمارەکان لە ئەم گۆڕاوەدا دانرا
+      })
+      .catch(() => {
+        alert("ناوی phones.json دروست نیە یان کێشە هەیە.");
       });
 
-    function sendMessage(btn, number) {
-      const msg = btn.parentElement.querySelector(".message").value;
-      const encodedMsg = encodeURIComponent(msg);
-      const link = `https://wa.me/964${number}?text=${encodedMsg}`;
-      window.open(link, "_blank");
+    function sendToAll() {
+      const msg = document.getElementById("message").value.trim();
+      if (!msg) {
+        alert("تکایە پەیامەکەت بنوسە.");
+        return;
+      }
+      if (phones.length === 0) {
+        alert("هیچ ژمارەیەک بار نەکراوە.");
+        return;
+      }
+
+      phones.forEach((phone, idx) => {
+        const url = `https://wa.me/964${phone}?text=${encodeURIComponent(msg)}`;
+        // ناردنی لینکەکان لە وێندۆوەیەکی نوێ بەپێی تاکە تاکە بەرەوپێش بەتاخیر 600 ملیسەکەند
+        setTimeout(() => {
+          window.open(url, "_blank");
+        }, idx * 600);
+      });
     }
   </script>
 </body>
