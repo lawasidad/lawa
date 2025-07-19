@@ -1,165 +1,110 @@
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>زیادکردنی کاڵا و لیستی کاڵاکان</title>
-<style>
-  body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f7f9fc; }
-  label, input, button { display: block; width: 100%; max-width: 400px; margin: 10px 0; }
-  input { padding: 8px; font-size: 16px; border-radius: 6px; border: 1.5px solid #ccc; }
-  button { background: #28a745; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; }
-  button:hover { background: #218838; }
-  table { border-collapse: collapse; width: 100%; max-width: 800px; margin-top: 30px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-  th { background-color: #28a745; color: white; }
-  img { width: 80px; height: 80px; object-fit: contain; border-radius: 5px; }
-  .action-btn { cursor: pointer; margin: 0 5px; font-size: 18px; user-select: none; }
-  .edit-btn { color: #007bff; }
-  .delete-btn { color: #dc3545; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>زیادکردنی کاڵا</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    .form-container {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #444;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+  </style>
 </head>
 <body>
 
-<h2>زیادکردنی کاڵا</h2>
-<form id="addProductForm">
-  <label for="productName">ناوی کاڵا</label>
-  <input type="text" id="productName" required placeholder="ناوی کاڵاکە بنووسە" />
+  <div class="form-container">
+    <h2>زیادکردنی کاڵا</h2>
+    <form id="productForm">
+      <label>کۆدی کاڵا</label>
+      <input type="text" id="code" required>
 
-  <label for="productPrice">نرخ (دینار)</label>
-  <input type="number" id="productPrice" required placeholder="نرخی کاڵا" min="0" />
+      <label>ناوی کاڵا</label>
+      <input type="text" id="name" required>
 
-  <label for="productImage">وێنەی کاڵا (URL)</label>
-  <input type="url" id="productImage" placeholder="لینکی وێنە" />
+      <label>ژمارەی بارکۆد</label>
+      <input type="text" id="barcode">
 
-  <button type="submit">📦 زیادکردن</button>
-</form>
+      <label>نرخی یەکە</label>
+      <input type="number" id="unit_price" required>
 
-<h3>📋 لیستی کاڵاکان</h3>
-<table id="productTable">
-  <thead>
-    <tr>
-      <th>ناو</th>
-      <th>نرخ (دینار)</th>
-      <th>وێنە</th>
-      <th>کردارەکان</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+      <label>بڕ (Qty)</label>
+      <input type="number" id="quantity" required>
 
-<script>
-  async function loadProductsFromJson() {
-    try {
-      const response = await fetch('products.json');
-      if (!response.ok) throw new Error('Error loading products.json');
-      const products = await response.json();
-      localStorage.setItem('products', JSON.stringify(products));
-      renderProducts();
-    } catch(e) {
-      console.warn('ناتوانرایە products.json بخوێندرێت, داتاکانی localStorage بەکار دەهێنرێت');
-      renderProducts();
-    }
-  }
+      <label>بەروار</label>
+      <input type="date" id="date">
 
-  function getProducts() {
-    return JSON.parse(localStorage.getItem('products') || '[]');
-  }
+      <button type="submit">✅ زیادکردن</button>
+    </form>
+  </div>
 
-  function saveProducts(products) {
-    localStorage.setItem('products', JSON.stringify(products));
-  }
+  <script>
+    document.getElementById("productForm").addEventListener("submit", function(e) {
+      e.preventDefault();
 
-  function renderProducts() {
-    const tbody = document.querySelector('#productTable tbody');
-    tbody.innerHTML = '';
-    const products = getProducts();
-    products.forEach((p, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${p.name}</td>
-        <td>${p.price.toLocaleString()}</td>
-        <td>${p.image ? `<img src="${p.image}" alt="${p.name}" />` : ''}</td>
-        <td>
-          <span class="action-btn edit-btn" data-index="${index}">✏️</span>
-          <span class="action-btn delete-btn" data-index="${index}">🗑️</span>
-        </td>
-      `;
-      tbody.appendChild(tr);
+      const code = document.getElementById("code").value;
+      const name = document.getElementById("name").value;
+      const barcode = document.getElementById("barcode").value;
+      const unit_price = parseFloat(document.getElementById("unit_price").value);
+      const quantity = parseInt(document.getElementById("quantity").value);
+      const date = document.getElementById("date").value;
+
+      const product = {
+        code,
+        name,
+        barcode,
+        unit_price,
+        quantity,
+        date
+      };
+
+      let products = JSON.parse(localStorage.getItem("products") || "[]");
+      products.push(product);
+      localStorage.setItem("products", JSON.stringify(products));
+
+      alert("✅ کاڵا زیادکرا");
+      this.reset();
     });
-  }
-
-  document.getElementById('addProductForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const nameInput = document.getElementById('productName');
-    const priceInput = document.getElementById('productPrice');
-    const imageInput = document.getElementById('productImage');
-
-    const name = nameInput.value.trim();
-    const price = parseInt(priceInput.value.trim());
-    const image = imageInput.value.trim();
-
-    if (!name || isNaN(price) || price < 0) {
-      alert('تکایە ناو و نرخ بە دروستی بنووسە.');
-      return;
-    }
-
-    const products = getProducts();
-    products.push({ name, price, image });
-    saveProducts(products);
-    renderProducts();
-
-    e.target.reset();
-  });
-
-  document.querySelector('#productTable tbody').addEventListener('click', e => {
-    const target = e.target;
-    if (target.classList.contains('edit-btn')) {
-      const idx = parseInt(target.dataset.index);
-      editProduct(idx);
-    } else if (target.classList.contains('delete-btn')) {
-      const idx = parseInt(target.dataset.index);
-      deleteProduct(idx);
-    }
-  });
-
-  function editProduct(index) {
-    const products = getProducts();
-    const product = products[index];
-
-    const newName = prompt('ناوی نوێی کاڵا بنووسە:', product.name);
-    if (newName === null) return;
-
-    const newPriceStr = prompt('نرخی نوێی کاڵا بنووسە:', product.price);
-    if (newPriceStr === null) return;
-
-    const newPrice = parseInt(newPriceStr);
-    if (isNaN(newPrice) || newPrice < 0) {
-      alert('نرخەکە هەڵەیە!');
-      return;
-    }
-
-    products[index].name = newName.trim();
-    products[index].price = newPrice;
-
-    saveProducts(products);
-    renderProducts();
-  }
-
-  function deleteProduct(index) {
-    if (!confirm('دڵنیایت لە سڕینەوەی ئەم کاڵایە؟')) return;
-
-    const products = getProducts();
-    products.splice(index, 1);
-    saveProducts(products);
-    renderProducts();
-  }
-
-  // بارکردنی products.json یەکجار لە کاتی بارکردنی پەڕە
-  window.addEventListener('DOMContentLoaded', () => {
-    loadProductsFromJson();
-  });
-</script>
+  </script>
 
 </body>
 </html>
