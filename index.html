@@ -3,44 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>زیادکردنی کاڵا و لیستی کاڵاکان</title>
+  <title>داواکاری کاڵا</title>
   <style>
     body { font-family: sans-serif; padding: 20px; direction: rtl; background: #f7f9fc; }
     label, input, button { display: block; width: 100%; max-width: 400px; margin: 10px 0; }
     input { padding: 8px; font-size: 16px; border-radius: 6px; border: 1.5px solid #ccc; }
-    button { background: #28a745; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #218838; }
+    button { background: #007bff; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #0056b3; }
     table { border-collapse: collapse; width: 100%; max-width: 800px; margin-top: 30px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-    th { background-color: #28a745; color: white; }
+    th { background-color: #007bff; color: white; }
     img { width: 80px; height: 80px; object-fit: contain; border-radius: 5px; }
     .action-btn { cursor: pointer; margin: 0 5px; font-size: 18px; user-select: none; }
-    .edit-btn { color: #007bff; }
+    .edit-btn { color: #ffc107; }
     .delete-btn { color: #dc3545; }
   </style>
 </head>
 <body>
 
-<h2>زیادکردنی کاڵا</h2>
+<h2>📥 داواکاری کاڵا</h2>
 <form id="addProductForm">
   <label for="productName">ناوی کاڵا</label>
   <input type="text" id="productName" required placeholder="ناوی کاڵاکە بنووسە" />
 
-  <label for="productPrice">نرخ (دینار)</label>
-  <input type="number" id="productPrice" required placeholder="نرخی کاڵا" min="0" />
+  <label for="productPrice">ژمارەی داواکراو</label>
+  <input type="number" id="productPrice" required placeholder="بڕی داواکراو" min="1" />
 
   <label for="productImage">وێنەی کاڵا (URL)</label>
   <input type="url" id="productImage" placeholder="لینکی وێنە" />
 
-  <button type="submit">📦 زیادکردن</button>
+  <button type="submit">📥 داواکردن</button>
 </form>
 
-<h3>📋 لیستی کاڵاکان</h3>
+<h3>📋 لیستی داواکاریەکان</h3>
 <table id="productTable">
   <thead>
     <tr>
       <th>ناو</th>
-      <th>نرخ (دینار)</th>
+      <th>بڕ</th>
       <th>وێنە</th>
       <th>کردارەکان</th>
     </tr>
@@ -49,19 +49,6 @@
 </table>
 
 <script>
-  async function loadProductsFromJson() {
-    try {
-      const response = await fetch('products.json');
-      if (!response.ok) throw new Error('Error loading products.json');
-      const products = await response.json();
-      localStorage.setItem('products', JSON.stringify(products));
-      renderProducts();
-    } catch(e) {
-      console.warn('ناتوانرایە products.json بخوێندرێت, داتاکانی localStorage بەکار دەهێنرێت');
-      renderProducts();
-    }
-  }
-
   function getProducts() {
     return JSON.parse(localStorage.getItem('products') || '[]');
   }
@@ -78,7 +65,7 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${p.name}</td>
-        <td>${p.price.toLocaleString()}</td>
+        <td>${p.price}</td>
         <td>${p.image ? `<img src="${p.image}" alt="${p.name}" />` : ''}</td>
         <td>
           <span class="action-btn edit-btn" data-index="${index}">✏️</span>
@@ -99,8 +86,8 @@
     const price = parseInt(priceInput.value.trim());
     const image = imageInput.value.trim();
 
-    if (!name || isNaN(price) || price < 0) {
-      alert('تکایە ناو و نرخ بە دروستی بنووسە.');
+    if (!name || isNaN(price) || price < 1) {
+      alert('تکایە ناو و ژمارەی دروست بنووسە.');
       return;
     }
 
@@ -108,7 +95,6 @@
     products.push({ name, price, image });
     saveProducts(products);
     renderProducts();
-
     e.target.reset();
   });
 
@@ -130,24 +116,24 @@
     const newName = prompt('ناوی نوێی کاڵا بنووسە:', product.name);
     if (newName === null) return;
 
-    const newPriceStr = prompt('نرخی نوێی کاڵا بنووسە:', product.price);
-    if (newPriceStr === null) return;
+    const newAmountStr = prompt('ژمارەی نوێی داواکراو بنووسە:', product.price);
+    if (newAmountStr === null) return;
 
-    const newPrice = parseInt(newPriceStr);
-    if (isNaN(newPrice) || newPrice < 0) {
-      alert('نرخەکە هەڵەیە!');
+    const newAmount = parseInt(newAmountStr);
+    if (isNaN(newAmount) || newAmount < 1) {
+      alert('ژمارە هەڵەیە!');
       return;
     }
 
     products[index].name = newName.trim();
-    products[index].price = newPrice;
+    products[index].price = newAmount;
 
     saveProducts(products);
     renderProducts();
   }
 
   function deleteProduct(index) {
-    if (!confirm('دڵنیایت لە سڕینەوەی ئەم کاڵایە؟')) return;
+    if (!confirm('دڵنیایت لە سڕینەوەی ئەم داواکارییە؟')) return;
 
     const products = getProducts();
     products.splice(index, 1);
@@ -156,7 +142,7 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    loadProductsFromJson();
+    renderProducts();
   });
 </script>
 
