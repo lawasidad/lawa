@@ -7,7 +7,7 @@
   <style>
     body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f5f5f5; }
     label, input, textarea, button { display: block; margin-bottom: 10px; }
-    textarea, input[type="text"] { width: 100%; padding: 8px; }
+    textarea, input[type="file"] { width: 100%; padding: 8px; }
     ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
     li { padding: 5px 10px; border-bottom: 1px solid #eee; }
     button { background-color: #25D366; color: white; border: none; padding: 10px 20px; cursor: pointer; }
@@ -20,39 +20,66 @@
 <label for="message">پەیامەکەت بنوسە:</label>
 <textarea id="message" rows="3" placeholder="پەیام..."></textarea>
 
-<label for="imageUrl">URL ـی وێنە:</label>
-<input type="text" id="imageUrl" placeholder="https://example.com/image.jpg" />
+<label for="imageFile">وێنە هەڵبژێرە (ناوەوەی فایل):</label>
+<input type="file" id="imageFile" accept="image/*" />
 
 <h3>هەلبژاردنی ژمارەکان:</h3>
-<ul id="phoneList">
-  <li><label><input type="checkbox" class="phone" value="9647501234567" /> 9647501234567</label></li>
-  <li><label><input type="checkbox" class="phone" value="9647701234567" /> 9647701234567</label></li>
-  <li><label><input type="checkbox" class="phone" value="9647512345678" /> 9647512345678</label></li>
-  <!-- دەتوانی زیاد بکەیت لێرە -->
-</ul>
+<ul id="phoneList"></ul>
 
 <button id="sendBtn">ناردنی پەیام و وێنە بە واتسئاپ</button>
 
 <script>
+  let base64Image = "";
+
+  // خوێندنەوەی phones.json
+  fetch("phones.json")
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById("phoneList");
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<label><input type="checkbox" class="phone" value="${item.phone}"/> ${item.name} — ${item.phone}</label>`;
+        tbody.appendChild(li);
+      });
+    })
+    .catch(() => alert("نەتوانرا phones.json بخوێندرێت"));
+
+  // گرتنی وێنە بە base64
+  document.getElementById('imageFile').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) {
+      base64Image = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      base64Image = e.target.result;
+      alert("وێنە بە سەرکەوتوویی هەڵگرت");
+    };
+    reader.readAsDataURL(file);
+  });
+
   document.getElementById('sendBtn').addEventListener('click', () => {
     const message = document.getElementById('message').value.trim();
-    const imageUrl = document.getElementById('imageUrl').value.trim();
     if (!message) {
       alert('تکایە پەیامەکەت بنوسە.');
       return;
     }
-    if (!imageUrl) {
-      alert('تکایە URL ـی وێنەکە دابنێ.');
+    if (!base64Image) {
+      alert('تکایە وێنە هەڵبژێرە.');
       return;
     }
-
     const checkedPhones = Array.from(document.querySelectorAll('.phone:checked')).map(el => el.value);
     if (checkedPhones.length === 0) {
       alert('تکایە یەک ژمارە هەلبژێرە.');
       return;
     }
 
-    const fullMessage = `${message}\n\nوێنە: ${imageUrl}`;
+    // واتسئاپ ناتوانێت وێنەی base64 لە پەیامەکاندا نێرێت
+    // بۆیە ئەم کۆدە پەیام و وێنە لە پەیامەکەدا بەشێوەی دەربڕاوە ناردن ناکات
+    // ئەتوانیت هەروەها وێنەکە لە URL دا بنێریت، بەڵام پێویستە URL ـەکی فڕۆشراو و ئامادەبێت
+
+    const fullMessage = `${message}\n\n(وێنە: ناچالاکە لە واتسئاپ API بە بەکار هێنانی base64)`;
 
     checkedPhones.forEach((phone, index) => {
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`;
