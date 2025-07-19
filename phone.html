@@ -3,26 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ناردنی پەیام و وێنە بە واتسئاپ</title>
+  <title>ناردنی پەیام بە واتس‌ئاپ</title>
   <style>
     body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f5f5f5; }
-    textarea, input, button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+    textarea, button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
     ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
     li { padding: 5px 10px; border-bottom: 1px solid #eee; }
-    .preview img { max-width: 100%; margin-bottom: 10px; display: block; }
     .total { font-weight: bold; margin-top: 10px; background: #fff; padding: 10px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
 
-<h2>ناردنی پەیام و وێنە بە واتسئاپ</h2>
+<h2>ناردنی پەیام بە واتس‌ئاپ</h2>
 
 <textarea id="message" rows="4" placeholder="نامەکەت بنوسە..."></textarea>
-
-<label>چند وێنە هەلبژێرە:</label>
-<input type="file" id="imageInput" accept="image/*" multiple />
-
-<div id="preview" class="preview"></div>
 
 <ul id="phoneList"></ul>
 
@@ -31,53 +25,36 @@
 <button id="sendBtn">ناردن بۆ هەموو ژمارەکان</button>
 
 <script>
-  let base64Images = [];
-
-  // خوێندنەوەی phones.json و دامەزراندنی checkbox
-  fetch("phones.json")
+  // خوێندنەوەی customers.json (دەبێ فایلەکە لە هەمان فۆڵدەری سێرڤەر بێت)
+  fetch("customers.json")
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById("phoneList");
-      data.forEach(phone => {
-        const fullPhone = phone.startsWith('964') ? phone : '964' + phone;
+      data.forEach(cust => {
+        const phone = cust.mobile.startsWith('964') ? cust.mobile : '964' + cust.mobile;
+        const images = cust.images || [];
+        let imgLinks = '';
+        if (images.length > 0) {
+          imgLinks = images.map((src, i) =>
+            `<a href="${src}" target="_blank" rel="noopener noreferrer">وێنە ${i+1}</a>`
+          ).join(' | ');
+        }
+
         const li = document.createElement("li");
-        li.innerHTML = `<label><input type="checkbox" class="phone" value="${fullPhone}" checked /> ${fullPhone}</label>`;
+        li.innerHTML = `<label><input type="checkbox" class="phone" value="${phone}" checked /> ${phone} ${imgLinks ? ' - ' + imgLinks : ''}</label>`;
         list.appendChild(li);
       });
 
-      // پیشاندانی ژمارە گشتی
-      document.getElementById("totalCount").textContent = `گشتی ژمارەکان: ${data.length}`;
+      document.getElementById("totalCount").textContent = `کۆی ژمارەکان: ${data.length}`;
     })
-    .catch(() => alert("نەتوانرا phones.json بخوێندرێت"));
+    .catch(() => alert("نەتوانرا customers.json بخوێندرێت"));
 
-  // گۆڕینی چەند وێنە بۆ base64 و پیشاندان
-  document.getElementById('imageInput').addEventListener('change', function () {
-    const files = Array.from(this.files);
-    base64Images = [];
-    const preview = document.getElementById("preview");
-    preview.innerHTML = "";
-
-    if (files.length === 0) return;
-
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        base64Images.push(e.target.result);
-        const img = document.createElement("img");
-        img.src = e.target.result;
-        preview.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
-  });
-
-  // ناردن بۆ ژمارەکان
   document.getElementById("sendBtn").addEventListener("click", () => {
     const message = document.getElementById("message").value.trim();
     const selectedPhones = [...document.querySelectorAll(".phone:checked")].map(i => i.value);
 
-    if (!message && base64Images.length === 0) {
-      alert("تکایە نامە یان وێنە هەلبژێرە.");
+    if (!message) {
+      alert("تکایە نامەکەت بنوسە.");
       return;
     }
 
@@ -87,13 +64,7 @@
     }
 
     selectedPhones.forEach((phone, i) => {
-      let fullMessage = message;
-
-      if (base64Images.length > 0) {
-        fullMessage += `\n\n[${base64Images.length} وێنە هەیە — پیشاندەکرێن، بەڵام ناتوانرێن بە واتسئاپ نێردرێن]`;
-      }
-
-      const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`;
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
       setTimeout(() => window.open(url, "_blank"), i * 700);
     });
   });
