@@ -49,7 +49,19 @@
 </table>
 
 <script>
-  // داتاکان لە localStorage بەناوی 'products' هەڵگرن یان فڕۆشراوەکەی دیفالت دانرێت
+  async function loadProductsFromJson() {
+    try {
+      const response = await fetch('products.json');
+      if (!response.ok) throw new Error('Error loading products.json');
+      const products = await response.json();
+      localStorage.setItem('products', JSON.stringify(products));
+      renderProducts();
+    } catch(e) {
+      console.warn('ناتوانرایە products.json بخوێندرێت, داتاکانی localStorage بەکار دەهێنرێت');
+      renderProducts();
+    }
+  }
+
   function getProducts() {
     return JSON.parse(localStorage.getItem('products') || '[]');
   }
@@ -64,7 +76,6 @@
     const products = getProducts();
     products.forEach((p, index) => {
       const tr = document.createElement('tr');
-
       tr.innerHTML = `
         <td>${p.name}</td>
         <td>${p.price.toLocaleString()}</td>
@@ -74,12 +85,10 @@
           <span class="action-btn delete-btn" data-index="${index}">🗑️</span>
         </td>
       `;
-
       tbody.appendChild(tr);
     });
   }
 
-  // زیادکردن کاڵا
   document.getElementById('addProductForm').addEventListener('submit', e => {
     e.preventDefault();
     const nameInput = document.getElementById('productName');
@@ -96,17 +105,13 @@
     }
 
     const products = getProducts();
-
-    // زیادکردن بۆ ئەریە
     products.push({ name, price, image });
-
     saveProducts(products);
     renderProducts();
 
     e.target.reset();
   });
 
-  // دەسکاری و سڕینەوە بۆ تێبلەکە
   document.querySelector('#productTable tbody').addEventListener('click', e => {
     const target = e.target;
     if (target.classList.contains('edit-btn')) {
@@ -123,7 +128,7 @@
     const product = products[index];
 
     const newName = prompt('ناوی نوێی کاڵا بنووسە:', product.name);
-    if (newName === null) return; // بەکارهێنەر وەستاند
+    if (newName === null) return;
 
     const newPriceStr = prompt('نرخی نوێی کاڵا بنووسە:', product.price);
     if (newPriceStr === null) return;
@@ -134,7 +139,6 @@
       return;
     }
 
-    // گۆڕین داتاکان
     products[index].name = newName.trim();
     products[index].price = newPrice;
 
@@ -151,16 +155,10 @@
     renderProducts();
   }
 
-  // ئەگەر localStorage بەتاڵ بێت، فەرمی بە نمونه زیاد دەکات
-  if (getProducts().length === 0) {
-    const defaultProducts = [
-      { name: 'سنور180 گرام', price: 32000, image: '' },
-      { name: 'سنور500 گرام', price: 36000, image: '' }
-    ];
-    saveProducts(defaultProducts);
-  }
-
-  renderProducts();
+  // بارکردنی products.json یەکجار لە کاتی بارکردنی پەڕە
+  window.addEventListener('DOMContentLoaded', () => {
+    loadProductsFromJson();
+  });
 </script>
 
 </body>
