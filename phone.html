@@ -52,14 +52,13 @@
       return;
     }
 
-    // پەیام + URL وێنە کە ناو یەک پەیامەوە ناردراوە
     const fullMessage = `${message}\n\nوێنە: ${imageUrl}`;
 
     checkedPhones.forEach((phone, index) => {
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`;
       setTimeout(() => {
         window.open(url, '_blank');
-      }, index * 700);  // دیفرانسی 700 ملیسەکەند بۆ هەردوو لینکەوە
+      }, index * 700);
     });
   });
 </script>
