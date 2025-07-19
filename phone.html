@@ -2,70 +2,65 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8">
-  <title>لیستی ژمارە مۆبایلەکان</title>
+  <title>Whatsapp Bulk Sender</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
+      font-family: sans-serif;
       padding: 20px;
+      background: #f4f4f4;
     }
-    h2 {
-      color: #333;
-      margin-bottom: 10px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-    th, td {
+    input, textarea, button {
       padding: 10px;
-      text-align: left;
+      margin: 10px 0;
+      width: 100%;
+      font-size: 16px;
+    }
+    .link {
+      margin: 5px 0;
+      padding: 10px;
+      background: white;
       border: 1px solid #ccc;
     }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
+    .link a {
+      color: green;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
+  <h2>ناردنی پەیام بۆ ژمارەکان لە واتس‌ئاپ</h2>
 
-  <h2>📱 لیستی ژمارە مۆبایلەکان</h2>
-  <table id="phoneTable">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>ژمارە مۆبایل</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- داتاکان لێرە زیاد دەبن -->
-    </tbody>
-  </table>
+  <textarea id="message" rows="4" placeholder="پەیامەکەت بنوسە..."></textarea>
+  <button onclick="loadAndGenerateLinks()">ناردنی پەیامەکە</button>
+
+  <div id="output"></div>
 
   <script>
-    fetch('phones.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('نەتوانرا پەیوەندیکردن بە phones.json');
-        }
-        return response.json();
-      })
-      .then(data => {
-        const tbody = document.querySelector("#phoneTable tbody");
-        data.forEach((phone, index) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${phone}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      })
-      .catch(error => {
-        console.error("هەڵە لە خوێندنەوەی فایلەکە:", error);
-      });
-  </script>
+    function loadAndGenerateLinks() {
+      const message = document.getElementById('message').value;
+      const output = document.getElementById('output');
+      output.innerHTML = "پەیامەکان دروستدەکرێن ...";
 
+      fetch('phones.json')
+        .then(res => res.json())
+        .then(data => {
+          output.innerHTML = '';
+          data.forEach(phone => {
+            const fullNumber = `+964${phone}`;
+            const encodedMessage = encodeURIComponent(message);
+            const waLink = `https://wa.me/${fullNumber}?text=${encodedMessage}`;
+
+            const div = document.createElement('div');
+            div.className = 'link';
+            div.innerHTML = `<a href="${waLink}" target="_blank">${fullNumber}</a>`;
+            output.appendChild(div);
+          });
+        })
+        .catch(err => {
+          output.innerHTML = 'کێشەیەک هەیە لە خوێندنەوەی phones.json';
+          console.error(err);
+        });
+    }
+  </script>
 </body>
 </html>
