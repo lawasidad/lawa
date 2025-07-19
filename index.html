@@ -320,7 +320,7 @@
 📡 GPS: ${order.gps}
 📝 تێبینی: ${order.note || 'هیچی نییە'}
 📦 کاڵاکان:
-${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
+${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n--------------------\n')}
 💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
 `;
     const encodedText = encodeURIComponent(orderText);
