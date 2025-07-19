@@ -20,8 +20,7 @@
       position: relative;
     }
     .product.selected {
-      border-color: #28a745;
-      background: #e0f7e9;
+      border-width: 3px;
     }
     .product img {
       width: 160px;
@@ -100,23 +99,37 @@
       display: none;
     }
 
+    /* رەنگەکان بۆ کەتەگۆریەکان */
+    option.category-fruit { background-color: #ffecb3; color: #795548; }
+    option.category-vegetable { background-color: #c8e6c9; color: #2e7d32; }
+    option.category-drink { background-color: #bbdefb; color: #1565c0; }
+    option.category-snack { background-color: #ffe0b2; color: #ef6c00; }
+
+    /* رەنگەکان بۆ هەر product لە هەمان کەتەگۆری */
+    .product.category-fruit { border-color: #ffb300; background-color: #fff8e1; }
+    .product.category-vegetable { border-color: #388e3c; background-color: #e8f5e9; }
+    .product.category-drink { border-color: #1976d2; background-color: #e3f2fd; }
+    .product.category-snack { border-color: #ef6c00; background-color: #fff3e0; }
+
+    .product.selected.category-fruit { background-color: #ffe082; }
+    .product.selected.category-vegetable { background-color: #a5d6a7; }
+    .product.selected.category-drink { background-color: #90caf9; }
+    .product.selected.category-snack { background-color: #ffcc80; }
+
     /* ریسپۆنسیڤ بۆ مۆبایل */
     @media (max-width: 600px) {
       .product-list {
         flex-direction: column;
         align-items: center;
       }
-
       .product {
         width: 100%;
         max-width: 320px;
       }
-
       .product img {
         width: 100%;
         height: auto;
       }
-
       form {
         position: static;
         box-shadow: none;
@@ -166,6 +179,19 @@
   const productList = document.getElementById('productList');
   const categoryFilter = document.getElementById('categoryFilter');
 
+  // وەشاندنی کەتەگۆریەکان بەم جۆرە رەنگەکان زیاد دەکات بۆ option ـەکان
+  function addCategoryOptions(categories) {
+    categoryFilter.innerHTML = '<option value="">هەموو کەتەگۆری</option>';
+    categories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      // زیادکردنی class بۆ رەنگدان
+      opt.className = `category-${cat.toLowerCase()}`;
+      categoryFilter.appendChild(opt);
+    });
+  }
+
   async function autoFetchGPS() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(pos => {
@@ -187,13 +213,7 @@
       products = await response.json();
 
       const categories = [...new Set(products.map(p => p.category).filter(c => c))];
-      categoryFilter.innerHTML = `<option value="">هەموو کەتەگۆری</option>`;
-      categories.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        categoryFilter.appendChild(opt);
-      });
+      addCategoryOptions(categories);
 
       filteredProducts = products;
       updateUI();
@@ -211,9 +231,10 @@
     filteredProducts.forEach((product, index) => {
       const id = product.id ?? index;
       const isSelected = selected[id] > 0;
+      const categoryClass = product.category ? `category-${product.category.toLowerCase()}` : '';
 
       const div = document.createElement('div');
-      div.className = 'product';
+      div.className = `product ${categoryClass}`;
       if (isSelected) div.classList.add('selected');
 
       div.innerHTML = `
@@ -254,124 +275,4 @@
         };
 
         controls.appendChild(btnMinus);
-        controls.appendChild(qtySpan);
-        controls.appendChild(btnPlus);
-
-        div.appendChild(controls);
-
-        total += product.price * selected[id];
-      }
-
-      div.onclick = () => {
-        if (isSelected) {
-          delete selected[id];
-        } else {
-          selected[id] = 1;
-        }
-        updateUI();
-      };
-
-      productList.appendChild(div);
-    });
-
-    document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
-  }
-
-  categoryFilter.addEventListener('change', () => {
-    const cat = categoryFilter.value;
-    if (!cat) {
-      filteredProducts = products;
-    } else {
-      filteredProducts = products.filter(p => p.category === cat);
-    }
-    selected = {};
-    updateUI();
-  });
-
-  window.addEventListener('DOMContentLoaded', () => {
-    autoFetchGPS();
-    loadProductsFromJson();
-  });
-
-  document.getElementById('orderForm').addEventListener('submit', e => {
-    e.preventDefault();
-
-    const name = document.getElementById('customerName').value.trim();
-    const mobile = document.getElementById('mobile').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const note = document.getElementById('note').value.trim();
-
-    if (!name || !mobile || !address) {
-      alert('تکایە هەموو خانەکان پڕ بکە.');
-      return;
-    }
-
-    if (Object.keys(selected).length === 0) {
-      alert('تکایە کاڵایەک هەلبژێرە.');
-      return;
-    }
-
-    const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
-
-    const selectedProducts = products
-      .filter(p => selected[p.id ?? products.indexOf(p)])
-      .map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        quantity: selected[p.id ?? products.indexOf(p)],
-        totalPrice: p.price * selected[p.id ?? products.indexOf(p)]
-      }));
-
-    const totalAmount = selectedProducts.reduce((sum, p) => sum + p.totalPrice, 0);
-
-    const order = {
-      id: Date.now(),
-      name,
-      mobile,
-      address,
-      note,
-      products: selectedProducts,
-      time: new Date().toLocaleString(),
-      gps,
-      total: totalAmount
-    };
-
-    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-
-    const orderText = `
-🧾 داواکاری نوێ - ${order.time}
-
-👤 کریار: ${order.name}
-📞 مۆبایل: ${order.mobile}
-📍 ناونیشان: ${order.address}
-📡 GPS: ${order.gps}
-📝 تێبینی: ${order.note || 'هیچی نییە'}
-
-📦 کاڵاکان:
-${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
-
-💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
-`;
-    const encodedText = encodeURIComponent(orderText);
-    const whatsappUrl = `https://wa.me/9647503272277?text=${encodedText}`;
-    window.open(whatsappUrl, '_blank');
-
-    selected = {};
-    document.getElementById('orderForm').reset();
-    document.getElementById('gps').value = '';
-    autoFetchGPS();
-    updateUI();
-
-    const successMsg = document.getElementById('successMessage');
-    successMsg.style.display = 'block';
-    setTimeout(() => {
-      successMsg.style.display = 'none';
-    }, 3000);
-  });
-</script>
-
-</body>
-</html>
+        controls.appendChild(qtySpan
