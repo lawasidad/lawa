@@ -159,7 +159,7 @@ fetch('phones.json')
     document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
   });
 
-// ناردنی پەیام بۆ ژمارەکان
+// ناردنی پەیام بۆ ژمارەکان بە یەکەی یەکەوە بە setTimeout
 document.getElementById('sendMessageBtn').addEventListener('click', () => {
   const message = document.getElementById('message').value.trim();
   const status = document.getElementById('status');
@@ -180,7 +180,7 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
     const url = `https://wa.me/${phone}?text=${encodedMessage}`;
     setTimeout(() => {
       window.open(url, '_blank');
-    }, idx * 400); // هەر ٤٠٠ میلێک جارێک بکرێتەوە
+    }, idx * 500); // هر ٥٠٠ میلێک جارێک popup نوێ دروست دەکات
   });
 
   status.textContent = `پەیام نێردرا بۆ ${selectedCheckboxes.length} ژمارە.`;
