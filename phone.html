@@ -2,77 +2,67 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <title>ناردنی پەیام بە وەستسئاپ بۆ هەموو ژمارەکان</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ناردنی پەیام و وێنە بۆ واتسئاپ</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-      direction: rtl;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      font-size: 1.1em;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #25D366;
-      border: none;
-      color: white;
-      padding: 12px 20px;
-      font-size: 1.1em;
-      cursor: pointer;
-      border-radius: 6px;
-      width: 100%;
-    }
-    button:hover {
-      background-color: #128C7E;
-    }
+    body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f5f5f5; }
+    label, input, textarea, button { display: block; margin-bottom: 10px; }
+    textarea, input[type="text"] { width: 100%; padding: 8px; }
+    ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
+    li { padding: 5px 10px; border-bottom: 1px solid #eee; }
+    button { background-color: #25D366; color: white; border: none; padding: 10px 20px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <h2>ناردنی پەیام بۆ هەموو ژمارەکان بە وەستسئاپ</h2>
+<h2>ناردنی پەیام و وێنە بۆ واتسئاپ</h2>
 
-  <input type="text" id="message" placeholder="پەیامەکەت بنوسە..." />
+<label for="message">پەیامەکەت بنوسە:</label>
+<textarea id="message" rows="3" placeholder="پەیام..."></textarea>
 
-  <button onclick="sendToAll()">ناردن بۆ هەموو ژمارەکان</button>
+<label for="imageUrl">URL ـی وێنە:</label>
+<input type="text" id="imageUrl" placeholder="https://example.com/image.jpg" />
 
-  <script>
-    let phones = [];
+<h3>هەلبژاردنی ژمارەکان:</h3>
+<ul id="phoneList">
+  <li><label><input type="checkbox" class="phone" value="9647501234567" /> 9647501234567</label></li>
+  <li><label><input type="checkbox" class="phone" value="9647701234567" /> 9647701234567</label></li>
+  <li><label><input type="checkbox" class="phone" value="9647512345678" /> 9647512345678</label></li>
+  <!-- دەتوانی زیاد بکەیت لێرە -->
+</ul>
 
-    // خوێندنەوەی phones.json
-    fetch("phones.json")
-      .then(response => response.json())
-      .then(data => {
-        phones = data; // هەموو ژمارەکان لە ئەم گۆڕاوەدا دانرا
-      })
-      .catch(() => {
-        alert("ناوی phones.json دروست نیە یان کێشە هەیە.");
-      });
+<button id="sendBtn">ناردنی پەیام و وێنە بە واتسئاپ</button>
 
-    function sendToAll() {
-      const msg = document.getElementById("message").value.trim();
-      if (!msg) {
-        alert("تکایە پەیامەکەت بنوسە.");
-        return;
-      }
-      if (phones.length === 0) {
-        alert("هیچ ژمارەیەک بار نەکراوە.");
-        return;
-      }
-
-      phones.forEach((phone, idx) => {
-        const url = `https://wa.me/964${phone}?text=${encodeURIComponent(msg)}`;
-        // ناردنی لینکەکان لە وێندۆوەیەکی نوێ بەپێی تاکە تاکە بەرەوپێش بەتاخیر 600 ملیسەکەند
-        setTimeout(() => {
-          window.open(url, "_blank");
-        }, idx * 600);
-      });
+<script>
+  document.getElementById('sendBtn').addEventListener('click', () => {
+    const message = document.getElementById('message').value.trim();
+    const imageUrl = document.getElementById('imageUrl').value.trim();
+    if (!message) {
+      alert('تکایە پەیامەکەت بنوسە.');
+      return;
     }
-  </script>
+    if (!imageUrl) {
+      alert('تکایە URL ـی وێنەکە دابنێ.');
+      return;
+    }
+
+    const checkedPhones = Array.from(document.querySelectorAll('.phone:checked')).map(el => el.value);
+    if (checkedPhones.length === 0) {
+      alert('تکایە یەک ژمارە هەلبژێرە.');
+      return;
+    }
+
+    // پەیام + URL وێنە کە ناو یەک پەیامەوە ناردراوە
+    const fullMessage = `${message}\n\nوێنە: ${imageUrl}`;
+
+    checkedPhones.forEach((phone, index) => {
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`;
+      setTimeout(() => {
+        window.open(url, '_blank');
+      }, index * 700);  // دیفرانسی 700 ملیسەکەند بۆ هەردوو لینکەوە
+    });
+  });
+</script>
+
 </body>
 </html>
