@@ -54,13 +54,13 @@
       font-weight: bold;
       user-select: none;
     }
-    label, input, button {
+    label, input, button, select {
       display: block;
       margin: 10px 0;
       width: 100%;
       max-width: 400px;
     }
-    input, button {
+    input, button, select {
       padding: 10px;
       font-size: 16px;
       border-radius: 10px;
@@ -105,6 +105,12 @@
 
 <h2>فۆرمی داواکاری کاڵا</h2>
 
+<!-- فلتەری کەتەگۆری زیادکرا -->
+<label for="categoryFilter">فلتەر بەپێی کەتەگۆری</label>
+<select id="categoryFilter">
+  <option value="">هەموو کەتەگۆری</option>
+</select>
+
 <div class="product-list" id="productList"></div>
 
 <form id="orderForm">
@@ -132,8 +138,10 @@
 <script>
   let autoGps = null;
   let products = [];
+  let filteredProducts = [];
   let selected = {};
   const productList = document.getElementById('productList');
+  const categoryFilter = document.getElementById('categoryFilter');
 
   async function autoFetchGPS() {
     if (!navigator.geolocation) return;
@@ -154,6 +162,18 @@
       const response = await fetch('products.json');
       if (!response.ok) throw new Error('نەتوانرا فایل بخوێندرێت');
       products = await response.json();
+
+      // خانەکانی کەتەگۆری لێبگرە بۆ فلتەر
+      const categories = [...new Set(products.map(p => p.category).filter(c => c))];
+      categoryFilter.innerHTML = `<option value="">هەموو کەتەگۆری</option>`;
+      categories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        categoryFilter.appendChild(opt);
+      });
+
+      filteredProducts = products; // سەرەتا هەموو کاڵاکان نیشان بدە
       updateUI();
     } catch (error) {
       console.error('هەڵە لە خوێندنەوەی products.json:', error);
@@ -166,7 +186,7 @@
 
     let total = 0;
 
-    products.forEach(product => {
+    filteredProducts.forEach(product => {
       const isSelected = selected[product.id] > 0;
 
       const div = document.createElement('div');
@@ -233,6 +253,17 @@
 
     document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
   }
+
+  categoryFilter.addEventListener('change', () => {
+    const cat = categoryFilter.value;
+    if (!cat) {
+      filteredProducts = products;
+    } else {
+      filteredProducts = products.filter(p => p.category === cat);
+    }
+    selected = {}; // پاککردنی هەڵبژاردەکان کاتێک فلتەر دەگۆڕێت
+    updateUI();
+  });
 
   window.addEventListener('DOMContentLoaded', () => {
     autoFetchGPS();
