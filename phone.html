@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ناردنی پەیام بە واتسئاپ</title>
+  <title>ناردنی پەیام و وێنە بە واتسئاپ</title>
   <style>
     body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f5f5f5; }
-    textarea, button { width: 100%; padding: 10px; margin-bottom: 10px; }
+    textarea, input[type="text"], button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
     ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
     li { padding: 5px 10px; border-bottom: 1px solid #eee; }
   </style>
 </head>
 <body>
 
-<h2>ناردنی پەیام بە واتسئاپ</h2>
+<h2>ناردنی پەیام و وێنە بە واتسئاپ</h2>
 
 <textarea id="message" rows="4" placeholder="نامەکەت بنوسە..."></textarea>
+<input type="text" id="imageUrl" placeholder="لینکی وێنە بنووسە (بە فۆرمات https://)"/>
 
 <ul id="phoneList"></ul>
 
@@ -37,8 +38,9 @@
 
   document.getElementById("sendBtn").addEventListener("click", () => {
     const message = document.getElementById("message").value.trim();
-    if (!message) {
-      alert("تکایە نامەکەت بنوسە.");
+    const imageUrl = document.getElementById("imageUrl").value.trim();
+    if (!message && !imageUrl) {
+      alert("تکایە نامەکە یان لینکی وێنەکە بنوسە.");
       return;
     }
     const selectedPhones = [...document.querySelectorAll(".phone:checked")].map(i => i.value);
@@ -48,7 +50,14 @@
     }
 
     selectedPhones.forEach((phone, i) => {
-      const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      let url;
+      if (imageUrl) {
+        // پەیام و وێنە لەبەرکەوتەوە بە لینک
+        const text = encodeURIComponent(message + "\n" + imageUrl);
+        url = `https://wa.me/${phone}?text=${text}`;
+      } else {
+        url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      }
       setTimeout(() => window.open(url, "_blank"), i * 700);
     });
   });
