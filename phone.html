@@ -96,6 +96,28 @@
     color: #666;
     text-align: center;
   }
+  /* فۆرمی زیادکردن ژمارە */
+  #add-phone-container {
+    max-width: 600px;
+    margin: 10px auto 20px auto;
+    text-align: center;
+  }
+  #newPhone {
+    padding: 8px;
+    width: 70%;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  #addPhoneBtn {
+    padding: 9px 15px;
+    font-size: 16px;
+    border-radius: 6px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -103,6 +125,11 @@
 <h1>ناردنی پەیام بە واتسئاپ</h1>
 
 <textarea id="message" placeholder="پەیامەکەت بنوسە..."></textarea>
+
+<div id="add-phone-container">
+  <input type="text" id="newPhone" placeholder="ژمارەی نوێ بنوسە" />
+  <button id="addPhoneBtn">زیادکردن</button>
+</div>
 
 <div class="select-all-container">
   <input type="checkbox" id="selectAll" />
@@ -131,21 +158,7 @@ fetch('phones.json')
       return;
     }
     data.mobiles.forEach(phone => {
-      const li = document.createElement('li');
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'phone-checkbox';
-      checkbox.value = phone;
-
-      const phoneText = document.createElement('span');
-      phoneText.textContent = phone;
-      phoneText.className = 'phone-number';
-
-      li.appendChild(checkbox);
-      li.appendChild(phoneText);
-
-      list.appendChild(li);
+      addPhoneToList(phone);
     });
 
     // کارکردنی select all
@@ -158,6 +171,54 @@ fetch('phones.json')
   .catch(err => {
     document.getElementById('phone-list').innerHTML = '<li>هەڵە ڕوودا: ' + err.message + '</li>';
   });
+
+// فانکشنی زیادکردنی ژمارە بۆ لیست
+function addPhoneToList(phone) {
+  const list = document.getElementById('phone-list');
+
+  const li = document.createElement('li');
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = 'phone-checkbox';
+  checkbox.value = phone;
+
+  const phoneText = document.createElement('span');
+  phoneText.textContent = phone;
+  phoneText.className = 'phone-number';
+
+  li.appendChild(checkbox);
+  li.appendChild(phoneText);
+
+  list.appendChild(li);
+
+  // ئەگەر هەلبژاردنی هەموو ژمارەکان هەڵبژێردراوە، ئەم checkbox ـەش هەڵبژێرە
+  const selectAllCheckbox = document.getElementById('selectAll');
+  if (selectAllCheckbox.checked) {
+    checkbox.checked = true;
+  }
+}
+
+// زیادکردنی ژمارە نوێ بێ ریفڕێشکردن
+document.getElementById('addPhoneBtn').addEventListener('click', () => {
+  const newPhoneInput = document.getElementById('newPhone');
+  const phone = newPhoneInput.value.trim();
+
+  if (!phone) {
+    alert('تکایە ژمارەی نوێ بنوسە.');
+    return;
+  }
+
+  // ڕێگەدان بە ژمارەی تەنها ژمارە (نەخوازراوە بێت)
+  if (!/^\+?\d{7,15}$/.test(phone)) {
+    alert('تکایە ژمارەی دروست بنوسە (تەنها ژمارە).');
+    return;
+  }
+
+  addPhoneToList(phone);
+
+  newPhoneInput.value = '';
+});
 
 // ناردنی پەیام بۆ ژمارەکان بە یەکەی یەکەوە بە setTimeout
 document.getElementById('sendMessageBtn').addEventListener('click', () => {
