@@ -1,32 +1,32 @@
 [
   {
-    "name": "کەلوپەلی سێوز",
-    "category": "میوە",
-    "price": 1500,
+    "name": "پەنیر سنور 180 گرام ",
+    "category": "پەنیر",
+    "price": 32000,
     "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxOBcVAu1VN3J46pU-AJ8Ck-hQZLzBjpg5XA&s"
   },
   {
-    "name": "شیر",
-    "category": "خواردنی سەربەخۆ",
-    "price": 800,
+    "name": "پەنیر سنور 500 گرام",
+    "category": "پەنیر ",
+    "price": 36000,
     "image": "https://example.com/images/milk.jpg"
   },
   {
-    "name": "نان",
-    "category": "خواردنی سەربەخۆ",
-    "price": 500,
+    "name": "پەنیر سنور 1 کیلۆ گرام",
+    "category": "پەنیر ",
+    "price": 36000,
     "image": "https://example.com/images/bread.jpg"
   },
   {
-    "name": "کەلوپەلی مانگۆ",
-    "category": "میوە",
-    "price": 2000,
+    "name": "پەنیر سنور 2 کیلۆ گرام",
+    "category": "پەنیر",
+    "price": 36000,
     "image": "https://example.com/images/mango.jpg"
   },
   {
-    "name": "قەھوە",
-    "category": "خواردنی سەربەخۆ",
-    "price": 1200,
+    "name": "1.5 لیتر دۆی رەشمال",
+    "category": "دۆ ",
+    "price": 6000,
     "image": "https://example.com/images/coffee.jpg"
   }
 ]
