@@ -1,76 +1,103 @@
-<?php
-// زانیاریەکان لە فایلەکە بخوێنەوە
-$dataFile = 'customers.json';
-$customers = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $mobile = $_POST['mobile'];
-
-    // وێنەکان باربکە (تا 3 دانە)
-    $uploadedImages = [];
-    for ($i = 0; $i < 3; $i++) {
-        if (isset($_FILES['images']['name'][$i]) && $_FILES['images']['name'][$i]) {
-            $filename = uniqid() . '_' . basename($_FILES['images']['name'][$i]);
-            $target = 'uploads/' . $filename;
-            move_uploaded_file($_FILES['images']['tmp_name'][$i], $target);
-            $uploadedImages[] = $target;
-        }
-    }
-
-    // زانیاری زیادبکە
-    $customers[] = [
-        'name' => $name,
-        'mobile' => $mobile,
-        'images' => $uploadedImages
-    ];
-
-    // نووسینی داتا
-    file_put_contents($dataFile, json_encode($customers, JSON_PRETTY_PRINT));
-    header("Location: form.php");
-    exit;
-}
-?>
-
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-    <meta charset="UTF-8">
-    <title>زیادکردنی کریار</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-        img { width: 100px; height: 100px; object-fit: cover; margin: 5px; border-radius: 10px; }
-        .customer { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 8px; }
-        input, button { padding: 10px; margin: 5px 0; width: 100%; }
-        form { margin-bottom: 30px; }
-        .images-container { display: flex; flex-wrap: wrap; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ناردنی پەیام و وێنە بە واتسئاپ</title>
+  <style>
+    body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f5f5f5; }
+    textarea, input, button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+    ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
+    li { padding: 5px 10px; border-bottom: 1px solid #eee; }
+    .preview img { max-width: 100%; margin-bottom: 10px; display: block; }
+    .total { font-weight: bold; margin-top: 10px; background: #fff; padding: 10px; border: 1px solid #ccc; }
+  </style>
 </head>
 <body>
 
-<h2>زیادکردنی کریار + وێنە</h2>
-<form method="POST" enctype="multipart/form-data">
-    <input type="text" name="name" placeholder="ناوی کریار" required>
-    <input type="text" name="mobile" placeholder="ژمارەی مۆبایل" required>
-    <label>وێنە (تا 3 دانە):</label>
-    <input type="file" name="images[]" accept="image/*" multiple>
-    <button type="submit">زیادکردن</button>
-</form>
+<h2>ناردنی پەیام و وێنە بە واتسئاپ</h2>
 
-<h3>کۆی ژمارەی مۆبایلەکان: <?= count($customers) ?></h3>
+<textarea id="message" rows="4" placeholder="نامەکەت بنوسە..."></textarea>
 
-<?php foreach ($customers as $cust): ?>
-    <div class="customer">
-        <strong><?= htmlspecialchars($cust['name']) ?></strong><br>
-        📱 <?= htmlspecialchars($cust['mobile']) ?><br>
-        <div class="images-container">
-            <?php foreach ($cust['images'] as $img): ?>
-                <img src="<?= $img ?>" alt="Customer Image">
-            <?php endforeach; ?>
-        </div>
-    </div>
-<?php endforeach; ?>
+<label>چند وێنە هەلبژێرە:</label>
+<input type="file" id="imageInput" accept="image/*" multiple />
+
+<div id="preview" class="preview"></div>
+
+<ul id="phoneList"></ul>
+
+<div id="totalCount" class="total"></div>
+
+<button id="sendBtn">ناردن بۆ هەموو ژمارەکان</button>
+
+<script>
+  let base64Images = [];
+
+  // خوێندنەوەی phones.json و دامەزراندنی checkbox
+  fetch("phones.json")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("phoneList");
+      data.forEach(phone => {
+        const fullPhone = phone.startsWith('964') ? phone : '964' + phone;
+        const li = document.createElement("li");
+        li.innerHTML = `<label><input type="checkbox" class="phone" value="${fullPhone}" checked /> ${fullPhone}</label>`;
+        list.appendChild(li);
+      });
+
+      // پیشاندانی ژمارە گشتی
+      document.getElementById("totalCount").textContent = `گشتی ژمارەکان: ${data.length}`;
+    })
+    .catch(() => alert("نەتوانرا phones.json بخوێندرێت"));
+
+  // گۆڕینی چەند وێنە بۆ base64 و پیشاندان
+  document.getElementById('imageInput').addEventListener('change', function () {
+    const files = Array.from(this.files);
+    base64Images = [];
+    const preview = document.getElementById("preview");
+    preview.innerHTML = "";
+
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        base64Images.push(e.target.result);
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // ناردن بۆ ژمارەکان
+  document.getElementById("sendBtn").addEventListener("click", () => {
+    const message = document.getElementById("message").value.trim();
+    const selectedPhones = [...document.querySelectorAll(".phone:checked")].map(i => i.value);
+
+    if (!message && base64Images.length === 0) {
+      alert("تکایە نامە یان وێنە هەلبژێرە.");
+      return;
+    }
+
+    if (selectedPhones.length === 0) {
+      alert("تکایە ژمارەیەک هەلبژێرە.");
+      return;
+    }
+
+    selectedPhones.forEach((phone, i) => {
+      let fullMessage = message;
+
+      if (base64Images.length > 0) {
+        fullMessage += `\n\n[${base64Images.length} وێنە هەیە — پیشاندەکرێن، بەڵام ناتوانرێن بە واتسئاپ نێردرێن]`;
+      }
+
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`;
+      setTimeout(() => window.open(url, "_blank"), i * 700);
+    });
+  });
+</script>
 
 </body>
 </html>
-
