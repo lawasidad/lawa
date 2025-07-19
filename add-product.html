@@ -53,18 +53,21 @@
 </table>
 
 <script>
-  function getProducts() {
-    return JSON.parse(localStorage.getItem('products') || '[]');
+  async function loadProductsFromServer() {
+    try {
+      const response = await fetch('products.json');
+      if (!response.ok) throw new Error('Error loading products.json');
+      const products = await response.json();
+      renderProducts(products);
+    } catch (e) {
+      console.warn('ناتوانرایە products.json بخوێندرێت');
+      document.querySelector('#productTable tbody').innerHTML = '<tr><td colspan="5" style="color:red;">ناتوانرایە کاڵا بخوێندرێت.</td></tr>';
+    }
   }
 
-  function saveProducts(products) {
-    localStorage.setItem('products', JSON.stringify(products));
-  }
-
-  function renderProducts() {
+  function renderProducts(products) {
     const tbody = document.querySelector('#productTable tbody');
     tbody.innerHTML = '';
-    const products = getProducts();
     products.forEach((p, index) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -81,97 +84,44 @@
     });
   }
 
-  document.getElementById('addProductForm').addEventListener('submit', e => {
+  document.getElementById('addProductForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const nameInput = document.getElementById('productName');
-    const priceInput = document.getElementById('productPrice');
-    const categoryInput = document.getElementById('productCategory');
-    const imageInput = document.getElementById('productImage');
 
-    const name = nameInput.value.trim();
-    const price = parseInt(priceInput.value.trim());
-    const category = categoryInput.value.trim();
-    const image = imageInput.value.trim();
+    const name = document.getElementById('productName').value.trim();
+    const price = parseInt(document.getElementById('productPrice').value.trim());
+    const category = document.getElementById('productCategory').value.trim();
+    const image = document.getElementById('productImage').value.trim();
 
     if (!name || isNaN(price) || price < 0) {
       alert('تکایە ناو و نرخ بە دروستی بنووسە.');
       return;
     }
 
-    const products = getProducts();
-    products.push({ name, price, category, image });
-    saveProducts(products);
-    renderProducts();
+    try {
+      const response = await fetch('save_product.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, price, category, image })
+      });
 
-    e.target.reset();
-  });
+      if (!response.ok) throw new Error('هەڵە لە ناردنی داتا');
 
-  document.querySelector('#productTable tbody').addEventListener('click', e => {
-    const target = e.target;
-    if (target.classList.contains('edit-btn')) {
-      const idx = parseInt(target.dataset.index);
-      editProduct(idx);
-    } else if (target.classList.contains('delete-btn')) {
-      const idx = parseInt(target.dataset.index);
-      deleteProduct(idx);
+      const result = await response.json();
+      if (result.success) {
+        renderProducts(result.products);
+        e.target.reset();
+      } else {
+        alert('زیادکردن تەواو نەبوو');
+      }
+    } catch(err) {
+      alert('کێشە هەیە: ' + err.message);
     }
   });
 
-  function editProduct(index) {
-    const products = getProducts();
-    const product = products[index];
+  // لێدوانەکانی edit و delete بەردەوام نیە چونکە ئەوەیە دەبێت لە سێرڤەر کار بکات
 
-    const newName = prompt('ناوی نوێی کاڵا بنووسە:', product.name);
-    if (newName === null) return;
-
-    const newCategory = prompt('کەتەگۆری نوێی کاڵا بنووسە:', product.category || '');
-    if (newCategory === null) return;
-
-    const newPriceStr = prompt('نرخی نوێی کاڵا بنووسە:', product.price);
-    if (newPriceStr === null) return;
-
-    const newPrice = parseInt(newPriceStr);
-    if (isNaN(newPrice) || newPrice < 0) {
-      alert('نرخەکە هەڵەیە!');
-      return;
-    }
-
-    products[index].name = newName.trim();
-    products[index].category = newCategory.trim();
-    products[index].price = newPrice;
-
-    saveProducts(products);
-    renderProducts();
-  }
-
-  function deleteProduct(index) {
-    if (!confirm('دڵنیایت لە سڕینەوەی ئەم کاڵایە؟')) return;
-
-    const products = getProducts();
-    products.splice(index, 1);
-    saveProducts(products);
-    renderProducts();
-  }
-
-  // --- ئەم بەشە چارەسەر دەکات کێشەی ریفرێش و بارکردنی دیتای products.json جارێکی یەکەم ---
   window.addEventListener('DOMContentLoaded', () => {
-    const stored = localStorage.getItem('products');
-    if (!stored) {
-      fetch('products.json')
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to load products.json');
-          return res.json();
-        })
-        .then(json => {
-          localStorage.setItem('products', JSON.stringify(json));
-          renderProducts();
-        })
-        .catch(() => {
-          renderProducts();
-        });
-    } else {
-      renderProducts();
-    }
+    loadProductsFromServer();
   });
 </script>
 
