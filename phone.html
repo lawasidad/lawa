@@ -1,128 +1,68 @@
-<?php
-// فایلەکە customers.json دەبێت لە هەمان فولدەری کۆد هەبێت
-$dataFile = 'customers.json';
-$uploadDir = 'uploads/';
-
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
-}
-
-// بارکردنی داتاکان
-$customers = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
-
-// زیادکردنی کریار و وێنەکان بە فۆرم (هەردوو کار لە یەک فایل)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name']);
-    $mobile = trim($_POST['mobile']);
-
-    $uploadedImages = [];
-    for ($i = 0; $i < 3; $i++) {
-        if (isset($_FILES['images']['name'][$i]) && $_FILES['images']['error'][$i] === 0) {
-            $filename = uniqid() . '_' . basename($_FILES['images']['name'][$i]);
-            $target = $uploadDir . $filename;
-            if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $target)) {
-                $uploadedImages[] = $target;
-            }
-        }
-    }
-
-    $customers[] = [
-        'name' => $name,
-        'mobile' => $mobile,
-        'images' => $uploadedImages,
-    ];
-
-    file_put_contents($dataFile, json_encode($customers, JSON_PRETTY_PRINT));
-
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-?>
-
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-    <meta charset="UTF-8" />
-    <title>زیادکردنی کریار و ناردنی پەیام بە واتسئاپ</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; padding: 20px; direction: rtl; }
-        input, button, textarea { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
-        .customer { border: 1px solid #ddd; padding: 10px; margin: 15px 0; border-radius: 8px; background: #fff; }
-        .images-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .images-container img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
-        ul { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ccc; margin-bottom: 10px; }
-        li { padding: 5px 10px; border-bottom: 1px solid #eee; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ناردنی پەیام بە واتسئاپ</title>
+  <style>
+    body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f5f5f5; }
+    input, textarea, button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+    ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ccc; }
+    li { padding: 5px 10px; border-bottom: 1px solid #eee; }
+  </style>
 </head>
 <body>
-
-<h2>زیادکردنی کریار + وێنە (تا 3)</h2>
-<form method="POST" enctype="multipart/form-data">
-    <input type="text" name="name" placeholder="ناوی کریار" required />
-    <input type="text" name="mobile" placeholder="ژمارەی مۆبایل" required />
-    <label>وێنە (تا 3 دانە):</label>
-    <input type="file" name="images[]" accept="image/*" multiple />
-    <button type="submit">زیادکردن</button>
-</form>
 
 <h2>ناردنی پەیام و وێنە بە واتسئاپ</h2>
 
 <textarea id="message" rows="4" placeholder="نامەکەت بنوسە..."></textarea>
+<input type="text" id="imageUrl" placeholder="لینکی وێنەکە بنوسە (بە هۆستێکی وێب)" />
 
-<ul id="phoneList">
-    <?php foreach ($customers as $cust): 
-        $phone = $cust['mobile'];
-        if (!str_starts_with($phone, '964')) {
-            $phone = '964' . $phone;
-        }
-        $images = $cust['images'] ?? [];
-        $links = [];
-        foreach ($images as $k => $img) {
-            $links[] = "<a href=\"$img\" target=\"_blank\" rel=\"noopener noreferrer\">وێنە ".($k+1)."</a>";
-        }
-        $linksText = implode(' | ', $links);
-    ?>
-    <li>
-      <label>
-        <input type="checkbox" class="phone" value="<?= htmlspecialchars($phone) ?>" checked />
-        <?= htmlspecialchars($phone) ?>
-        <?php if ($linksText): ?>
-          - <?= $linksText ?>
-        <?php endif; ?>
-      </label>
-    </li>
-    <?php endforeach; ?>
-</ul>
+<ul id="phoneList"></ul>
 
 <button id="sendBtn">ناردن بۆ هەموو ژمارەکان</button>
 
 <script>
+  // خوێندنەوەی phones.json
+  fetch("phones.json")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("phoneList");
+      data.forEach(phone => {
+        // دڵنیابە ژمارە بە شێوەی بینەری نمرەی واتسئاپ بێت (ڕەقەمی عێراق +964 هەبێت)
+        const fullPhone = phone.startsWith('964') ? phone : '964' + phone;
+        const li = document.createElement("li");
+        li.textContent = fullPhone;
+        list.appendChild(li);
+      });
+    })
+    .catch(() => alert("نەتوانرا phones.json بخوێندرێت"));
+
   document.getElementById("sendBtn").addEventListener("click", () => {
     const message = document.getElementById("message").value.trim();
-    const checkedBoxes = [...document.querySelectorAll(".phone:checked")];
-    if (!message) {
-      alert("تکایە نامەکەت بنوسە.");
-      return;
-    }
-    if (checkedBoxes.length === 0) {
-      alert("تکایە ژمارەیەک هەلبژێرە.");
+    const imageUrl = document.getElementById("imageUrl").value.trim();
+
+    if (!message && !imageUrl) {
+      alert("تکایە نامە یان وێنە بنوسە.");
       return;
     }
 
-    checkedBoxes.forEach((checkbox, i) => {
-      // وێنەکان ناتوانرێن بە واتسئاپ نێردرێن بە wa.me، بەڵام لینکەکانیان لە پەیامەکە زیاد دەکرێن
-      const li = checkbox.closest('li');
-      const imageLinks = [...li.querySelectorAll('a')].map(a => a.href);
-      let fullMessage = message;
-      if (imageLinks.length > 0) {
-        fullMessage += "\n\nوێنەکان:\n";
-        imageLinks.forEach(link => {
-          fullMessage += link + "\n";
-        });
+    const phoneElements = document.querySelectorAll("#phoneList li");
+    if (phoneElements.length === 0) {
+      alert("ژمارەکانی موبایل تێدا نیە.");
+      return;
+    }
+
+    // ئەم کۆدە بۆ هەر ژمارەیەک لینک wa.me دروست دەکات بۆ ناردنی نامە بەشدارکراوی وێنە
+    phoneElements.forEach((li, i) => {
+      const phone = li.textContent.trim();
+      // وێنە بە لینک لە ناو نامەکەدا زیاد دەکەین (وێنەیەکی کە لینکی وێبە)
+      let text = message;
+      if (imageUrl) {
+        text += ` %0A%0A${encodeURIComponent(imageUrl)}`;
       }
 
-      const phone = checkbox.value;
-      const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`;
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
       setTimeout(() => window.open(url, "_blank"), i * 700);
     });
   });
