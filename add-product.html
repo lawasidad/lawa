@@ -2,101 +2,102 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>فۆرمی داواکاری</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>زیادکردنی کاڵا</title>
   <style>
     body {
-      font-family: 'Tahoma', sans-serif;
-      background: #f2f2f2;
+      font-family: Arial;
+      background: #f4f4f4;
       margin: 0;
       padding: 0;
     }
-
-    .container {
-      width: 95%;
+    .form-container {
       max-width: 500px;
-      margin: 20px auto;
       background: white;
       padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin: 20px auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     h2 {
       text-align: center;
       margin-bottom: 20px;
     }
-
     label {
       display: block;
-      margin-top: 10px;
-      font-weight: bold;
+      margin: 10px 0 5px;
     }
-
-    input[type="text"],
-    textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
-      border-radius: 10px;
       border: 1px solid #ccc;
-      font-size: 16px;
+      border-radius: 6px;
+      margin-bottom: 10px;
       box-sizing: border-box;
     }
-
-    input[readonly] {
-      background-color: #eee;
-    }
-
-    .total {
-      margin-top: 15px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .submit-btn {
-      display: block;
+    button {
       width: 100%;
-      padding: 12px;
-      background-color: #28a745;
+      background: #4CAF50;
       color: white;
+      padding: 10px;
       border: none;
-      border-radius: 12px;
-      font-size: 18px;
-      cursor: pointer;
-      margin-top: 20px;
+      border-radius: 6px;
+      font-size: 16px;
     }
-
-    .submit-btn:hover {
-      background-color: #218838;
+    button:hover {
+      background: #45a049;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>فۆرمی داواکاری کاڵا</h2>
+<div class="form-container">
+  <h2>زیادکردنی کاڵا</h2>
+  <form id="addProductForm">
+    <label for="code">بارکۆد</label>
+    <input type="text" id="code" required />
 
-  <label>ناوی کریار</label>
-  <input type="text" value="ناوی خۆت بنووسە" readonly>
+    <label for="name">ناوی کاڵا</label>
+    <input type="text" id="name" required />
 
-  <label>ژمارەی مۆبایل</label>
-  <input type="text" value="07XX XXX XXX" readonly>
+    <label for="price">نرخی یەکە</label>
+    <input type="number" id="price" required />
 
-  <label>ناونیشان</label>
-  <input type="text" value="GPS" readonly>
+    <label for="quantity">بڕ</label>
+    <input type="number" id="quantity" required />
 
-  <label>GPS</label>
-  <input type="text" value="36.22175, 44.03364" readonly>
+    <label for="date">بەروار</label>
+    <input type="date" id="date" required />
 
-  <label>تێبینی (Note)</label>
-  <textarea rows="3" placeholder="تێبینیەکانت بنووسە..."></textarea>
-
-  <div class="total">کۆی گشتی: 0 دینار</div>
-
-  <button class="submit-btn">✅ ناردنی داواکاری</button>
+    <button type="submit">✅ زیادکردن</button>
+  </form>
 </div>
+
+<script>
+  document.getElementById('addProductForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const code = document.getElementById('code').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const price = document.getElementById('price').value.trim();
+    const quantity = document.getElementById('quantity').value.trim();
+    const date = document.getElementById('date').value.trim();
+
+    if (!code || !name || !price || !quantity || !date) {
+      alert("تکایە هەموو خانەکان پڕبکەوە");
+      return;
+    }
+
+    const product = { code, name, price, quantity, date };
+
+    let products = JSON.parse(localStorage.getItem("products") || "[]");
+    products.push(product);
+    localStorage.setItem("products", JSON.stringify(products));
+
+    alert("✅ کاڵا بە سەرکەوتوویی زیادکرا");
+    this.reset();
+  });
+</script>
 
 </body>
 </html>
