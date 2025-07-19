@@ -2,70 +2,95 @@
 <html lang="ku">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>زیادکردنی بەرهەم</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>زیادکردنی کاڵا</title>
   <style>
     body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      margin: 0;
+      padding: 0;
     }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    .container {
       max-width: 500px;
-      margin: auto;
+      margin: 40px auto;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
     }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+    h2 {
+      text-align: center;
+      color: #333;
     }
     label {
-      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+      margin-top: 15px;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
     }
     button {
-      background-color: #4CAF50;
-      color: white;
+      background-color: #28a745;
+      color: #fff;
+      padding: 12px 20px;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 15px;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>زیادکردنی کاڵا</h2>
+    <form id="productForm">
+      <label for="name">ناوی کاڵا</label>
+      <input type="text" id="name" name="name" required />
 
-  <form action="add-product.php" method="post">
-    <h2 style="text-align:center;">📦 زیادکردنی بەرهەم</h2>
+      <label for="barcode">بارکۆد</label>
+      <input type="text" id="barcode" name="barcode" required />
 
-    <label>ناوی بەرهەم</label>
-    <input type="text" name="name" required>
+      <label for="price">نرخی کاڵا</label>
+      <input type="number" id="price" name="price" required />
 
-    <label>ناوی کەتە</label>
-    <input type="text" name="category" required>
+      <label for="category">جۆری کاڵا</label>
+      <input type="text" id="category" name="category" required />
 
-    <label>ژمارەی بارکۆد</label>
-    <input type="text" name="barcode">
+      <button type="submit">زیادکردن</button>
+    </form>
+  </div>
 
-    <label>نرخی یەکە</label>
-    <input type="number" name="unit_price" step="0.01" required>
+  <script>
+    document.getElementById("productForm").addEventListener("submit", function (e) {
+      e.preventDefault();
 
-    <label>ژمارەی بەرهەم</label>
-    <input type="number" name="quantity" required>
+      const name = document.getElementById("name").value;
+      const barcode = document.getElementById("barcode").value;
+      const price = document.getElementById("price").value;
+      const category = document.getElementById("category").value;
 
-    <label>تێبینی</label>
-    <textarea name="note" rows="3"></textarea>
+      const product = { name, barcode, price, category };
 
-    <button type="submit">✅ زیادکردن</button>
-  </form>
+      let products = JSON.parse(localStorage.getItem("products")) || [];
+      products.push(product);
+      localStorage.setItem("products", JSON.stringify(products));
 
+      alert("کاڵا زیادکرا!");
+      this.reset();
+    });
+  </script>
 </body>
 </html>
