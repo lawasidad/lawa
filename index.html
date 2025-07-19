@@ -99,6 +99,30 @@
       margin-top: 15px;
       display: none;
     }
+
+    /* ریسپۆنسیڤ بۆ مۆبایل */
+    @media (max-width: 600px) {
+      .product-list {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .product {
+        width: 100%;
+        max-width: 320px;
+      }
+
+      .product img {
+        width: 100%;
+        height: auto;
+      }
+
+      form {
+        position: static;
+        box-shadow: none;
+        margin: 20px auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -149,7 +173,7 @@
         latitude: pos.coords.latitude,
         longitude: pos.coords.longitude
       };
-      document.getElementById("gps").value = ${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)};
+      document.getElementById("gps").value = `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}`;
     }, error => {
       console.warn('ناتوانرایە GPS بگەڕێنرێت:', error.message);
       document.getElementById("gps").value = 'GPS نەدۆزرایەوە';
@@ -163,7 +187,7 @@
       products = await response.json();
 
       const categories = [...new Set(products.map(p => p.category).filter(c => c))];
-      categoryFilter.innerHTML = <option value="">هەموو کەتەگۆری</option>;
+      categoryFilter.innerHTML = `<option value="">هەموو کەتەگۆری</option>`;
       categories.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat;
@@ -192,11 +216,11 @@
       div.className = 'product';
       if (isSelected) div.classList.add('selected');
 
-      div.innerHTML = 
+      div.innerHTML = `
         <img src="${product.image}" alt="${product.name}" />
         <div><strong>${product.name}</strong></div>
         <div>${product.price.toLocaleString()} دینار</div>
-      ;
+      `;
 
       if (isSelected) {
         const controls = document.createElement('div');
@@ -250,7 +274,7 @@
       productList.appendChild(div);
     });
 
-    document.getElementById('totalAmount').textContent = کۆی گشتی: ${total.toLocaleString()} دینار;
+    document.getElementById('totalAmount').textContent = `کۆی گشتی: ${total.toLocaleString()} دینار`;
   }
 
   categoryFilter.addEventListener('change', () => {
@@ -287,7 +311,7 @@
       return;
     }
 
-    const gps = autoGps ? ${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)} : '';
+    const gps = autoGps ? `${autoGps.latitude.toFixed(5)}, ${autoGps.longitude.toFixed(5)}` : '';
 
     const selectedProducts = products
       .filter(p => selected[p.id ?? products.indexOf(p)])
@@ -317,7 +341,7 @@
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    const orderText = 
+    const orderText = `
 🧾 داواکاری نوێ - ${order.time}
 
 👤 کریار: ${order.name}
@@ -327,12 +351,12 @@
 📝 تێبینی: ${order.note || 'هیچی نییە'}
 
 📦 کاڵاکان:
-${order.products.map(p => - ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار).join('\n')}
+${order.products.map(p => `- ${p.name} × ${p.quantity} = ${p.totalPrice.toLocaleString()} دینار`).join('\n')}
 
 💰 کۆی گشتی: ${order.total.toLocaleString()} دینار
-;
+`;
     const encodedText = encodeURIComponent(orderText);
-    const whatsappUrl = https://wa.me/9647502020061?text=${encodedText};
+    const whatsappUrl = `https://wa.me/9647502020061?text=${encodedText}`;
     window.open(whatsappUrl, '_blank');
 
     selected = {};
